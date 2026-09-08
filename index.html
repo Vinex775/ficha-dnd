@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head>
+  <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://*.firebaseio.com;
+  connect-src 'self' https://*.firebaseio.com https://*.googleapis.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:;
+">
 <meta charset="UTF-8">
 <title>Ficha de Personagem — D&amp;D 5e</title>
 <style>
@@ -207,6 +214,7 @@ textarea.freeform{width:100%;min-height:80px;border:1px solid var(--line);border
   .page{box-shadow:none;margin:0;width:auto;min-height:auto;}
   .small-btn,.x-btn,.add-spell-btn{display:none !important;}
 }
+
 </style>
 </head>
 <body>
@@ -219,6 +227,22 @@ textarea.freeform{width:100%;min-height:80px;border:1px solid var(--line);border
   <button class="small-btn" onclick="document.getElementById('importFile').click()">Importar backup</button>
   <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
   <button class="small-btn remove-btn" onclick="resetSheet()">Limpar ficha</button>
+</div>
+
+<!-- ============ SELETOR DE FICHAS ============ -->
+<div style="max-width:210mm; margin:0 auto 20px; background:#f0f4ed; border-radius:8px; padding:12px 16px; border:2px solid var(--moss);">
+  <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+    <span style="font-weight:bold; color:var(--moss); font-size:14px;">📂 Minhas Fichas:</span>
+    <select id="fichaSelector" style="flex:1; min-width:200px; padding:6px 10px; border:1px solid var(--line); border-radius:4px; background:#fff; font-size:14px;">
+      <option value="">-- Selecione uma ficha --</option>
+    </select>
+    <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss);">Abrir</button>
+    <button class="small-btn" onclick="listarFichas()" style="background:var(--sage);">🔄 Atualizar Lista</button>
+    <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white;">✨ Nova Ficha</button>
+  </div>
+  <div id="fichaInfo" style="margin-top:8px; font-size:12px; color:#55604f; display:none;">
+    <span id="fichaInfoText"></span>
+  </div>
 </div>
 
 <!-- ============ PÁGINA 1 ============ -->
