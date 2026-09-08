@@ -523,6 +523,7 @@
       <button class="small-btn" onclick="listarFichas()" style="background:var(--sage); color:white; padding:6px 16px; border-radius:8px;">🔄 Atualizar</button>
       <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white; padding:6px 16px; border-radius:8px;">✨ Nova</button>
       <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white; padding:6px 16px; border-radius:8px;">🔗 Compartilhar</button>
+      <button class="small-btn" onclick="excluirFicha()" style="background:#a15c4a; color:white; padding:6px 16px; border-radius:8px;">🗑️ Excluir</button>
     </div>
     <div id="fichaInfo" style="margin-top:10px; font-size:13px; color:#4a5a44; display:none; background:rgba(255,255,255,0.5); padding:6px 12px; border-radius:6px;">
       <span id="fichaInfoText"></span>
@@ -598,7 +599,13 @@
           <h3>Estatísticas de Combate</h3>
           <div class="combat-grid">
             <div class="combat-stat"><label>CA</label><input id="ca" type="number" value="10"></div>
-            <div class="combat-stat"><label>Iniciativa</label><input id="initiative" type="number" value="0"></div>
+            <div class="combat-stat">
+              <label>Iniciativa</label>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <input id="initiative" type="number" value="0" style="width:60%; text-align:center; border:none; background:transparent; font-size:16px; border-bottom:1px solid var(--line);">
+                <span style="font-size:12px; color:var(--moss);">(DEX: <span id="dexModDisplay">+0</span>)</span>
+              </div>
+            </div>
             <div class="combat-stat"><label>Deslocamento</label><input id="speed" type="text" value="9m"></div>
             <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8"></div>
           </div>
@@ -944,8 +951,33 @@
       });
 
       updateSpellDC();
+      calcularIniciativa();
       saveState();
     }
+
+            /* ---------------------------------------------------------
+          CALCULAR INICIATIVA
+        --------------------------------------------------------- */
+        function calcularIniciativa() {
+          const dex = getAttrVal('DES');
+          const dexMod = mod(dex);
+          
+          // Atualiza o display do modificador
+          const dexDisplay = document.getElementById('dexModDisplay');
+          if (dexDisplay) {
+            dexDisplay.textContent = fmt(dexMod);
+          }
+          
+          // Atualiza o campo de iniciativa com o modificador
+          const initiativeInput = document.getElementById('initiative');
+          if (initiativeInput) {
+            // Se o campo estiver vazio ou for 0, coloca o modificador
+            if (!initiativeInput.value || initiativeInput.value === '0') {
+              initiativeInput.value = dexMod;
+            }
+            // Se tiver um valor diferente, mantém (permite ajuste manual)
+          }
+}
 
     function onLevelChange() {
       const level = parseInt(document.getElementById('level').value || 1, 10);
@@ -1262,6 +1294,7 @@
     if (embeddedState) {
       applyState(embeddedState);
       saveState();
+      calcularIniciativa();
     } else {
       // Tenta carregar do Firebase após 1.5 segundos
       setTimeout(async () => {
@@ -1269,6 +1302,7 @@
         if (!carregou) {
           onLevelChange();
           updatePreparedCount();
+          calcularIniciativa();
         }
       }, 1500);
     }
@@ -1282,7 +1316,8 @@
       setDoc,
       getDoc,
       collection,
-      getDocs
+      getDocs,
+      deleteDoc
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1529,6 +1564,64 @@
         prompt('Copie este link:', url);
       });
     };
+
+// ============================================
+// FUNÇÃO: Excluir ficha
+// ============================================
+window.excluirFicha = async function() {
+  const select = document.getElementById('fichaSelector');
+  const fichaId = select.value;
+  
+  if (!fichaId) {
+    alert('Selecione uma ficha para excluir!');
+    return;
+  }
+  
+  // Pega o nome da ficha para mostrar no aviso
+  const option = select.options[select.selectedIndex];
+  const nomeFicha = option.textContent || fichaId;
+  
+  // CONFIRMAÇÃO DUPLA (segurança!)
+  const confirmar1 = confirm(`⚠️ Tem certeza que quer excluir a ficha:\n\n"${nomeFicha}"\n\nEsta ação não pode ser desfeita!`);
+  if (!confirmar1) return;
+  
+  const confirmar2 = confirm(`🔄 ÚLTIMA CHANCE!\n\nDeseja realmente APAGAR PERMANENTEMENTE a ficha "${nomeFicha}"?\n\nTodos os dados serão perdidos!`);
+  if (!confirmar2) return;
+  
+  try {
+    // Importa a função deleteDoc
+    const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js");
+    
+    const docRef = doc(db, 'fichas', fichaId);
+    await deleteDoc(docRef);
+    
+    console.log(`🗑️ Ficha "${fichaId}" excluída!`);
+    flashIndicator(`Ficha excluída!`);
+    
+    // Remove a opção do select
+    option.remove();
+    
+    // Se a ficha atual for a que foi excluída, limpa a tela
+    const nomeAtual = document.getElementById('charName').value;
+    if (nomeAtual && nomeAtual.toLowerCase().replace(/\s+/g, '_') === fichaId) {
+      if (confirm('A ficha que você excluiu está aberta. Deseja limpar a tela?')) {
+        // Limpa a ficha atual
+        document.getElementById('charName').value = '';
+        document.getElementById('charName2').value = '';
+        // Recarrega a página para limpar tudo
+        location.reload();
+      }
+    }
+    
+    // Atualiza a lista
+    setTimeout(window.listarFichas, 500);
+    
+  } catch (e) {
+    console.error('❌ Erro ao excluir ficha:', e);
+    alert('Erro ao excluir ficha! Verifique o console (F12) para mais detalhes.');
+    flashIndicator('Erro ao excluir!');
+  }
+};
 
     // ============================================
     // INICIALIZAÇÃO
