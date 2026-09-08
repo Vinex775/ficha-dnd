@@ -500,6 +500,22 @@
         display: none !important;
       }
     }
+        /* ---------- Estilo da lista de personagens ---------- */
+    #listaPersonagens::-webkit-scrollbar {
+      width: 6px;
+    }
+    #listaPersonagens::-webkit-scrollbar-track {
+      background: var(--paper-dark);
+      border-radius: 3px;
+    }
+    #listaPersonagens::-webkit-scrollbar-thumb {
+      background: var(--sage);
+      border-radius: 3px;
+    }
+    #listaPersonagens::-webkit-scrollbar-thumb:hover {
+      background: var(--moss);
+}
+
   </style>
 </head>
 <body>
@@ -512,24 +528,32 @@
     <button class="small-btn" onclick="exportFilledHTML()" style="background:#e2b93b; color:#26332c;">📥 Baixar HTML</button>
   </div>
 
-  <!-- ============ SELETOR DE FICHAS ============ -->
-  <div style="max-width:210mm; margin:0 auto 20px; background:linear-gradient(135deg, #f0f4ed, #e3ecdd); border-radius:12px; padding:16px 20px; border:2px solid var(--moss); box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <span style="font-weight:bold; color:var(--moss); font-size:16px;">📂 Minhas Fichas</span>
-      <select id="fichaSelector" style="flex:1; min-width:200px; padding:8px 12px; border:2px solid var(--sage); border-radius:8px; background:#fff; font-size:14px; font-family:inherit; color:var(--ink);">
-        <option value="">-- Selecione uma ficha --</option>
-      </select>
-      <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss); color:white; padding:6px 16px; border-radius:8px;">Abrir</button>
-      <button class="small-btn" onclick="listarFichas()" style="background:var(--sage); color:white; padding:6px 16px; border-radius:8px;">🔄 Atualizar</button>
-      <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white; padding:6px 16px; border-radius:8px;">✨ Nova</button>
-      <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white; padding:6px 16px; border-radius:8px;">🔗 Compartilhar</button>
-      <button class="small-btn" onclick="excluirFicha()" style="background:#a15c4a; color:white; padding:6px 16px; border-radius:8px;">🗑️ Excluir</button>
+  <!-- ============ TELA DE SELEÇÃO ============ -->
+<div id="telaSelecao" style="max-width:210mm; margin:0 auto 20px;">
+  <div style="background:linear-gradient(135deg, #f0f4ed, #e3ecdd); border-radius:12px; padding:30px 24px; border:2px solid var(--moss); box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <h2 style="color:var(--moss); margin:0 0 20px 0; font-family:Arial,Helvetica,sans-serif; text-align:center; font-size:24px;">📂 Meus Personagens</h2>
+    
+    <!-- Lista de personagens -->
+    <div id="listaPersonagens" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding:4px;">
+      <div style="text-align:center; color:#8a9a84; padding:20px;">Carregando personagens...</div>
     </div>
-    <div id="fichaInfo" style="margin-top:10px; font-size:13px; color:#4a5a44; display:none; background:rgba(255,255,255,0.5); padding:6px 12px; border-radius:6px;">
-      <span id="fichaInfoText"></span>
+    
+    <!-- Botão Criar Novo -->
+    <div style="text-align:center; margin-top:20px;">
+      <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white; padding:10px 30px; border-radius:8px; font-size:14px;">✨ Criar Novo Personagem</button>
     </div>
   </div>
+</div>
 
+<!-- ============ TELA DA FICHA ============ -->
+<div id="telaFicha" style="display:none;">
+  <!-- Botão Voltar -->
+  <div style="max-width:210mm; margin:0 auto 10px;">
+    <button class="small-btn" onclick="voltarParaSelecao()" style="background:var(--moss); color:white; padding:8px 20px; border-radius:8px; font-size:13px;">← Voltar para seleção</button>
+  </div>
+  
+  <!-- A ficha em si -->
+  <div class="page" id="paginaFicha">
   <!-- ============ PÁGINA 1 ============ -->
   <div class="page">
 
@@ -690,6 +714,26 @@
       <div id="historyDiv" contenteditable="true" style="outline:none;"></div>
     </div>
 
+  </div>
+  </div>
+</div>
+
+  <!-- ============ SELETOR DE FICHAS ============ -->
+  <div style="max-width:210mm; margin:0 auto 20px; background:linear-gradient(135deg, #f0f4ed, #e3ecdd); border-radius:12px; padding:16px 20px; border:2px solid var(--moss); box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <span style="font-weight:bold; color:var(--moss); font-size:16px;">📂 Minhas Fichas</span>
+      <select id="fichaSelector" style="flex:1; min-width:200px; padding:8px 12px; border:2px solid var(--sage); border-radius:8px; background:#fff; font-size:14px; font-family:inherit; color:var(--ink);">
+        <option value="">-- Selecione uma ficha --</option>
+      </select>
+      <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss); color:white; padding:6px 16px; border-radius:8px;">Abrir</button>
+      <button class="small-btn" onclick="listarFichas()" style="background:var(--sage); color:white; padding:6px 16px; border-radius:8px;">🔄 Atualizar</button>
+      <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white; padding:6px 16px; border-radius:8px;">✨ Nova</button>
+      <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white; padding:6px 16px; border-radius:8px;">🔗 Compartilhar</button>
+      <button class="small-btn" onclick="excluirFicha()" style="background:#a15c4a; color:white; padding:6px 16px; border-radius:8px;">🗑️ Excluir</button>
+    </div>
+    <div id="fichaInfo" style="margin-top:10px; font-size:13px; color:#4a5a44; display:none; background:rgba(255,255,255,0.5); padding:6px 12px; border-radius:6px;">
+      <span id="fichaInfoText"></span>
+    </div>
   </div>
 
   <script>
@@ -1456,6 +1500,220 @@
       }
     };
 
+        // ============================================
+    // FUNÇÃO: Mostrar tela de seleção
+    // ============================================
+    window.mostrarSelecao = function() {
+      document.getElementById('telaSelecao').style.display = 'block';
+      document.getElementById('telaFicha').style.display = 'none';
+      window.listarPersonagens(); // Atualiza a lista
+    };
+
+    // ============================================
+    // FUNÇÃO: Mostrar tela da ficha
+    // ============================================
+    window.mostrarFicha = function() {
+      document.getElementById('telaSelecao').style.display = 'none';
+      document.getElementById('telaFicha').style.display = 'block';
+    };
+
+    // ============================================
+    // FUNÇÃO: Voltar para seleção
+    // ============================================
+    window.voltarParaSelecao = function() {
+      if (confirm('Tem certeza que quer sair da ficha? As alterações não salvas serão perdidas!')) {
+        window.mostrarSelecao();
+      }
+    };
+
+    // ============================================
+    // FUNÇÃO: Listar personagens (versão com botões)
+    // ============================================
+    window.listarPersonagens = async function() {
+      try {
+        const container = document.getElementById('listaPersonagens');
+        container.innerHTML = '<div style="text-align:center; color:#8a9a84; padding:20px;">🔄 Carregando...</div>';
+        
+        const collectionRef = collection(db, 'fichas');
+        const querySnapshot = await getDocs(collectionRef);
+        
+        if (querySnapshot.empty) {
+          container.innerHTML = `
+            <div style="text-align:center; color:#8a9a84; padding:30px;">
+              <p style="font-size:18px; margin:0;">😕 Nenhum personagem encontrado</p>
+              <p style="font-size:14px; margin-top:8px;">Clique em "Criar Novo Personagem" para começar!</p>
+            </div>
+          `;
+          return;
+        }
+    
+    container.innerHTML = '';
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const nome = data.nomePersonagem || data.nome || doc.id;
+      const nivel = data.nivel || '?';
+      const classe = data.classe || data.charClass || '?';
+      const raca = data.raceInput || '?';
+      const atualizado = data.ultimaAtualizacao ? new Date(data.ultimaAtualizacao).toLocaleDateString('pt-BR') : '';
+      
+      // Cria o botão do personagem
+      const btn = document.createElement('button');
+      btn.style.cssText = `
+        background: white;
+        border: 2px solid var(--sage);
+        border-radius: 10px;
+        padding: 14px 20px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 16px;
+        color: var(--ink);
+        text-align: left;
+        transition: all 0.2s;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      `;
+      
+      btn.onmouseover = () => {
+        btn.style.borderColor = 'var(--moss)';
+        btn.style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)';
+        btn.style.transform = 'translateY(-1px)';
+      };
+      btn.onmouseout = () => {
+        btn.style.borderColor = 'var(--sage)';
+        btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
+        btn.style.transform = 'translateY(0)';
+      };
+      
+      btn.onclick = () => {
+        // Carrega a ficha
+        carregarFichaPorId(doc.id);
+      };
+      
+      // Nome do personagem
+      const nomeSpan = document.createElement('span');
+      nomeSpan.style.cssText = 'font-weight: bold; color: var(--moss);';
+      nomeSpan.textContent = nome;
+      
+      // Informações adicionais
+      const infoSpan = document.createElement('span');
+      infoSpan.style.cssText = 'font-size: 13px; color: #6a7a64;';
+      infoSpan.textContent = `${raca} · Nv${nivel} ${classe}`;
+      
+      // Data (se tiver)
+      if (atualizado) {
+        const dataSpan = document.createElement('span');
+        dataSpan.style.cssText = 'font-size: 11px; color: #9aaa94;';
+        dataSpan.textContent = `📅 ${atualizado}`;
+        infoSpan.appendChild(document.createTextNode(' · '));
+        infoSpan.appendChild(dataSpan);
+      }
+      
+      btn.appendChild(nomeSpan);
+      btn.appendChild(infoSpan);
+      
+      container.appendChild(btn);
+    });
+    
+    console.log(`✅ ${querySnapshot.size} personagens listados`);
+    
+  } catch(e) {
+    console.error('❌ Erro ao listar personagens:', e);
+    const container = document.getElementById('listaPersonagens');
+    container.innerHTML = `
+      <div style="text-align:center; color:#a15c4a; padding:20px;">
+        ❌ Erro ao carregar personagens<br>
+        <span style="font-size:12px;">${e.message}</span>
+      </div>
+    `;
+  }
+};
+
+// ============================================
+// FUNÇÃO: Carregar ficha por ID
+// ============================================
+window.carregarFichaPorId = async function(fichaId) {
+  try {
+    const docRef = doc(db, 'fichas', fichaId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      applyState(data);
+      
+      // Atualiza o nome no campo
+      const nome = data.nomePersonagem || data.nome || fichaId;
+      document.getElementById('charName').value = nome;
+      document.getElementById('charName2').value = nome;
+      
+      flashIndicator(`✅ Ficha carregada: ${nome}`);
+      console.log('✅ Ficha carregada:', data);
+      
+      onLevelChange();
+      updatePreparedCount();
+      
+      // Mostra a ficha
+      window.mostrarFicha();
+      
+    } else {
+      alert('Ficha não encontrada!');
+    }
+  } catch(e) {
+    console.error('Erro ao carregar ficha:', e);
+    alert('Erro ao carregar ficha!');
+  }
+};
+
+// ============================================
+// FUNÇÃO: Criar nova ficha (modificada)
+// ============================================
+const criarNovaFichaOriginal = window.criarNovaFicha;
+window.criarNovaFicha = function() {
+  const nome = prompt('Digite o nome do novo personagem:');
+  if (!nome) return;
+  
+  // Limpa a ficha atual
+  const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+  inputs.forEach(el => {
+    if (el.id !== 'charName' && el.id !== 'charName2') {
+      el.value = '';
+    }
+  });
+  
+  ATTRS.forEach(a => {
+    document.getElementById('attr_' + a.key).value = 10;
+  });
+  
+  document.querySelectorAll('input[type="checkbox"]').forEach(el => {
+    el.checked = false;
+  });
+  
+  for (let i = 1; i <= 9; i++) {
+    document.getElementById('slotMax_' + i).value = 0;
+    document.getElementById('slotCur_' + i).value = 0;
+  }
+  
+  document.querySelectorAll('.spell-cards').forEach(el => {
+    el.innerHTML = '';
+  });
+  
+  document.getElementById('charName').value = nome;
+  document.getElementById('charName2').value = nome;
+  
+  onLevelChange();
+  updatePreparedCount();
+  
+  // Salva imediatamente
+  saveState();
+  
+  flashIndicator(`Nova ficha: ${nome}`);
+  
+  // Mostra a ficha
+  window.mostrarFicha();
+};
+
     // ============================================
     // FUNÇÃO: Carregar ficha selecionada
     // ============================================
@@ -1623,14 +1881,31 @@ window.excluirFicha = async function() {
   }
 };
 
-    // ============================================
-    // INICIALIZAÇÃO
-    // ============================================
-    setTimeout(() => {
-      window.listarFichas();
-    }, 500);
+// ============================================
+// INICIALIZAÇÃO - Mostra tela de seleção
+// ============================================
+setTimeout(() => {
+  // Mostra a tela de seleção
+  document.getElementById('telaSelecao').style.display = 'block';
+  document.getElementById('telaFicha').style.display = 'none';
+  
+  // Lista os personagens
+  window.listarPersonagens();
+  
+  // Verifica se tem ficha na URL (para compatibilidade)
+  const urlParams = new URLSearchParams(window.location.search);
+  const fichaId = urlParams.get('ficha');
+  
+  if (fichaId) {
+    // Se tiver ?ficha= na URL, carrega direto
+    setTimeout(async () => {
+      await window.carregarFichaPorId(fichaId);
+    }, 1000);
+  }
+}, 500);
 
-    console.log('✅ Seletor de fichas inicializado!');
+console.log('✅ Tela de seleção inicializada!');
+
   </script>
 </body>
 </html>
