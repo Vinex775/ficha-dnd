@@ -2,8 +2,8 @@
 <html lang="pt-BR"><head>
   <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://*.firebaseio.com;
-  connect-src 'self' https://*.firebaseio.com https://*.googleapis.com;
+  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com;
+  connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebaseapp.com wss://*.firebaseio.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data:;
 ">
@@ -980,9 +980,9 @@ if(embeddedState){
     doc,
     setDoc,
     getDoc,
-    collection,   // <-- NOVO
-    getDocs,      // <-- NOVO
-    deleteDoc     // <-- NOVO (opcional, para excluir)
+    collection,
+    getDocs,
+    deleteDoc
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -1001,8 +1001,8 @@ if(embeddedState){
   window.firebaseDoc = doc;
   window.firebaseSetDoc = setDoc;
   window.firebaseGetDoc = getDoc;
-  window.firebaseCollection = collection;  // <-- NOVO
-  window.firebaseGetDocs = getDocs;        // <-- NOVO
+  window.firebaseCollection = collection;
+  window.firebaseGetDocs = getDocs;
 
   console.log("✅ Firebase conectado!");
 
@@ -1033,7 +1033,6 @@ if(embeddedState){
       console.log('✅ Ficha salva no Firebase! ID:', sheetId);
       flashIndicator('Salvo no Firebase ✓');
       
-      // Atualiza a lista
       setTimeout(window.listarFichas, 1000);
       
       return true;
@@ -1074,12 +1073,12 @@ if(embeddedState){
   };
 
   // ============================================
-  // FUNÇÕES DO SELETOR DE FICHAS (NOVAS)
+  // FUNÇÃO: Listar todas as fichas
   // ============================================
-
-  // Lista todas as fichas
   window.listarFichas = async function() {
     try {
+      console.log('🔍 Iniciando listagem...');
+      
       const select = document.getElementById('fichaSelector');
       const info = document.getElementById('fichaInfo');
       const infoText = document.getElementById('fichaInfoText');
@@ -1121,14 +1120,16 @@ if(embeddedState){
       console.log(`✅ ${count} fichas encontradas`);
       
     } catch(e) {
-      console.error('Erro ao listar fichas:', e);
+      console.error('❌ Erro ao listar fichas:', e);
       flashIndicator('Erro ao listar fichas!');
       const select = document.getElementById('fichaSelector');
       select.innerHTML = '<option value="">❌ Erro ao carregar</option>';
     }
   };
 
-  // Carrega a ficha selecionada
+  // ============================================
+  // FUNÇÃO: Carregar ficha selecionada
+  // ============================================
   window.carregarFichaSelecionada = async function() {
     const select = document.getElementById('fichaSelector');
     const fichaId = select.value;
@@ -1167,7 +1168,9 @@ if(embeddedState){
     }
   };
 
-  // Cria uma nova ficha
+  // ============================================
+  // FUNÇÃO: Criar nova ficha
+  // ============================================
   window.criarNovaFicha = function() {
     const nome = prompt('Digite o nome do novo personagem:');
     if (!nome) return;
@@ -1184,7 +1187,30 @@ if(embeddedState){
     }
   };
 
-  // Carrega a primeira ficha automaticamente
+  // ============================================
+  // FUNÇÃO: Gerar link
+  // ============================================
+  window.gerarLinkFicha = function() {
+    const nome = document.getElementById('charName').value;
+    if (!nome) {
+      alert('Digite o nome do personagem primeiro!');
+      return;
+    }
+    
+    const id = nome.toLowerCase().replace(/\s+/g, '_');
+    const url = window.location.href.split('?')[0] + '?ficha=' + id;
+    
+    navigator.clipboard.writeText(url).then(() => {
+      flashIndicator('Link copiado!');
+      alert('Link copiado!\n\n' + url + '\n\nEnvie para seu mestre!');
+    }).catch(() => {
+      prompt('Copie este link:', url);
+    });
+  };
+
+  // ============================================
+  // FUNÇÃO: Carregar primeira ficha automaticamente
+  // ============================================
   window.carregarPrimeiraFicha = async function() {
     const nome = document.getElementById('charName')?.value;
     if (nome && nome.trim()) {
@@ -1208,19 +1234,6 @@ if(embeddedState){
     } catch(e) {
       console.error('Erro ao carregar primeira ficha:', e);
     }
-  };
-
-  // MODIFICA A FUNÇÃO saveState ORIGINAL
-  const saveStateOriginal = window.saveState;
-  window.saveState = async function() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
-      flashIndicator('Salvo ✓');
-    } catch(e) {
-      console.error('Erro ao salvar local:', e);
-    }
-    
-    await window.salvarFirebase();
   };
 
   // ============================================
@@ -1262,28 +1275,5 @@ if(embeddedState){
   }, 500);
 
   console.log('✅ Seletor de fichas inicializado!');
-  
-  // ============================================
-  // FUNÇÃO: GERAR LINK (OPCIONAL)
-  // ============================================
-  window.gerarLinkFicha = function() {
-    const nome = document.getElementById('charName').value;
-    if (!nome) {
-      alert('Digite o nome do personagem primeiro!');
-      return;
-    }
-    
-    const id = nome.toLowerCase().replace(/\s+/g, '_');
-    const url = window.location.href.split('?')[0] + '?ficha=' + id;
-    
-    navigator.clipboard.writeText(url).then(() => {
-      flashIndicator('Link copiado!');
-      alert('Link copiado!\n\n' + url + '\n\nEnvie para seu mestre!');
-    }).catch(() => {
-      prompt('Copie este link:', url);
-    });
-  };
-
-  console.log('✅ Seletor de fichas inicializado!');
-</script>  <!-- ← FECHA AQUI -->
+</script>
 </body></html>
