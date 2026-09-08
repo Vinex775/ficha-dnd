@@ -1314,25 +1314,23 @@
       flashIndicator('Cópia exportada');
     }
 
-    /* ---------------------------------------------------------
-       INICIALIZAÇÃO
-    --------------------------------------------------------- */
-    const embeddedState = window.__EMBEDDED_STATE__;
-    if (embeddedState) {
-      applyState(embeddedState);
-      saveState();
-      calcularIniciativa();
-    } else {
-      // Tenta carregar do Firebase após 1.5 segundos
-      setTimeout(async () => {
-        const carregou = await window.carregarFirebase();
-        if (!carregou) {
-          onLevelChange();
-          updatePreparedCount();
-          calcularIniciativa();
-        }
-      }, 1500);
-    }
+/* ---------------------------------------------------------
+   INICIALIZAÇÃO
+--------------------------------------------------------- */
+const embeddedState = window.__EMBEDDED_STATE__;
+if (embeddedState) {
+  applyState(embeddedState);
+  saveState();
+  calcularIniciativa();
+} else {
+  // NÃO TENTA CARREGAR AUTOMATICAMENTE
+  // Apenas inicializa os campos padrão
+  onLevelChange();
+  updatePreparedCount();
+  calcularIniciativa();
+  console.log('✅ Ficha pronta para uso. Selecione um personagem na tela inicial.');
+}
+
   </script>
 
   <script type="module">
@@ -1503,7 +1501,7 @@
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       const nome = data.nomePersonagem || data.nome || doc.id;
-      const nivel = data.nivel || '?';
+      const nivel = data.level || data.nivel || '?';
       const classe = data.classe || data.charClass || '?';
       const raca = data.raceInput || '?';
       const atualizado = data.ultimaAtualizacao ? new Date(data.ultimaAtualizacao).toLocaleDateString('pt-BR') : '';
