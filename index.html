@@ -526,6 +526,7 @@
     <button class="small-btn" onclick="saveState()" style="background:#4a7aa8; color:white;">💾 Salvar</button>
     <button class="small-btn" onclick="window.carregarFirebase()" style="background:#7a8a4a; color:white;">📂 Carregar</button>
     <button class="small-btn" onclick="exportFilledHTML()" style="background:#e2b93b; color:#26332c;">📥 Baixar HTML</button>
+    <button class="small-btn" onclick="excluirFichaAtual()" style="background:#a15c4a; color:white;">🗑️ Excluir</button>
   </div>
 
   <!-- ============ TELA DE SELEÇÃO ============ -->
@@ -1446,11 +1447,21 @@
     };
 
     // ============================================
-    // FUNÇÃO: Voltar para seleção
+    // FUNÇÃO: Voltar para seleção (com verificação)
     // ============================================
-    window.voltarParaSelecao = function() {
-      if (confirm('Tem certeza que quer sair da ficha? As alterações não salvas serão perdidas!')) {
+    window.voltarParaSelecao = async function() {
+      // Tenta salvar primeiro
+      const salvou = await window.salvarFirebase();
+      
+      if (salvou) {
+        // Se salvou, volta sem perguntar
         window.mostrarSelecao();
+        flashIndicator('✅ Ficha salva! Voltando...');
+      } else {
+        // Se não salvou, pergunta
+        if (confirm('⚠️ Não foi possível salvar. Deseja sair mesmo assim?')) {
+          window.mostrarSelecao();
+        }
       }
     };
 
@@ -1712,7 +1723,42 @@ window.carregarFichaPorId = async function(fichaId) {
         flashIndicator('Erro ao excluir!');
       }
     };
-
+    // ============================================
+    // FUNÇÃO: Excluir a ficha que está aberta
+    // ============================================
+    window.excluirFichaAtual = async function() {
+      const nome = document.getElementById('charName').value;
+      if (!nome) {
+        alert('Nenhuma ficha aberta para excluir!');
+        return;
+      }
+      
+      const fichaId = getSheetId();
+      
+      // CONFIRMAÇÃO DUPLA
+      const confirmar1 = confirm(`⚠️ Tem certeza que quer excluir a ficha:\n\n"${nome}"\n\nEsta ação não pode ser desfeita!`);
+      if (!confirmar1) return;
+      
+      const confirmar2 = confirm(`🔄 ÚLTIMA CHANCE!\n\nDeseja realmente APAGAR PERMANENTEMENTE a ficha "${nome}"?\n\nTodos os dados serão perdidos!`);
+      if (!confirmar2) return;
+      
+      try {
+        const docRef = doc(db, 'fichas', fichaId);
+        await deleteDoc(docRef);
+        
+        console.log(`🗑️ Ficha "${fichaId}" excluída!`);
+        flashIndicator(`Ficha "${nome}" excluída!`);
+        
+        // Volta para a seleção
+        window.mostrarSelecao();
+        
+      } catch (e) {
+        console.error('❌ Erro ao excluir ficha:', e);
+        alert('Erro ao excluir ficha! Verifique o console (F12) para mais detalhes.');
+        flashIndicator('Erro ao excluir!');
+      }
+    };
+    
 // ============================================
 // INICIALIZAÇÃO - Mostra tela de seleção
 // ============================================
