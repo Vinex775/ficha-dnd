@@ -625,11 +625,9 @@
           <div class="combat-grid">
             <div class="combat-stat"><label>CA</label><input id="ca" type="number" value="10"></div>
             <div class="combat-stat">
+            <div class="combat-stat">
               <label>Iniciativa</label>
-              <div style="display:flex; align-items:center; gap:4px;">
-                <input id="initiative" type="number" value="0" style="width:60%; text-align:center; border:none; background:transparent; font-size:16px; border-bottom:1px solid var(--line);">
-                <span style="font-size:12px; color:var(--moss);">(DEX: <span id="dexModDisplay">+0</span>)</span>
-              </div>
+              <input id="initiative" type="number" value="0" style="width:100%; text-align:center; border:none; background:transparent; font-size:16px; border-bottom:1px solid var(--line);">
             </div>
             <div class="combat-stat"><label>Deslocamento</label><input id="speed" type="text" value="9m"></div>
             <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8"></div>
@@ -659,10 +657,6 @@
               <thead><tr><th>Nv</th><th>Prof.</th><th>Truques</th><th>Espaços de Magia</th><th>Recursos Desbloqueados</th></tr></thead>
               <tbody id="progressionBody"></tbody>
             </table>
-          </div>
-          <div class="note-line">
-            Deslocamento aquático/voo desbloqueado a partir do nível:
-            <input id="flightNote" type="text" placeholder="ex: 10 (Voo), 6 (Natação)">
           </div>
         </div>
 
@@ -994,7 +988,8 @@
           }
         }
       }
-      
+      preencherTabelaProgressao(classeId);
+
       console.log(`✅ Configuração aplicada: ${config.nome}`);
     }
 
@@ -1021,6 +1016,116 @@
         const casterSelect = slotBox.querySelector('.caster-type');
         if (casterSelect) casterSelect.style.display = '';
       }
+      preencherTabelaProgressao('druida');
+    }
+
+    /* ---------------------------------------------------------
+      TABELAS DE PROGRESSÃO POR CLASSE
+    --------------------------------------------------------- */
+    const PROGRESSION_TABLES = {
+      barbaro: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        recursos: ['Fúria (2)', 'Fúria (2), Ataque Temerário', 'Fúria (3)', 'Caminho Primordial', 'Fúria (3), Ataque Extra', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)']
+      },
+      bardo: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        truques: [2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      },
+      clerigo: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        truques: [3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      },
+      druida: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        truques: [2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      },
+      guerreiro: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        recursos: ['Estilo de Luta', 'Surto de Ação (1)', 'Caminho Arcano', 'Aumento de Atributo', 'Ataque Extra', 'Aumento de Atributo', 'Caminho Arcano', 'Aumento de Atributo', 'Indomável (1)', 'Caminho Arcano', 'Ataque Extra (2)', 'Aumento de Atributo', 'Indomável (2)', 'Aumento de Atributo', 'Caminho Arcano', 'Aumento de Atributo', 'Surto de Ação (2)', 'Aumento de Atributo', 'Aumento de Atributo', 'Ataque Extra (3)']
+      },
+      ladino: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        recursos: ['Ataque Furtivo (1d6)', 'Ação Astuta', 'Ataque Furtivo (2d6)', 'Esquiva Cautelosa', 'Ataque Furtivo (3d6)', 'Perícias Especializadas', 'Ataque Furtivo (4d6)', 'Esquiva Sobrenatural', 'Ataque Furtivo (5d6)', 'Aumento de Atributo', 'Ataque Furtivo (6d6)', 'Aumento de Atributo', 'Ataque Furtivo (7d6)', 'Sentidos Cegos', 'Ataque Furtivo (8d6)', 'Aumento de Atributo', 'Ataque Furtivo (9d6)', 'Sombra Furtiva', 'Ataque Furtivo (10d6)', 'Golpe de Mestre']
+      },
+      mago: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        truques: [3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      },
+      monge: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        recursos: ['Ki (2)', 'Ki (3)', 'Ki (4)', 'Ki (5)', 'Ki (6)', 'Ki (7)', 'Ki (8)', 'Ki (9)', 'Ki (10)', 'Ki (11)', 'Ki (12)', 'Ki (13)', 'Ki (14)', 'Ki (15)', 'Ki (16)', 'Ki (17)', 'Ki (18)', 'Ki (19)', 'Ki (20)']
+      },
+      paladino: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      },
+      patrulheiro: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      },
+      bruxo: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        truques: [2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+        slots: ['1º:1','1º:2','2º:2','2º:2','3º:2','3º:2','4º:2','4º:2','5º:2','5º:2','5º:3','5º:3','5º:3','5º:3','5º:3','5º:3','5º:4','5º:4','5º:4','5º:4']
+      },
+      feiticeiro: {
+        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
+        truques: [4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
+        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+      }
+    };
+
+    // Preenche a tabela de progressão automaticamente
+    function preencherTabelaProgressao(classeId) {
+      const config = PROGRESSION_TABLES[classeId];
+      if (!config) return;
+      
+      for (let lvl = 1; lvl <= 20; lvl++) {
+        const idx = lvl - 1;
+        
+        // Proficiência (sempre igual para todas as classes)
+        const profEl = document.getElementById('prog_prof_' + lvl);
+        if (profEl) profEl.textContent = '+' + config.prof[idx];
+        
+        // Truques (se existir)
+        const truquesEl = document.getElementById('prog_truques_' + lvl);
+        if (truquesEl) {
+          if (config.truques && config.truques[idx]) {
+            truquesEl.value = config.truques[idx];
+          } else {
+            truquesEl.value = '-';
+          }
+          truquesEl.readOnly = true;
+        }
+        
+        // Espaços de Magia (se existir)
+        const slotsEl = document.getElementById('prog_slots_' + lvl);
+        if (slotsEl) {
+          if (config.slots && config.slots[idx]) {
+            slotsEl.value = config.slots[idx];
+          } else {
+            slotsEl.value = '-';
+          }
+          slotsEl.readOnly = true;
+        }
+        
+        // Recursos Desbloqueados
+        const recursosEl = document.getElementById('prog_resources_' + lvl);
+        if (recursosEl) {
+          if (config.recursos && config.recursos[idx]) {
+            recursosEl.value = config.recursos[idx];
+          } else {
+            recursosEl.value = '-';
+          }
+          recursosEl.readOnly = true;
+        }
+      }
+      
+      console.log(`✅ Tabela de progressão preenchida para: ${classeId}`);
     }
 
     const CASTER_TABLES = {
@@ -1252,29 +1357,22 @@
       saveState();
     }
 
-            /* ---------------------------------------------------------
-          CALCULAR INICIATIVA
-        --------------------------------------------------------- */
-        function calcularIniciativa() {
-          const dex = getAttrVal('DES');
-          const dexMod = mod(dex);
-          
-          // Atualiza o display do modificador
-          const dexDisplay = document.getElementById('dexModDisplay');
-          if (dexDisplay) {
-            dexDisplay.textContent = fmt(dexMod);
-          }
-          
-          // Atualiza o campo de iniciativa com o modificador
-          const initiativeInput = document.getElementById('initiative');
-          if (initiativeInput) {
-            // Se o campo estiver vazio ou for 0, coloca o modificador
-            if (!initiativeInput.value || initiativeInput.value === '0') {
-              initiativeInput.value = dexMod;
-            }
-            // Se tiver um valor diferente, mantém (permite ajuste manual)
-          }
-}
+    /* ---------------------------------------------------------
+      CALCULAR INICIATIVA
+    --------------------------------------------------------- */
+    function calcularIniciativa() {
+      const dex = getAttrVal('DES');
+      const dexMod = mod(dex);
+      
+      const initiativeInput = document.getElementById('initiative');
+      if (initiativeInput) {
+        // Se o campo estiver vazio ou for 0, coloca o modificador
+        if (!initiativeInput.value || initiativeInput.value === '0') {
+          initiativeInput.value = dexMod;
+        }
+        // Se tiver um valor diferente, mantém (permite ajuste manual)
+      }
+    }
 
     function onLevelChange() {
       const level = parseInt(document.getElementById('level').value || 1, 10);
@@ -1400,7 +1498,7 @@
     --------------------------------------------------------- */
     const SIMPLE_IDS = ['charName', 'level', 'raceInput', 'charClass', 'backgroundInput', 'alignmentInput',
       'originsText', 'inspiration', 'casterType', 'ca', 'initiative', 'speed', 'hitDice', 'hpCur', 'hpMax', 'hpTemp',
-      'specialResource', 'equipmentText', 'flightNote', 'castAbility', 'preparedMax'
+      'specialResource', 'equipmentText', 'castAbility', 'preparedMax'
     ];
 
     function collectState() {
