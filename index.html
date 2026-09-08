@@ -561,7 +561,7 @@
     <div class="sheet-header">
       <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
       <div class="field"><label>Raça / Sub-raça</label><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
-      <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)"></div>
+      <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse()"></div>
       <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
       <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
       <div class="field"><label>Alinhamento</label><input id="alignmentInput" type="text" placeholder="Ex: Neutro e Bom"></div>
@@ -752,6 +752,276 @@
       { name: 'Sobrevivência', attr: 'SAB' },
       { name: 'Atuação', attr: 'CAR' }
     ];
+
+    /* ---------------------------------------------------------
+      CONFIGURAÇÃO DE CLASSES
+    --------------------------------------------------------- */
+    const CLASS_CONFIG = {
+      barbaro: {
+        nome: 'Bárbaro',
+        recursos: {
+          progressao: 'Fúrias por Descanso',
+          truques: 'Fúrias',
+          slots: 'Dano de Fúria',
+          especial: 'Dano de Fúria'
+        },
+        usaMagia: false,
+        dadoVida: 'd12'
+      },
+      bardo: {
+        nome: 'Bardo',
+        recursos: {
+          progressao: 'Inspiração de Bardo (d6)',
+          truques: 'Truques Conhecidos',
+          slots: 'Espaços de Magia',
+          especial: 'Inspiração de Bardo'
+        },
+        usaMagia: true,
+        dadoVida: 'd8'
+      },
+      clerigo: {
+        nome: 'Clérigo',
+        recursos: {
+          progressao: 'Canais Divinos',
+          truques: 'Truques',
+          slots: 'Espaços de Magia',
+          especial: 'Canal Divino'
+        },
+        usaMagia: true,
+        dadoVida: 'd8'
+      },
+      druida: {
+        nome: 'Druida',
+        recursos: {
+          progressao: 'Formas Selvagens',
+          truques: 'Truques',
+          slots: 'Espaços de Magia',
+          especial: 'Forma Selvagem'
+        },
+        usaMagia: true,
+        dadoVida: 'd8'
+      },
+      guerreiro: {
+        nome: 'Guerreiro',
+        recursos: {
+          progressao: 'Surto de Ação',
+          truques: 'Estilos de Luta',
+          slots: 'Surto de Ação',
+          especial: 'Surto de Ação'
+        },
+        usaMagia: false,
+        dadoVida: 'd10'
+      },
+      ladino: {
+        nome: 'Ladino',
+        recursos: {
+          progressao: 'Ataque Furtivo',
+          truques: 'Perícias Especializadas',
+          slots: 'Ataque Furtivo',
+          especial: 'Ataque Furtivo'
+        },
+        usaMagia: false,
+        dadoVida: 'd8'
+      },
+      mago: {
+        nome: 'Mago',
+        recursos: {
+          progressao: 'Recuperação Arcana',
+          truques: 'Truques',
+          slots: 'Espaços de Magia',
+          especial: 'Recuperação Arcana'
+        },
+        usaMagia: true,
+        dadoVida: 'd6'
+      },
+      monge: {
+        nome: 'Monge',
+        recursos: {
+          progressao: 'Pontos de Ki',
+          truques: 'Pontos de Ki',
+          slots: 'Pontos de Ki',
+          especial: 'Pontos de Ki'
+        },
+        usaMagia: false,
+        dadoVida: 'd8'
+      },
+      paladino: {
+        nome: 'Paladino',
+        recursos: {
+          progressao: 'Imposição de Mãos',
+          truques: 'Truques (opcional)',
+          slots: 'Espaços de Magia',
+          especial: 'Imposição de Mãos'
+        },
+        usaMagia: true,
+        dadoVida: 'd10'
+      },
+      patrulheiro: {
+        nome: 'Patrulheiro',
+        recursos: {
+          progressao: 'Favores da Natureza',
+          truques: 'Truques (opcional)',
+          slots: 'Espaços de Magia',
+          especial: 'Favores da Natureza'
+        },
+        usaMagia: true,
+        dadoVida: 'd10'
+      },
+      bruxo: {
+        nome: 'Bruxo',
+        recursos: {
+          progressao: 'Invocações Místicas',
+          truques: 'Truques',
+          slots: 'Espaços de Pacto',
+          especial: 'Invocações Místicas'
+        },
+        usaMagia: true,
+        dadoVida: 'd8'
+      },
+      feiticeiro: {
+        nome: 'Feiticeiro',
+        recursos: {
+          progressao: 'Pontos de Feitiçaria',
+          truques: 'Truques',
+          slots: 'Espaços de Magia',
+          especial: 'Pontos de Feitiçaria'
+        },
+        usaMagia: true,
+        dadoVida: 'd6'
+      }
+    };
+
+    // Detecta a classe baseada no texto do campo
+    function detectarClasse(texto) {
+      if (!texto) return null;
+      const lower = texto.toLowerCase();
+      
+      // Lista de palavras-chave para cada classe
+      const palavrasChave = {
+        barbaro: ['bárbaro', 'barbaro', 'barbarian'],
+        bardo: ['bardo', 'bard'],
+        clerigo: ['clérigo', 'clerigo', 'cleric'],
+        druida: ['druida', 'druid'],
+        guerreiro: ['guerreiro', 'fighter', 'lutador'],
+        ladino: ['ladino', 'rogue', 'ladrao', 'ladrão'],
+        mago: ['mago', 'wizard', 'feiticeiro', 'sorcerer'],
+        monges: ['monge', 'monk'],
+        paladino: ['paladino', 'paladin'],
+        patrulheiro: ['patrulheiro', 'ranger', 'caçador'],
+        bruxo: ['bruxo', 'warlock'],
+        feiticeiro: ['feiticeiro', 'sorcerer']
+      };
+      
+      for (const [classe, palavras] of Object.entries(palavrasChave)) {
+        for (const palavra of palavras) {
+          if (lower.includes(palavra)) {
+            return classe;
+          }
+        }
+      }
+      return null;
+    }
+
+    // Aplica a configuração da classe na ficha
+    function aplicarConfiguracaoClasse() {
+      const classeInput = document.getElementById('charClass');
+      if (!classeInput) return;
+      
+      const classeTexto = classeInput.value;
+      const classeId = detectarClasse(classeTexto);
+      
+      if (!classeId || !CLASS_CONFIG[classeId]) {
+        // Se não detectar classe, volta ao padrão (Druida)
+        aplicarConfiguracaoPadrao();
+        return;
+      }
+      
+      const config = CLASS_CONFIG[classeId];
+      
+      // 1. Altera o título "Truques" na Progressão
+      const truquesHeader = document.querySelector('#progressionTable thead th:nth-child(3)');
+      if (truquesHeader) {
+        truquesHeader.textContent = config.recursos.truques;
+      }
+      
+      // 2. Altera o título "Espaços de Magia" na Progressão
+      const slotsHeader = document.querySelector('#progressionTable thead th:nth-child(4)');
+      if (slotsHeader) {
+        slotsHeader.textContent = config.recursos.slots;
+      }
+      
+      // 3. Altera o título "Recursos Desbloqueados" na Progressão
+      const recursosHeader = document.querySelector('#progressionTable thead th:nth-child(5)');
+      if (recursosHeader) {
+        recursosHeader.textContent = config.recursos.progressao;
+      }
+      
+      // 4. Altera o título "Recurso Especial de Classe / Subclasse"
+      const specialBox = document.querySelector('.box:has(#specialResource) h3');
+      if (specialBox) {
+        specialBox.textContent = `Recurso: ${config.recursos.especial}`;
+      }
+      
+      // 5. Altera o Dado de Vida
+      const hitDiceInput = document.getElementById('hitDice');
+      if (hitDiceInput && config.dadoVida) {
+        // Só muda se estiver vazio ou for o padrão
+        if (!hitDiceInput.value || hitDiceInput.value === '' || hitDiceInput.value === '1d8') {
+          hitDiceInput.value = config.dadoVida;
+        }
+      }
+      
+      // 6. Se a classe usa magia, mostra os espaços; se não, esconde ou renomeia
+      const slotBox = document.querySelector('.box:has(.slot-table)');
+      if (slotBox) {
+        const slotLabel = slotBox.querySelector('h3');
+        if (slotLabel) {
+          if (config.usaMagia) {
+            slotLabel.textContent = 'Espaços de Magia';
+            // Mostra a tabela
+            const table = slotBox.querySelector('.slot-table');
+            if (table) table.style.display = '';
+            const casterSelect = slotBox.querySelector('.caster-type');
+            if (casterSelect) casterSelect.style.display = '';
+          } else {
+            // Classes sem magia
+            slotLabel.textContent = config.recursos.slots || 'Recursos de Classe';
+            // Esconde a tabela e o seletor
+            const table = slotBox.querySelector('.slot-table');
+            if (table) table.style.display = 'none';
+            const casterSelect = slotBox.querySelector('.caster-type');
+            if (casterSelect) casterSelect.style.display = 'none';
+          }
+        }
+      }
+      
+      console.log(`✅ Configuração aplicada: ${config.nome}`);
+    }
+
+        function aplicarConfiguracaoPadrao() {
+      // Restaura os títulos padrão (Druida)
+      const truquesHeader = document.querySelector('#progressionTable thead th:nth-child(3)');
+      if (truquesHeader) truquesHeader.textContent = 'Truques';
+      
+      const slotsHeader = document.querySelector('#progressionTable thead th:nth-child(4)');
+      if (slotsHeader) slotsHeader.textContent = 'Espaços de Magia';
+      
+      const recursosHeader = document.querySelector('#progressionTable thead th:nth-child(5)');
+      if (recursosHeader) recursosHeader.textContent = 'Recursos Desbloqueados';
+      
+      const specialBox = document.querySelector('.box:has(#specialResource) h3');
+      if (specialBox) specialBox.textContent = 'Recurso Especial de Classe / Subclasse';
+      
+      const slotBox = document.querySelector('.box:has(.slot-table)');
+      if (slotBox) {
+        const slotLabel = slotBox.querySelector('h3');
+        if (slotLabel) slotLabel.textContent = 'Espaços de Magia';
+        const table = slotBox.querySelector('.slot-table');
+        if (table) table.style.display = '';
+        const casterSelect = slotBox.querySelector('.caster-type');
+        if (casterSelect) casterSelect.style.display = '';
+      }
+    }
 
     const CASTER_TABLES = {
       full: [
@@ -1267,6 +1537,7 @@
       syncName();
       onLevelChange();
       updatePreparedCount();
+      aplicarConfiguracaoClasse();
     }
 
     /* ---------------------------------------------------------
@@ -1322,12 +1593,14 @@ if (embeddedState) {
   applyState(embeddedState);
   saveState();
   calcularIniciativa();
+  aplicarConfiguracaoClasse();
 } else {
   // NÃO TENTA CARREGAR AUTOMATICAMENTE
   // Apenas inicializa os campos padrão
   onLevelChange();
   updatePreparedCount();
   calcularIniciativa();
+  aplicarConfiguracaoClasse();
   console.log('✅ Ficha pronta para uso. Selecione um personagem na tela inicial.');
 }
 
