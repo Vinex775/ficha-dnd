@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head>
+<html lang="pt-BR">
+<head>
   <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' 'unsafe-inline' https://www.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com;
@@ -7,1273 +8,1536 @@
   style-src 'self' 'unsafe-inline';
   img-src 'self' data:;
 ">
-<meta charset="UTF-8">
-<title>Ficha de Personagem — D&amp;D 5e</title>
-<style>
-:root{
-  --moss:#2d4a3e;
-  --sage:#8fa876;
-  --paper:#f4f6f3;
-  --paper-dark:#e8ebe4;
-  --ink:#26332c;
-  --line:#c9d4c2;
-}
-*{box-sizing:border-box;}
-body{
-  margin:0;
-  background:#dfe4dc;
-  font-family:'Georgia','Times New Roman',serif;
-  color:var(--ink);
-  padding:24px 0 60px;
-}
-.page{
-  width:210mm;
-  min-height:297mm;
-  margin:0 auto 24px;
-  background:var(--paper);
-  box-shadow:0 2px 10px rgba(0,0,0,.15);
-  padding:14mm 12mm;
-}
-.page-break{page-break-before:always;}
+  <meta charset="UTF-8">
+  <title>Ficha de Personagem — D&amp;D 5e</title>
+  <style>
+    :root {
+      --moss: #2d4a3e;
+      --sage: #8fa876;
+      --paper: #fafcfa;
+      --paper-dark: #f0f4ed;
+      --ink: #2a3630;
+      --line: #d4ddd0;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #e8ede5;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: var(--ink);
+      padding: 24px 0 60px;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 24px;
+      background: var(--paper);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 14mm 12mm;
+      border-radius: 8px;
+    }
+    .page-break {
+      page-break-before: always;
+    }
 
-/* ---------- Cabeçalho ---------- */
-.sheet-header{
-  border-bottom:3px solid var(--moss);
-  padding-bottom:10px;
-  margin-bottom:16px;
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 0.6fr;
-  gap:8px 14px;
-}
-.sheet-header .name-field{grid-column:1 / -1;}
-.field label{
-  display:block;
-  font-size:10px;
-  letter-spacing:.5px;
-  color:var(--moss);
-  margin-bottom:2px;
-  font-family:Arial,Helvetica,sans-serif;
-}
-.field input, .field select, .field textarea{
-  width:100%;
-  border:none;
-  border-bottom:1px solid var(--line);
-  background:transparent;
-  font-family:inherit;
-  font-size:15px;
-  color:var(--ink);
-  padding:2px 0;
-}
-.name-field input{font-size:22px;font-weight:bold;color:var(--moss);}
-.field input:focus, .field select:focus, .field textarea:focus{outline:none;border-bottom:1px solid var(--moss);}
+    /* ---------- Cabeçalho ---------- */
+    .sheet-header {
+      border-bottom: 3px solid var(--moss);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 0.6fr;
+      gap: 8px 14px;
+    }
+    .sheet-header .name-field {
+      grid-column: 1 / -1;
+    }
+    .field label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: .5px;
+      color: var(--moss);
+      margin-bottom: 2px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      padding: 2px 0;
+    }
+    .name-field input {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--moss);
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-bottom: 1px solid var(--moss);
+    }
 
-/* ---------- Grid principal ---------- */
-.main-grid{
-  display:grid;
-  grid-template-columns:33% 67%;
-  gap:16px;
-}
+    /* ---------- Grid principal ---------- */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 33% 67%;
+      gap: 16px;
+    }
 
-/* ---------- Boxes ---------- */
-.box{
-  border:1px solid var(--line);
-  border-radius:4px;
-  padding:10px 12px 12px;
-  margin-bottom:14px;
-  background:#fbfcfa;
-}
-.box h3{
-  margin:0 0 8px;
-  font-family:Arial,Helvetica,sans-serif;
-  font-size:12px;
-  letter-spacing:.6px;
-  text-transform:uppercase;
-  color:var(--moss);
-  border-bottom:2px solid var(--sage);
-  padding-bottom:5px;
-}
+    /* ---------- Boxes ---------- */
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px 12px;
+      margin-bottom: 14px;
+      background: var(--paper);
+      transition: box-shadow 0.2s;
+    }
+    .box:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    .box h3 {
+      margin: 0 0 8px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--moss);
+      border-bottom: 2px solid var(--sage);
+      padding-bottom: 5px;
+    }
 
-/* ---------- Atributos ---------- */
-.attr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.attr-block{
-  border:1px solid var(--line);
-  border-radius:4px;
-  text-align:center;
-  padding:6px 2px;
-  background:var(--paper-dark);
-}
-.attr-block label{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--moss);letter-spacing:.5px;}
-.attr-block input{
-  width:44px;text-align:center;font-size:16px;border:none;background:transparent;
-  border-bottom:1px solid var(--line);margin:2px 0;
-}
-.attr-mod{font-size:18px;font-weight:bold;color:var(--moss);}
+    /* ---------- Atributos ---------- */
+    .attr-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .attr-block {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      text-align: center;
+      padding: 6px 2px;
+      background: var(--paper-dark);
+    }
+    .attr-block label {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10px;
+      color: var(--moss);
+      letter-spacing: .5px;
+    }
+    .attr-block input {
+      width: 44px;
+      text-align: center;
+      font-size: 16px;
+      border: none;
+      background: transparent;
+      border-bottom: 1px solid var(--line);
+      margin: 2px 0;
+    }
+    .attr-mod {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--moss);
+    }
 
-/* ---------- Perícias / listas ---------- */
-.tag-list{display:flex;flex-direction:column;gap:3px;font-size:12.5px;}
-.tag-row{display:flex;align-items:center;gap:6px;padding:2px 4px;border-radius:3px;}
-.tag-row:nth-child(odd){background:var(--paper-dark);}
-.tag-row .skill-name{flex:1;}
-.tag-row .skill-attr{
-  font-family:Arial,Helvetica,sans-serif;font-size:9px;color:#fff;background:var(--sage);
-  padding:1px 5px;border-radius:8px;
-}
-.tag-row .skill-bonus{width:28px;text-align:right;font-weight:bold;color:var(--moss);}
+    /* ---------- Perícias / listas ---------- */
+    .tag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 12.5px;
+    }
+    .tag-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    .tag-row:nth-child(odd) {
+      background: var(--paper-dark);
+    }
+    .tag-row .skill-name {
+      flex: 1;
+    }
+    .tag-row .skill-attr {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      color: #fff;
+      background: var(--sage);
+      padding: 1px 5px;
+      border-radius: 8px;
+    }
+    .tag-row .skill-bonus {
+      width: 28px;
+      text-align: right;
+      font-weight: bold;
+      color: var(--moss);
+    }
 
-.save-row{display:flex;align-items:center;gap:6px;font-size:12.5px;padding:2px 4px;}
-.save-row .save-bonus{width:28px;text-align:right;font-weight:bold;color:var(--moss);}
+    .save-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      padding: 2px 4px;
+    }
+    .save-row .save-bonus {
+      width: 28px;
+      text-align: right;
+      font-weight: bold;
+      color: var(--moss);
+    }
 
-/* ---------- Espaços de magia ---------- */
-.slot-table{width:100%;border-collapse:collapse;font-size:12px;}
-.slot-table th{
-  font-family:Arial,Helvetica,sans-serif;font-size:9px;color:var(--moss);
-  text-transform:uppercase;border-bottom:1px solid var(--line);padding:3px;
-}
-.slot-table td{border-bottom:1px solid var(--paper-dark);padding:3px;text-align:center;}
-.slot-table input{width:34px;text-align:center;border:1px solid var(--line);border-radius:3px;background:#fff;}
-.caster-type{margin-bottom:8px;}
+    /* ---------- Espaços de magia ---------- */
+    .slot-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .slot-table th {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      color: var(--moss);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+      padding: 3px;
+    }
+    .slot-table td {
+      border-bottom: 1px solid var(--paper-dark);
+      padding: 3px;
+      text-align: center;
+    }
+    .slot-table input {
+      width: 34px;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: #fff;
+    }
+    .caster-type {
+      margin-bottom: 8px;
+    }
 
-/* ---------- Combate ---------- */
-.combat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.combat-stat{
-  border:1px solid var(--line);border-radius:4px;text-align:center;padding:6px 2px;background:var(--paper-dark);
-}
-.combat-stat label{font-family:Arial,Helvetica,sans-serif;font-size:9px;color:var(--moss);}
-.combat-stat input{width:100%;text-align:center;border:none;background:transparent;font-size:16px;border-bottom:1px solid var(--line);}
-.hp-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;}
+    /* ---------- Combate ---------- */
+    .combat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .combat-stat {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      text-align: center;
+      padding: 6px 2px;
+      background: var(--paper-dark);
+    }
+    .combat-stat label {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      color: var(--moss);
+    }
+    .combat-stat input {
+      width: 100%;
+      text-align: center;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .hp-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
 
-/* ---------- Tabelas ---------- */
-table.data-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:4px;}
-table.data-table th{
-  font-family:Arial,Helvetica,sans-serif;font-size:9px;text-transform:uppercase;color:var(--moss);
-  border-bottom:1px solid var(--moss);padding:4px 3px;text-align:left;
-}
-table.data-table td{border-bottom:1px solid var(--paper-dark);padding:3px;}
-table.data-table td input, table.data-table td textarea{
-  width:100%;border:none;background:transparent;font-family:inherit;font-size:11.5px;
-}
-table.data-table tr.current-lvl{background:#e3ecdd;}
-table.data-table tr.current-lvl td{font-weight:bold;}
-.small-btn{
-  font-family:Arial,Helvetica,sans-serif;font-size:10px;background:var(--moss);color:#fff;
-  border:none;border-radius:3px;padding:3px 8px;cursor:pointer;
-}
-.small-btn:hover{background:var(--sage);}
-.remove-btn{background:#a15c4a;}
-.remove-btn:hover{background:#c17a63;}
-.table-actions{margin-top:6px;text-align:right;}
+    /* ---------- Tabelas ---------- */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      margin-top: 4px;
+    }
+    table.data-table th {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--moss);
+      border-bottom: 1px solid var(--moss);
+      padding: 4px 3px;
+      text-align: left;
+    }
+    table.data-table td {
+      border-bottom: 1px solid var(--paper-dark);
+      padding: 3px;
+    }
+    table.data-table td input,
+    table.data-table td textarea {
+      width: 100%;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 11.5px;
+    }
+    table.data-table tr.current-lvl {
+      background: #e3ecdd;
+    }
+    table.data-table tr.current-lvl td {
+      font-weight: bold;
+    }
+    .small-btn {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 10px;
+      background: var(--moss);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .small-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    .remove-btn {
+      background: #a15c4a;
+    }
+    .remove-btn:hover {
+      background: #c17a63;
+    }
+    .table-actions {
+      margin-top: 6px;
+      text-align: right;
+    }
 
-textarea.freeform{width:100%;min-height:80px;border:1px solid var(--line);border-radius:4px;padding:6px;font-family:inherit;font-size:12.5px;background:#fff;resize:vertical;}
+    textarea.freeform {
+      width: 100%;
+      min-height: 80px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px;
+      font-family: inherit;
+      font-size: 12.5px;
+      background: #fff;
+      resize: vertical;
+    }
 
-.note-line{font-size:11px;color:#55604f;font-family:Arial,Helvetica,sans-serif;margin-top:6px;display:flex;align-items:center;gap:6px;}
-.note-line input{flex:1;border:none;border-bottom:1px solid var(--line);background:transparent;font-family:inherit;font-size:11.5px;}
+    .note-line {
+      font-size: 11px;
+      color: #55604f;
+      font-family: Arial, Helvetica, sans-serif;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .note-line input {
+      flex: 1;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      font-family: inherit;
+      font-size: 11.5px;
+    }
 
-/* ---------- Página 2 / Grimório ---------- */
-.spell-header-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
-.spellbook-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.spell-level-section h4{
-  font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:.5px;text-transform:uppercase;
-  color:var(--moss);border-bottom:1px solid var(--sage);padding-bottom:4px;margin:14px 0 6px;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.spell-card{
-  border:1px solid var(--line);border-radius:4px;padding:8px 10px;margin-bottom:8px;background:#fbfcfa;position:relative;
-}
-.spell-card .spell-top{display:flex;justify-content:space-between;align-items:center;}
-.spell-card .spell-name{font-weight:bold;color:var(--moss);}
-.spell-card .status-btn{
-  font-family:Arial,Helvetica,sans-serif;font-size:9px;border:1px solid var(--sage);border-radius:10px;
-  background:#fff;color:var(--moss);padding:2px 8px;cursor:pointer;
-}
-.spell-card .status-btn.prepared{background:var(--moss);color:#fff;}
-.spell-card .meta{font-family:Arial,Helvetica,sans-serif;font-size:9.5px;color:#5c6b56;margin:4px 0;}
-.spell-card .desc{font-size:12px;line-height:1.4;}
-.spell-card .x-btn{
-  position:absolute;top:4px;right:4px;background:none;border:none;color:#a15c4a;cursor:pointer;font-size:12px;display:none;
-}
-.spell-card:hover .x-btn{display:block;}
+    /* ---------- Página 2 / Grimório ---------- */
+    .spell-header-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .spellbook-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .spell-level-section h4 {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--moss);
+      border-bottom: 1px solid var(--sage);
+      padding-bottom: 4px;
+      margin: 14px 0 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .spell-card {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      background: var(--paper);
+      position: relative;
+    }
+    .spell-card .spell-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .spell-card .spell-name {
+      font-weight: bold;
+      color: var(--moss);
+    }
+    .spell-card .status-btn {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9px;
+      border: 1px solid var(--sage);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--moss);
+      padding: 2px 8px;
+      cursor: pointer;
+    }
+    .spell-card .status-btn.prepared {
+      background: var(--moss);
+      color: #fff;
+    }
+    .spell-card .meta {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 9.5px;
+      color: #5c6b56;
+      margin: 4px 0;
+    }
+    .spell-card .desc {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .spell-card .x-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: none;
+      border: none;
+      color: #a15c4a;
+      cursor: pointer;
+      font-size: 12px;
+      display: none;
+    }
+    .spell-card:hover .x-btn {
+      display: block;
+    }
 
-.history-box p{font-size:13px;line-height:1.7;margin:0 0 12px;}
-.history-box{padding:4px 2px;}
+    .history-box p {
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0 0 12px;
+    }
+    .history-box {
+      padding: 4px 2px;
+    }
 
-.save-bar{
-  max-width:210mm;margin:0 auto 10px;padding:8px 10px;
-  background:var(--moss);border-radius:4px;
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  font-family:Arial,Helvetica,sans-serif;
-}
-.save-bar .small-btn{background:var(--sage);color:var(--moss);font-weight:bold;}
-.save-bar .small-btn:hover{background:#fff;}
-.save-bar .remove-btn{background:#c17a63;color:#fff;}
-.save-bar .remove-btn:hover{background:#a15c4a;}
-#saveIndicator{color:#fff;font-size:11px;min-width:70px;}
+    /* ---------- Barra de Salvar ---------- */
+    .save-bar {
+      max-width: 210mm;
+      margin: 0 auto 10px;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--moss), #3d5a4e);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-family: Arial, Helvetica, sans-serif;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+    .save-bar .small-btn {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .save-bar .small-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      color: #fff;
+    }
+    .save-bar .remove-btn {
+      background: #a15c4a;
+      color: #fff;
+    }
+    .save-bar .remove-btn:hover {
+      background: #c17a63;
+    }
+    #saveIndicator {
+      color: #c4d4c0;
+      font-size: 12px;
+      min-width: 100px;
+    }
 
-@media print{
-  body{background:#fff;padding:0;}
-  .save-bar{display:none;}
-  .page{box-shadow:none;margin:0;width:auto;min-height:auto;}
-  .small-btn,.x-btn,.add-spell-btn{display:none !important;}
-}
-
-</style>
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+      .save-bar {
+        display: none;
+      }
+      .page {
+        box-shadow: none;
+        margin: 0;
+        width: auto;
+        min-height: auto;
+        border-radius: 0;
+      }
+      .small-btn,
+      .x-btn,
+      .add-spell-btn {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="save-bar">
-  <span id="saveIndicator"></span>
-  <button class="small-btn" onclick="saveState()">Salvar agora</button>
-  <button class="small-btn" onclick="exportFilledHTML()" style="background:#e2b93b;">Baixar cópia p/ enviar (preenchida)</button>
-  <button class="small-btn" onclick="exportBackup()">Exportar backup (.json)</button>
-  <button class="small-btn" onclick="document.getElementById('importFile').click()">Importar backup</button>
-  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
-  <button class="small-btn remove-btn" onclick="resetSheet()">Limpar ficha</button>
-</div>
-
-<!-- ============ SELETOR DE FICHAS ============ -->
-<div style="max-width:210mm; margin:0 auto 20px; background:#f0f4ed; border-radius:8px; padding:12px 16px; border:2px solid var(--moss);">
-  <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-    <span style="font-weight:bold; color:var(--moss); font-size:14px;">📂 Minhas Fichas:</span>
-    <select id="fichaSelector" style="flex:1; min-width:200px; padding:6px 10px; border:1px solid var(--line); border-radius:4px; background:#fff; font-size:14px;">
-      <option value="">-- Selecione uma ficha --</option>
-    </select>
-    <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss);">Abrir</button>
-    <button class="small-btn" onclick="listarFichas()" style="background:var(--sage);">🔄 Atualizar Lista</button>
-    <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white;">✨ Nova Ficha</button>
-    <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white;">🔗 Gerar Link</button>
-  </div>
-  <div id="fichaInfo" style="margin-top:8px; font-size:12px; color:#55604f; display:none;">
-    <span id="fichaInfoText"></span>
-  </div>
-</div>
-
-<!-- ============ PÁGINA 1 ============ -->
-<div class="page">
-
-  <div class="sheet-header">
-    <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
-    <div class="field"><label>Raça / Sub-raça</label><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
-    <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)"></div>
-    <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
-    <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
-    <div class="field"><label>Alinhamento</label><input id="alignmentInput" type="text" placeholder="Ex: Neutro e Bom"></div>
+  <!-- ============ BARRA DE SALVAR ============ -->
+  <div class="save-bar">
+    <span id="saveIndicator"></span>
+    <button class="small-btn" onclick="saveState()" style="background:#4a7aa8; color:white;">💾 Salvar</button>
+    <button class="small-btn" onclick="window.carregarFirebase()" style="background:#7a8a4a; color:white;">📂 Carregar</button>
+    <button class="small-btn" onclick="exportFilledHTML()" style="background:#e2b93b; color:#26332c;">📥 Baixar HTML</button>
   </div>
 
-  <div class="main-grid">
-    <!-- ===== COLUNA ESQUERDA ===== -->
-    <div>
+  <!-- ============ SELETOR DE FICHAS ============ -->
+  <div style="max-width:210mm; margin:0 auto 20px; background:linear-gradient(135deg, #f0f4ed, #e3ecdd); border-radius:12px; padding:16px 20px; border:2px solid var(--moss); box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <span style="font-weight:bold; color:var(--moss); font-size:16px;">📂 Minhas Fichas</span>
+      <select id="fichaSelector" style="flex:1; min-width:200px; padding:8px 12px; border:2px solid var(--sage); border-radius:8px; background:#fff; font-size:14px; font-family:inherit; color:var(--ink);">
+        <option value="">-- Selecione uma ficha --</option>
+      </select>
+      <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss); color:white; padding:6px 16px; border-radius:8px;">Abrir</button>
+      <button class="small-btn" onclick="listarFichas()" style="background:var(--sage); color:white; padding:6px 16px; border-radius:8px;">🔄 Atualizar</button>
+      <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white; padding:6px 16px; border-radius:8px;">✨ Nova</button>
+      <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white; padding:6px 16px; border-radius:8px;">🔗 Compartilhar</button>
+    </div>
+    <div id="fichaInfo" style="margin-top:10px; font-size:13px; color:#4a5a44; display:none; background:rgba(255,255,255,0.5); padding:6px 12px; border-radius:6px;">
+      <span id="fichaInfoText"></span>
+    </div>
+  </div>
 
-      <div class="box">
-        <h3>Atributos</h3>
-        <div class="attr-grid" id="attrGrid"></div>
-      </div>
+  <!-- ============ PÁGINA 1 ============ -->
+  <div class="page">
 
-      <div class="box">
-        <h3>Origens dos Bônus</h3>
-        <textarea id="originsText" class="freeform" placeholder="Descreva de onde vêm os bônus (raça, classe, antecedente). Ex: +2 SAB (Raça), +1 CON (Antecedente)..."></textarea>
-      </div>
+    <div class="sheet-header">
+      <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
+      <div class="field"><label>Raça / Sub-raça</label><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
+      <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)"></div>
+      <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
+      <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
+      <div class="field"><label>Alinhamento</label><input id="alignmentInput" type="text" placeholder="Ex: Neutro e Bom"></div>
+    </div>
 
-      <div class="box">
-        <h3>Bônus &amp; Perícias</h3>
-        <div class="save-row" style="margin-bottom:6px;">
-          <span style="flex:1;font-family:Arial,Helvetica,sans-serif;font-size:11px;">Bônus de Proficiência</span>
-          <span id="profBonusDisplay" style="font-weight:bold;color:var(--moss);">+2</span>
+    <div class="main-grid">
+      <!-- ===== COLUNA ESQUERDA ===== -->
+      <div>
+
+        <div class="box">
+          <h3>Atributos</h3>
+          <div class="attr-grid" id="attrGrid"></div>
         </div>
-        <div class="save-row" style="margin-bottom:8px;">
-          <input type="checkbox" id="inspiration">
-          <label for="inspiration" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;">Inspiração</label>
+
+        <div class="box">
+          <h3>Origens dos Bônus</h3>
+          <textarea id="originsText" class="freeform" placeholder="Descreva de onde vêm os bônus (raça, classe, antecedente). Ex: +2 SAB (Raça), +1 CON (Antecedente)..."></textarea>
         </div>
-        <div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--moss);text-transform:uppercase;margin-bottom:3px;">Salvaguardas</div>
-        <div id="saveList" class="tag-list" style="margin-bottom:10px;"></div>
-        <div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--moss);text-transform:uppercase;margin-bottom:3px;">Perícias</div>
-        <div id="skillList" class="tag-list"></div>
+
+        <div class="box">
+          <h3>Bônus &amp; Perícias</h3>
+          <div class="save-row" style="margin-bottom:6px;">
+            <span style="flex:1;font-family:Arial,Helvetica,sans-serif;font-size:11px;">Bônus de Proficiência</span>
+            <span id="profBonusDisplay" style="font-weight:bold;color:var(--moss);">+2</span>
+          </div>
+          <div class="save-row" style="margin-bottom:8px;">
+            <input type="checkbox" id="inspiration">
+            <label for="inspiration" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;">Inspiração</label>
+          </div>
+          <div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--moss);text-transform:uppercase;margin-bottom:3px;">Salvaguardas</div>
+          <div id="saveList" class="tag-list" style="margin-bottom:10px;"></div>
+          <div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--moss);text-transform:uppercase;margin-bottom:3px;">Perícias</div>
+          <div id="skillList" class="tag-list"></div>
+        </div>
+
+        <div class="box">
+          <h3>Espaços de Magia</h3>
+          <div class="caster-type field">
+            <label>Tipo de Conjurador (preenchimento automático)</label>
+            <select id="casterType" onchange="applyCasterTable()">
+              <option value="none">Manual / Não conjurador</option>
+              <option value="full">Completo (Mago, Druida, Clérigo, Bruxo-pacto exceto)</option>
+              <option value="half">Meio (Paladino, Patrulheiro)</option>
+              <option value="third">Terço (Cavaleiro Arcano, Trapaceiro Arcano)</option>
+              <option value="pact">Pacto (Bruxo)</option>
+            </select>
+          </div>
+          <table class="slot-table">
+            <thead><tr><th>Nível</th><th>Máx.</th><th>Atual</th></tr></thead>
+            <tbody id="slotBody"></tbody>
+          </table>
+        </div>
+
       </div>
 
-      <div class="box">
-        <h3>Espaços de Magia</h3>
-        <div class="caster-type field">
-          <label>Tipo de Conjurador (preenchimento automático)</label>
-          <select id="casterType" onchange="applyCasterTable()">
-            <option value="none">Manual / Não conjurador</option>
-            <option value="full">Completo (Mago, Druida, Clérigo, Bruxo-pacto exceto)</option>
-            <option value="half">Meio (Paladino, Patrulheiro)</option>
-            <option value="third">Terço (Cavaleiro Arcano, Trapaceiro Arcano)</option>
-            <option value="pact">Pacto (Bruxo)</option>
+      <!-- ===== COLUNA DIREITA ===== -->
+      <div>
+
+        <div class="box">
+          <h3>Estatísticas de Combate</h3>
+          <div class="combat-grid">
+            <div class="combat-stat"><label>CA</label><input id="ca" type="number" value="10"></div>
+            <div class="combat-stat"><label>Iniciativa</label><input id="initiative" type="number" value="0"></div>
+            <div class="combat-stat"><label>Deslocamento</label><input id="speed" type="text" value="9m"></div>
+            <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8"></div>
+          </div>
+          <div class="hp-row">
+            <div class="combat-stat"><label>PV Atual</label><input id="hpCur" type="number" value="0"></div>
+            <div class="combat-stat"><label>PV Máximo</label><input id="hpMax" type="number" value="0"></div>
+            <div class="combat-stat"><label>PV Temporário</label><input id="hpTemp" type="number" value="0"></div>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Ataques &amp; Armas</h3>
+          <table class="data-table" id="attackTable">
+            <thead><tr><th style="width:32%;">Nome</th><th style="width:14%;">Bônus</th><th style="width:24%;">Dano / Tipo</th><th style="width:24%;">Propriedades</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="table-actions">
+            <button class="small-btn" onclick="addAttackRow()">+ Adicionar Ataque</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Progressão de Classe</h3>
+          <div style="max-height:340px;overflow-y:auto;">
+            <table class="data-table" id="progressionTable">
+              <thead><tr><th>Nv</th><th>Prof.</th><th>Truques</th><th>Espaços de Magia</th><th>Recursos Desbloqueados</th></tr></thead>
+              <tbody id="progressionBody"></tbody>
+            </table>
+          </div>
+          <div class="note-line">
+            Deslocamento aquático/voo desbloqueado a partir do nível:
+            <input id="flightNote" type="text" placeholder="ex: 10 (Voo), 6 (Natação)">
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Recurso Especial de Classe / Subclasse</h3>
+          <textarea id="specialResource" class="freeform" placeholder="Descreva aqui as regras do recurso especial (ex: Forma Selvagem, Fúria, Ki, etc): usos por descanso, efeitos, restrições..."></textarea>
+        </div>
+
+        <div class="box">
+          <h3>Equipamento &amp; Inventário</h3>
+          <textarea id="equipmentText" class="freeform" style="min-height:110px;" placeholder="Liste equipamentos, pacotes de aventureiro, moedas e itens de interpretação..."></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PÁGINA 2 ============ -->
+  <div class="page page-break">
+
+    <div class="sheet-header">
+      <div class="field name-field"><label>Nome do Personagem</label><input id="charName2" type="text" placeholder="Nome do personagem" oninput="syncNameBack()"></div>
+    </div>
+
+    <div class="box">
+      <h3>Conjuração</h3>
+      <div class="spell-header-grid">
+        <div class="field">
+          <label>Habilidade de Conjuração</label>
+          <select id="castAbility" onchange="updateSpellDC()">
+            <option value="INT">Inteligência</option>
+            <option value="SAB" selected="">Sabedoria</option>
+            <option value="CAR">Carisma</option>
           </select>
         </div>
-        <table class="slot-table">
-          <thead><tr><th>Nível</th><th>Máx.</th><th>Atual</th></tr></thead>
-          <tbody id="slotBody"></tbody>
-        </table>
-      </div>
-
-    </div>
-
-    <!-- ===== COLUNA DIREITA ===== -->
-    <div>
-
-      <div class="box">
-        <h3>Estatísticas de Combate</h3>
-        <div class="combat-grid">
-          <div class="combat-stat"><label>CA</label><input id="ca" type="number" value="10"></div>
-          <div class="combat-stat"><label>Iniciativa</label><input id="initiative" type="number" value="0"></div>
-          <div class="combat-stat"><label>Deslocamento</label><input id="speed" type="text" value="9m"></div>
-          <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8"></div>
-        </div>
-        <div class="hp-row">
-          <div class="combat-stat"><label>PV Atual</label><input id="hpCur" type="number" value="0"></div>
-          <div class="combat-stat"><label>PV Máximo</label><input id="hpMax" type="number" value="0"></div>
-          <div class="combat-stat"><label>PV Temporário</label><input id="hpTemp" type="number" value="0"></div>
-        </div>
-      </div>
-
-      <div class="box">
-        <h3>Ataques &amp; Armas</h3>
-        <table class="data-table" id="attackTable">
-          <thead><tr><th style="width:32%;">Nome</th><th style="width:14%;">Bônus</th><th style="width:24%;">Dano / Tipo</th><th style="width:24%;">Propriedades</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-        <div class="table-actions">
-          <button class="small-btn" onclick="addAttackRow()">+ Adicionar Ataque</button>
-        </div>
-      </div>
-
-      <div class="box">
-        <h3>Progressão de Classe</h3>
-        <div style="max-height:340px;overflow-y:auto;">
-        <table class="data-table" id="progressionTable">
-          <thead><tr><th>Nv</th><th>Prof.</th><th>Truques</th><th>Espaços de Magia</th><th>Recursos Desbloqueados</th></tr></thead>
-          <tbody id="progressionBody"></tbody>
-        </table>
-        </div>
-        <div class="note-line">
-          Deslocamento aquático/voo desbloqueado a partir do nível:
-          <input id="flightNote" type="text" placeholder="ex: 10 (Voo), 6 (Natação)">
-        </div>
-      </div>
-
-      <div class="box">
-        <h3>Recurso Especial de Classe / Subclasse</h3>
-        <textarea id="specialResource" class="freeform" placeholder="Descreva aqui as regras do recurso especial (ex: Forma Selvagem, Fúria, Ki, etc): usos por descanso, efeitos, restrições..."></textarea>
-      </div>
-
-      <div class="box">
-        <h3>Equipamento &amp; Inventário</h3>
-        <textarea id="equipmentText" class="freeform" style="min-height:110px;" placeholder="Liste equipamentos, pacotes de aventureiro, moedas e itens de interpretação..."></textarea>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ============ PÁGINA 2 ============ -->
-<div class="page page-break">
-
-  <div class="sheet-header">
-    <div class="field name-field"><label>Nome do Personagem</label><input id="charName2" type="text" placeholder="Nome do personagem" oninput="syncNameBack()"></div>
-  </div>
-
-  <div class="box">
-    <h3>Conjuração</h3>
-    <div class="spell-header-grid">
-      <div class="field">
-        <label>Habilidade de Conjuração</label>
-        <select id="castAbility" onchange="updateSpellDC()">
-          <option value="INT">Inteligência</option>
-          <option value="SAB" selected="">Sabedoria</option>
-          <option value="CAR">Carisma</option>
-        </select>
-      </div>
-      <div class="field"><label>CD de Magia</label><input id="spellDC" type="text" readonly="" value="10"></div>
-      <div class="field"><label>Bônus de Ataque Mágico</label><input id="spellAtk" type="text" readonly="" value="+2"></div>
-      <div class="field"><label>Magias Preparadas</label>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span id="preparedCount">0</span> / <input id="preparedMax" type="number" value="0" style="width:40px;">
+        <div class="field"><label>CD de Magia</label><input id="spellDC" type="text" readonly="" value="10"></div>
+        <div class="field"><label>Bônus de Ataque Mágico</label><input id="spellAtk" type="text" readonly="" value="+2"></div>
+        <div class="field"><label>Magias Preparadas</label>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span id="preparedCount">0</span> / <input id="preparedMax" type="number" value="0" style="width:40px;">
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="spellbook-grid" id="spellbookGrid"></div>
+    <div class="spellbook-grid" id="spellbookGrid"></div>
 
-  <div class="box history-box">
-    <h3>História do Personagem</h3>
-    <div id="historyDiv" contenteditable="true" style="outline:none;"></div>
-  </div>
-
-</div>
-
-
-<script>
-/* ---------------------------------------------------------
-   DADOS BASE
---------------------------------------------------------- */
-const ATTRS = [
-  {key:'FOR', label:'Força'},
-  {key:'DES', label:'Destreza'},
-  {key:'CON', label:'Constituição'},
-  {key:'INT', label:'Inteligência'},
-  {key:'SAB', label:'Sabedoria'},
-  {key:'CAR', label:'Carisma'}
-];
-
-const SKILLS = [
-  {name:'Acrobacia', attr:'DES'},
-  {name:'Adestrar Animais', attr:'SAB'},
-  {name:'Arcanismo', attr:'INT'},
-  {name:'Atletismo', attr:'FOR'},
-  {name:'Enganação', attr:'CAR'},
-  {name:'Furtividade', attr:'DES'},
-  {name:'História', attr:'INT'},
-  {name:'Intimidação', attr:'CAR'},
-  {name:'Intuição', attr:'SAB'},
-  {name:'Investigação', attr:'INT'},
-  {name:'Medicina', attr:'SAB'},
-  {name:'Natureza', attr:'INT'},
-  {name:'Percepção', attr:'SAB'},
-  {name:'Persuasão', attr:'CAR'},
-  {name:'Prestidigitação', attr:'DES'},
-  {name:'Religião', attr:'INT'},
-  {name:'Sobrevivência', attr:'SAB'},
-  {name:'Atuação', attr:'CAR'}
-];
-
-const CASTER_TABLES = {
-  full: [
-    [1,2,0,0,0,0,0,0,0],[2,3,0,0,0,0,0,0,0],[3,4,2,0,0,0,0,0,0],[4,4,3,0,0,0,0,0,0],
-    [4,4,3,2,0,0,0,0,0],[4,4,3,3,0,0,0,0,0],[4,4,3,3,1,0,0,0,0],[4,4,3,3,2,0,0,0,0],
-    [4,4,3,3,3,1,0,0,0],[4,4,3,3,3,2,0,0,0],[4,4,3,3,3,2,1,0,0],[4,4,3,3,3,2,1,0,0],
-    [4,4,3,3,3,2,1,1,0],[4,4,3,3,3,2,1,1,0],[4,4,3,3,3,2,1,1,1],[4,4,3,3,3,2,1,1,1],
-    [4,4,3,3,3,2,1,1,1],[4,4,3,3,3,3,1,1,1],[4,4,3,3,3,3,2,1,1],[4,4,3,3,3,3,2,2,1]
-  ],
-  half: [
-    [0,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,0,0,0],[3,0,0,0,0,0,0,0,0],[3,0,0,0,0,0,0,0,0],
-    [4,2,0,0,0,0,0,0,0],[4,2,0,0,0,0,0,0,0],[4,3,0,0,0,0,0,0,0],[4,3,0,0,0,0,0,0,0],
-    [4,3,2,0,0,0,0,0,0],[4,3,2,0,0,0,0,0,0],[4,3,3,0,0,0,0,0,0],[4,3,3,0,0,0,0,0,0],
-    [4,3,3,1,0,0,0,0,0],[4,3,3,1,0,0,0,0,0],[4,3,3,2,0,0,0,0,0],[4,3,3,2,0,0,0,0,0],
-    [4,3,3,3,1,0,0,0,0],[4,3,3,3,1,0,0,0,0],[4,3,3,3,2,0,0,0,0],[4,3,3,3,2,0,0,0,0]
-  ],
-  third: [
-    [0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,0,0,0],[3,0,0,0,0,0,0,0,0],
-    [3,0,0,0,0,0,0,0,0],[3,0,0,0,0,0,0,0,0],[4,2,0,0,0,0,0,0,0],[4,2,0,0,0,0,0,0,0],
-    [4,2,0,0,0,0,0,0,0],[4,3,0,0,0,0,0,0,0],[4,3,0,0,0,0,0,0,0],[4,3,0,0,0,0,0,0,0],
-    [4,3,2,0,0,0,0,0,0],[4,3,2,0,0,0,0,0,0],[4,3,2,0,0,0,0,0,0],[4,3,3,0,0,0,0,0,0],
-    [4,3,3,0,0,0,0,0,0],[4,3,3,0,0,0,0,0,0],[4,3,3,1,0,0,0,0,0],[4,3,3,1,0,0,0,0,0]
-  ],
-  pact: [ // Bruxo: espaços todos do mesmo nível mais alto disponível (simplificado no nível 1)
-    [1,0,0,0,0,0,0,0,0],[2,0,0,0,0,0,0,0,0],[0,2,0,0,0,0,0,0,0],[0,2,0,0,0,0,0,0,0],
-    [0,0,2,0,0,0,0,0,0],[0,0,2,0,0,0,0,0,0],[0,0,0,2,0,0,0,0,0],[0,0,0,2,0,0,0,0,0],
-    [0,0,0,0,2,0,0,0,0],[0,0,0,0,2,0,0,0,0],[0,0,0,0,3,0,0,0,0],[0,0,0,0,3,0,0,0,0],
-    [0,0,0,0,3,0,0,0,0],[0,0,0,0,3,0,0,0,0],[0,0,0,0,3,0,0,0,0],[0,0,0,0,3,0,0,0,0],
-    [0,0,0,0,4,0,0,0,0],[0,0,0,0,4,0,0,0,0],[0,0,0,0,4,0,0,0,0],[0,0,0,0,4,0,0,0,0]
-  ]
-};
-
-/* ---------------------------------------------------------
-   HELPERS
---------------------------------------------------------- */
-function mod(v){ return Math.floor((v-10)/2); }
-function fmt(n){ return n>=0 ? '+'+n : String(n); }
-function profBonus(level){ return Math.ceil(level/4)+1; }
-
-function getAttrVal(key){
-  const el = document.getElementById('attr_'+key);
-  return el ? parseInt(el.value||10,10) : 10;
-}
-
-/* ---------------------------------------------------------
-   BUILD: ATRIBUTOS
---------------------------------------------------------- */
-const attrGrid = document.getElementById('attrGrid');
-ATTRS.forEach(a=>{
-  const div = document.createElement('div');
-  div.className = 'attr-block';
-  div.innerHTML = `
-    <label>${a.key}</label>
-    <input type="number" id="attr_${a.key}" value="10" min="1" max="30" oninput="onAttrChange()">
-    <div class="attr-mod" id="mod_${a.key}">+0</div>`;
-  attrGrid.appendChild(div);
-});
-
-/* ---------------------------------------------------------
-   BUILD: SALVAGUARDAS
---------------------------------------------------------- */
-const saveList = document.getElementById('saveList');
-ATTRS.forEach(a=>{
-  const row = document.createElement('div');
-  row.className = 'save-row';
-  row.innerHTML = `
-    <input type="checkbox" id="saveProf_${a.key}" onchange="onAttrChange()">
-    <span class="skill-name">${a.label}</span>
-    <span class="skill-bonus" id="saveBonus_${a.key}">+0</span>`;
-  saveList.appendChild(row);
-});
-
-/* ---------------------------------------------------------
-   BUILD: PERÍCIAS
---------------------------------------------------------- */
-const skillList = document.getElementById('skillList');
-SKILLS.forEach((s,i)=>{
-  const row = document.createElement('div');
-  row.className = 'tag-row';
-  row.innerHTML = `
-    <input type="checkbox" id="skillProf_${i}" onchange="onAttrChange()">
-    <span class="skill-name">${s.name}</span>
-    <span class="skill-attr">${s.attr}</span>
-    <span class="skill-bonus" id="skillBonus_${i}">+0</span>`;
-  skillList.appendChild(row);
-});
-
-/* ---------------------------------------------------------
-   BUILD: ESPAÇOS DE MAGIA (tabela nível 1-9)
---------------------------------------------------------- */
-const slotBody = document.getElementById('slotBody');
-for(let i=1;i<=9;i++){
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${i}º</td>
-    <td><input type="number" min="0" id="slotMax_${i}" value="0"></td>
-    <td><input type="number" min="0" id="slotCur_${i}" value="0"></td>`;
-  slotBody.appendChild(tr);
-}
-
-/* ---------------------------------------------------------
-   BUILD: TABELA DE PROGRESSÃO (1-20)
---------------------------------------------------------- */
-const progressionBody = document.getElementById('progressionBody');
-for(let lvl=1;lvl<=20;lvl++){
-  const tr = document.createElement('tr');
-  tr.id = 'prog_row_'+lvl;
-  tr.innerHTML = `
-    <td>${lvl}</td>
-    <td id="prog_prof_${lvl}">+${profBonus(lvl)}</td>
-    <td><input type="text" id="prog_truques_${lvl}" placeholder="-"></td>
-    <td><input type="text" id="prog_slots_${lvl}" placeholder="-"></td>
-    <td><input type="text" id="prog_resources_${lvl}" placeholder="-"></td>`;
-  progressionBody.appendChild(tr);
-}
-
-/* ---------------------------------------------------------
-   ATAQUES: linhas dinâmicas
---------------------------------------------------------- */
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str==null ? '' : str;
-  return d.innerHTML;
-}
-
-function addAttackRow(data){
-  const tbody = document.querySelector('#attackTable tbody');
-  const tr = document.createElement('tr');
-  const v = data || {};
-  tr.innerHTML = `
-    <td><input type="text" placeholder="Nome da arma" value="${escapeHtml(v.name)}"></td>
-    <td><input type="text" placeholder="+0" value="${escapeHtml(v.bonus)}"></td>
-    <td><input type="text" placeholder="1d6 cortante" value="${escapeHtml(v.damage)}"></td>
-    <td><input type="text" placeholder="Leve, acuidade..." value="${escapeHtml(v.props)}"></td>
-    <td><button class="small-btn remove-btn" onclick="this.closest('tr').remove(); saveState();">X</button></td>`;
-  tbody.appendChild(tr);
-  saveState();
-}
-addAttackRow(); addAttackRow(); addAttackRow();
-
-/* ---------------------------------------------------------
-   RECALCULO GERAL
---------------------------------------------------------- */
-function onAttrChange(){
-  const level = parseInt(document.getElementById('level').value||1,10);
-  const pb = profBonus(level);
-
-  ATTRS.forEach(a=>{
-    const m = mod(getAttrVal(a.key));
-    document.getElementById('mod_'+a.key).textContent = fmt(m);
-
-    const saveProf = document.getElementById('saveProf_'+a.key).checked;
-    document.getElementById('saveBonus_'+a.key).textContent = fmt(m + (saveProf?pb:0));
-  });
-
-  SKILLS.forEach((s,i)=>{
-    const m = mod(getAttrVal(s.attr));
-    const prof = document.getElementById('skillProf_'+i).checked;
-    document.getElementById('skillBonus_'+i).textContent = fmt(m + (prof?pb:0));
-  });
-
-  updateSpellDC();
-  saveState();
-}
-
-function onLevelChange(){
-  const level = parseInt(document.getElementById('level').value||1,10);
-  const pb = profBonus(level);
-  document.getElementById('profBonusDisplay').textContent = fmt(pb);
-
-  for(let l=1;l<=20;l++){
-    document.getElementById('prog_prof_'+l).textContent = fmt(profBonus(l));
-    document.getElementById('prog_row_'+l).classList.toggle('current-lvl', l===level);
-  }
-
-  applyCasterTable();
-  onAttrChange();
-}
-
-function applyCasterTable(){
-  const type = document.getElementById('casterType').value;
-  const level = parseInt(document.getElementById('level').value||1,10);
-  if(type==='none'){ saveState(); return; }
-  const row = CASTER_TABLES[type][Math.min(level,20)-1];
-  row.forEach((val,idx)=>{
-    const i = idx+1;
-    document.getElementById('slotMax_'+i).value = val;
-  });
-  saveState();
-}
-
-/* ---------------------------------------------------------
-   CONJURAÇÃO (Página 2)
---------------------------------------------------------- */
-function updateSpellDC(){
-  const level = parseInt(document.getElementById('level').value||1,10);
-  const pb = profBonus(level);
-  const ability = document.getElementById('castAbility').value;
-  const m = mod(getAttrVal(ability));
-  document.getElementById('spellDC').value = 8 + pb + m;
-  document.getElementById('spellAtk').value = fmt(pb + m);
-}
-
-/* ---------------------------------------------------------
-   NOME sincronizado entre páginas
---------------------------------------------------------- */
-function syncName(){ document.getElementById('charName2').value = document.getElementById('charName').value; }
-function syncNameBack(){ document.getElementById('charName').value = document.getElementById('charName2').value; }
-
-/* ---------------------------------------------------------
-   GRIMÓRIO
---------------------------------------------------------- */
-const SPELL_LEVELS = ['Truques','1º Nível','2º Nível','3º Nível','4º Nível','5º Nível','6º Nível','7º Nível','8º Nível','9º Nível'];
-const spellbookGrid = document.getElementById('spellbookGrid');
-const colLeft = document.createElement('div');
-const colRight = document.createElement('div');
-spellbookGrid.appendChild(colLeft);
-spellbookGrid.appendChild(colRight);
-
-SPELL_LEVELS.forEach((label,idx)=>{
-  const col = idx<5 ? colLeft : colRight;
-  const section = document.createElement('div');
-  section.className = 'spell-level-section';
-  section.id = 'spellsection_'+idx;
-  section.innerHTML = `
-    <h4><span>${label}</span><button class="small-btn add-spell-btn" onclick="addSpell(${idx})">+ Add</button></h4>
-    <div class="spell-cards" id="spellcards_${idx}"></div>`;
-  col.appendChild(section);
-});
-
-function addSpell(levelIdx, data){
-  let name, metaText, descText, prepared;
-  if(data){
-    name = data.name; metaText = data.meta; descText = data.desc; prepared = !!data.prepared;
-  } else {
-    name = prompt('Nome da magia:');
-    if(!name) return;
-    const time = prompt('Tempo de conjuração (ex: 1 ação):','1 ação') || '';
-    const range = prompt('Alcance (ex: 18m):','18m') || '';
-    const comp = prompt('Componentes (ex: V, S, M):','V, S') || '';
-    const dur = prompt('Duração (ex: Instantânea):','Instantânea') || '';
-    descText = prompt('Descrição do efeito:') || '';
-    metaText = `${time} · ${range} · ${comp} · ${dur}`;
-    prepared = false;
-  }
-
-  const card = document.createElement('div');
-  card.className = 'spell-card';
-  card.innerHTML = `
-    <button class="x-btn" onclick="removeSpell(this)">✕</button>
-    <div class="spell-top">
-      <span class="spell-name">${escapeHtml(name)}</span>
-      <button class="status-btn ${prepared?'prepared':''}" onclick="toggleSpellStatus(this)">${prepared?'Preparada':'Conhecida'}</button>
+    <div class="box history-box">
+      <h3>História do Personagem</h3>
+      <div id="historyDiv" contenteditable="true" style="outline:none;"></div>
     </div>
-    <div class="meta">${escapeHtml(metaText)}</div>
-    <div class="desc">${escapeHtml(descText)}</div>`;
-  document.getElementById('spellcards_'+levelIdx).appendChild(card);
-  updatePreparedCount();
-  saveState();
-}
 
-function removeSpell(btn){
-  const card = btn.closest('.spell-card');
-  const wasPrepared = card.querySelector('.status-btn').classList.contains('prepared');
-  card.remove();
-  updatePreparedCount();
-  saveState();
-}
+  </div>
 
-function toggleSpellStatus(btn){
-  btn.classList.toggle('prepared');
-  btn.textContent = btn.classList.contains('prepared') ? 'Preparada' : 'Conhecida';
-  updatePreparedCount();
-  saveState();
-}
+  <script>
+    /* ---------------------------------------------------------
+       DADOS BASE
+    --------------------------------------------------------- */
+    const ATTRS = [
+      { key: 'FOR', label: 'Força' },
+      { key: 'DES', label: 'Destreza' },
+      { key: 'CON', label: 'Constituição' },
+      { key: 'INT', label: 'Inteligência' },
+      { key: 'SAB', label: 'Sabedoria' },
+      { key: 'CAR', label: 'Carisma' }
+    ];
 
-function updatePreparedCount(){
-  const count = document.querySelectorAll('.status-btn.prepared').length;
-  document.getElementById('preparedCount').textContent = count;
-}
+    const SKILLS = [
+      { name: 'Acrobacia', attr: 'DES' },
+      { name: 'Adestrar Animais', attr: 'SAB' },
+      { name: 'Arcanismo', attr: 'INT' },
+      { name: 'Atletismo', attr: 'FOR' },
+      { name: 'Enganação', attr: 'CAR' },
+      { name: 'Furtividade', attr: 'DES' },
+      { name: 'História', attr: 'INT' },
+      { name: 'Intimidação', attr: 'CAR' },
+      { name: 'Intuição', attr: 'SAB' },
+      { name: 'Investigação', attr: 'INT' },
+      { name: 'Medicina', attr: 'SAB' },
+      { name: 'Natureza', attr: 'INT' },
+      { name: 'Percepção', attr: 'SAB' },
+      { name: 'Persuasão', attr: 'CAR' },
+      { name: 'Prestidigitação', attr: 'DES' },
+      { name: 'Religião', attr: 'INT' },
+      { name: 'Sobrevivência', attr: 'SAB' },
+      { name: 'Atuação', attr: 'CAR' }
+    ];
 
-/* ---------------------------------------------------------
-   PERSISTÊNCIA (localStorage + export/import backup)
---------------------------------------------------------- */
-const STORAGE_KEY = 'dnd5e_sheet_v1';
-const SIMPLE_IDS = ['charName','level','raceInput','charClass','backgroundInput','alignmentInput',
-  'originsText','inspiration','casterType','ca','initiative','speed','hitDice','hpCur','hpMax','hpTemp',
-  'specialResource','equipmentText','flightNote','castAbility','preparedMax'];
+    const CASTER_TABLES = {
+      full: [
+        [1, 2, 0, 0, 0, 0, 0, 0, 0],
+        [2, 3, 0, 0, 0, 0, 0, 0, 0],
+        [3, 4, 2, 0, 0, 0, 0, 0, 0],
+        [4, 4, 3, 0, 0, 0, 0, 0, 0],
+        [4, 4, 3, 2, 0, 0, 0, 0, 0],
+        [4, 4, 3, 3, 0, 0, 0, 0, 0],
+        [4, 4, 3, 3, 1, 0, 0, 0, 0],
+        [4, 4, 3, 3, 2, 0, 0, 0, 0],
+        [4, 4, 3, 3, 3, 1, 0, 0, 0],
+        [4, 4, 3, 3, 3, 2, 0, 0, 0],
+        [4, 4, 3, 3, 3, 2, 1, 0, 0],
+        [4, 4, 3, 3, 3, 2, 1, 0, 0],
+        [4, 4, 3, 3, 3, 2, 1, 1, 0],
+        [4, 4, 3, 3, 3, 2, 1, 1, 0],
+        [4, 4, 3, 3, 3, 2, 1, 1, 1],
+        [4, 4, 3, 3, 3, 2, 1, 1, 1],
+        [4, 4, 3, 3, 3, 2, 1, 1, 1],
+        [4, 4, 3, 3, 3, 3, 1, 1, 1],
+        [4, 4, 3, 3, 3, 3, 2, 1, 1],
+        [4, 4, 3, 3, 3, 3, 2, 2, 1]
+      ],
+      half: [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [4, 2, 0, 0, 0, 0, 0, 0, 0],
+        [4, 2, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 2, 0, 0, 0, 0, 0, 0],
+        [4, 3, 2, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 1, 0, 0, 0, 0, 0],
+        [4, 3, 3, 1, 0, 0, 0, 0, 0],
+        [4, 3, 3, 2, 0, 0, 0, 0, 0],
+        [4, 3, 3, 2, 0, 0, 0, 0, 0],
+        [4, 3, 3, 3, 1, 0, 0, 0, 0],
+        [4, 3, 3, 3, 1, 0, 0, 0, 0],
+        [4, 3, 3, 3, 2, 0, 0, 0, 0],
+        [4, 3, 3, 3, 2, 0, 0, 0, 0]
+      ],
+      third: [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [4, 2, 0, 0, 0, 0, 0, 0, 0],
+        [4, 2, 0, 0, 0, 0, 0, 0, 0],
+        [4, 2, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 2, 0, 0, 0, 0, 0, 0],
+        [4, 3, 2, 0, 0, 0, 0, 0, 0],
+        [4, 3, 2, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 1, 0, 0, 0, 0, 0],
+        [4, 3, 3, 1, 0, 0, 0, 0, 0]
+      ],
+      pact: [
+        [1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [2, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 2, 0, 0, 0, 0, 0, 0, 0],
+        [0, 2, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 2, 0, 0, 0, 0, 0, 0],
+        [0, 0, 2, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 2, 0, 0, 0, 0, 0],
+        [0, 0, 0, 2, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0, 0],
+        [0, 0, 0, 0, 2, 0, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 0, 0, 0],
+        [0, 0, 0, 0, 3, 0, 0, 0, 0],
+        [0, 0, 0, 0, 4, 0, 0, 0, 0],
+        [0, 0, 0, 0, 4, 0, 0, 0, 0],
+        [0, 0, 0, 0, 4, 0, 0, 0, 0],
+        [0, 0, 0, 0, 4, 0, 0, 0, 0]
+      ]
+    };
 
-function collectState(){
-  const state = {};
-  SIMPLE_IDS.forEach(id=>{
-    const el = document.getElementById(id);
-    if(!el) return;
-    state[id] = el.type==='checkbox' ? el.checked : el.value;
-  });
+    /* ---------------------------------------------------------
+       HELPERS
+    --------------------------------------------------------- */
+    function mod(v) { return Math.floor((v - 10) / 2); }
 
-  state.attrs = {}; ATTRS.forEach(a=>{ state.attrs[a.key] = document.getElementById('attr_'+a.key).value; });
-  state.saveProf = {}; ATTRS.forEach(a=>{ state.saveProf[a.key] = document.getElementById('saveProf_'+a.key).checked; });
-  state.skillProf = SKILLS.map((s,i)=> document.getElementById('skillProf_'+i).checked);
+    function fmt(n) { return n >= 0 ? '+' + n : String(n); }
 
-  state.slotMax = []; state.slotCur = [];
-  for(let i=1;i<=9;i++){
-    state.slotMax.push(document.getElementById('slotMax_'+i).value);
-    state.slotCur.push(document.getElementById('slotCur_'+i).value);
-  }
+    function profBonus(level) { return Math.ceil(level / 4) + 1; }
 
-  state.progression = [];
-  for(let l=1;l<=20;l++){
-    state.progression.push({
-      truques: document.getElementById('prog_truques_'+l).value,
-      slots: document.getElementById('prog_slots_'+l).value,
-      resources: document.getElementById('prog_resources_'+l).value
-    });
-  }
-
-  state.attacks = Array.from(document.querySelectorAll('#attackTable tbody tr')).map(tr=>{
-    const inputs = tr.querySelectorAll('input');
-    return {name:inputs[0].value, bonus:inputs[1].value, damage:inputs[2].value, props:inputs[3].value};
-  });
-
-  state.spells = {};
-  SPELL_LEVELS.forEach((label,idx)=>{
-    const container = document.getElementById('spellcards_'+idx);
-    state.spells[idx] = container ? Array.from(container.querySelectorAll('.spell-card')).map(card=>({
-      name: card.querySelector('.spell-name').textContent,
-      prepared: card.querySelector('.status-btn').classList.contains('prepared'),
-      meta: card.querySelector('.meta').textContent,
-      desc: card.querySelector('.desc').textContent
-    })) : [];
-  });
-
-  const hd = document.getElementById('historyDiv');
-  state.history = hd ? hd.innerHTML : '';
-
-  return state;
-}
-
-function saveState(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
-    flashIndicator('Salvo ✓');
-    // Tenta salvar no Firebase também
-    if (window.salvarFirebase) {
-      window.salvarFirebase();
+    function getAttrVal(key) {
+      const el = document.getElementById('attr_' + key);
+      return el ? parseInt(el.value || 10, 10) : 10;
     }
-  }catch(e){
-    console.error('Erro ao salvar no localStorage:', e);
-    flashIndicator('Erro ao salvar!');
-  }
-}
 
-function flashIndicator(msg){
-  const ind = document.getElementById('saveIndicator');
-  if(!ind) return;
-  ind.textContent = msg;
-  clearTimeout(window._indTimeout);
-  window._indTimeout = setTimeout(()=>{ ind.textContent=''; }, 1800);
-}
-
-function applyState(state){
-  if(!state) return;
-  SIMPLE_IDS.forEach(id=>{
-    if(!(id in state)) return;
-    const el = document.getElementById(id);
-    if(!el) return;
-    if(el.type==='checkbox') el.checked = state[id]; else el.value = state[id];
-  });
-
-  if(state.attrs) ATTRS.forEach(a=>{
-    if(state.attrs[a.key]!==undefined) document.getElementById('attr_'+a.key).value = state.attrs[a.key];
-  });
-  if(state.saveProf) ATTRS.forEach(a=>{
-    if(state.saveProf[a.key]!==undefined) document.getElementById('saveProf_'+a.key).checked = state.saveProf[a.key];
-  });
-  if(state.skillProf) state.skillProf.forEach((v,i)=>{
-    const el = document.getElementById('skillProf_'+i);
-    if(el) el.checked = v;
-  });
-
-  if(state.slotMax) state.slotMax.forEach((v,i)=>{
-    const el = document.getElementById('slotMax_'+(i+1)); if(el) el.value = v;
-  });
-  if(state.slotCur) state.slotCur.forEach((v,i)=>{
-    const el = document.getElementById('slotCur_'+(i+1)); if(el) el.value = v;
-  });
-
-  if(state.progression) state.progression.forEach((p,idx)=>{
-    const l = idx+1;
-    const t = document.getElementById('prog_truques_'+l); if(t) t.value = p.truques||'';
-    const s = document.getElementById('prog_slots_'+l); if(s) s.value = p.slots||'';
-    const r = document.getElementById('prog_resources_'+l); if(r) r.value = p.resources||'';
-  });
-
-  if(state.attacks){
-    document.querySelector('#attackTable tbody').innerHTML = '';
-    if(state.attacks.length){
-      state.attacks.forEach(a=>addAttackRow(a));
-    } else {
-      addAttackRow(); addAttackRow(); addAttackRow();
-    }
-  }
-
-  if(state.spells){
-    Object.keys(state.spells).forEach(idx=>{
-      const container = document.getElementById('spellcards_'+idx);
-      if(!container) return;
-      container.innerHTML = '';
-      state.spells[idx].forEach(sp=>addSpell(idx, sp));
+    /* ---------------------------------------------------------
+       BUILD: ATRIBUTOS
+    --------------------------------------------------------- */
+    const attrGrid = document.getElementById('attrGrid');
+    ATTRS.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'attr-block';
+      div.innerHTML = `
+        <label>${a.key}</label>
+        <input type="number" id="attr_${a.key}" value="10" min="1" max="30" oninput="onAttrChange()">
+        <div class="attr-mod" id="mod_${a.key}">+0</div>`;
+      attrGrid.appendChild(div);
     });
-  }
 
-  const hd = document.getElementById('historyDiv');
-  if(hd && state.history!==undefined) hd.innerHTML = state.history;
+    /* ---------------------------------------------------------
+       BUILD: SALVAGUARDAS
+    --------------------------------------------------------- */
+    const saveList = document.getElementById('saveList');
+    ATTRS.forEach(a => {
+      const row = document.createElement('div');
+      row.className = 'save-row';
+      row.innerHTML = `
+        <input type="checkbox" id="saveProf_${a.key}" onchange="onAttrChange()">
+        <span class="skill-name">${a.label}</span>
+        <span class="skill-bonus" id="saveBonus_${a.key}">+0</span>`;
+      saveList.appendChild(row);
+    });
 
-  syncName();
-  onLevelChange();
-  updatePreparedCount();
-}
+    /* ---------------------------------------------------------
+       BUILD: PERÍCIAS
+    --------------------------------------------------------- */
+    const skillList = document.getElementById('skillList');
+    SKILLS.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+      row.innerHTML = `
+        <input type="checkbox" id="skillProf_${i}" onchange="onAttrChange()">
+        <span class="skill-name">${s.name}</span>
+        <span class="skill-attr">${s.attr}</span>
+        <span class="skill-bonus" id="skillBonus_${i}">+0</span>`;
+      skillList.appendChild(row);
+    });
 
-function loadState(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return false;
-  try{
-    applyState(JSON.parse(raw));
-    return true;
-  }catch(e){
-    console.error('Erro ao carregar backup salvo:', e);
-    return false;
-  }
-}
+    /* ---------------------------------------------------------
+       BUILD: ESPAÇOS DE MAGIA (tabela nível 1-9)
+    --------------------------------------------------------- */
+    const slotBody = document.getElementById('slotBody');
+    for (let i = 1; i <= 9; i++) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i}º</td>
+        <td><input type="number" min="0" id="slotMax_${i}" value="0"></td>
+        <td><input type="number" min="0" id="slotCur_${i}" value="0"></td>`;
+      slotBody.appendChild(tr);
+    }
 
-function exportBackup(){
-  const state = collectState();
-  const name = (document.getElementById('charName').value || 'ficha_dnd5e').trim().replace(/\s+/g,'_');
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name + '_backup.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  flashIndicator('Backup exportado');
-}
+    /* ---------------------------------------------------------
+       BUILD: TABELA DE PROGRESSÃO (1-20)
+    --------------------------------------------------------- */
+    const progressionBody = document.getElementById('progressionBody');
+    for (let lvl = 1; lvl <= 20; lvl++) {
+      const tr = document.createElement('tr');
+      tr.id = 'prog_row_' + lvl;
+      tr.innerHTML = `
+        <td>${lvl}</td>
+        <td id="prog_prof_${lvl}">+${profBonus(lvl)}</td>
+        <td><input type="text" id="prog_truques_${lvl}" placeholder="-"></td>
+        <td><input type="text" id="prog_slots_${lvl}" placeholder="-"></td>
+        <td><input type="text" id="prog_resources_${lvl}" placeholder="-"></td>`;
+      progressionBody.appendChild(tr);
+    }
 
-function importBackup(evt){
-  const file = evt.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e=>{
-    try{
-      const state = JSON.parse(e.target.result);
-      applyState(state);
+    /* ---------------------------------------------------------
+       ATAQUES: linhas dinâmicas
+    --------------------------------------------------------- */
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str == null ? '' : str;
+      return d.innerHTML;
+    }
+
+    function addAttackRow(data) {
+      const tbody = document.querySelector('#attackTable tbody');
+      const tr = document.createElement('tr');
+      const v = data || {};
+      tr.innerHTML = `
+        <td><input type="text" placeholder="Nome da arma" value="${escapeHtml(v.name)}"></td>
+        <td><input type="text" placeholder="+0" value="${escapeHtml(v.bonus)}"></td>
+        <td><input type="text" placeholder="1d6 cortante" value="${escapeHtml(v.damage)}"></td>
+        <td><input type="text" placeholder="Leve, acuidade..." value="${escapeHtml(v.props)}"></td>
+        <td><button class="small-btn remove-btn" onclick="this.closest('tr').remove(); saveState();">X</button></td>`;
+      tbody.appendChild(tr);
       saveState();
-      flashIndicator('Backup importado');
-    }catch(err){
-      alert('Arquivo de backup inválido.');
     }
-  };
-  reader.readAsText(file);
-  evt.target.value = '';
-}
+    addAttackRow();
+    addAttackRow();
+    addAttackRow();
 
-function exportFilledHTML(){
-  const state = collectState();
+    /* ---------------------------------------------------------
+       RECALCULO GERAL
+    --------------------------------------------------------- */
+    function onAttrChange() {
+      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const pb = profBonus(level);
 
-  // Clona o documento completo já pronto.
-  const doc = document.documentElement.cloneNode(true);
+      ATTRS.forEach(a => {
+        const m = mod(getAttrVal(a.key));
+        document.getElementById('mod_' + a.key).textContent = fmt(m);
 
-  // Remove estados embutidos de exportações anteriores.
-  doc.querySelectorAll('#embeddedStateScript').forEach(el=>el.remove());
+        const saveProf = document.getElementById('saveProf_' + a.key).checked;
+        document.getElementById('saveBonus_' + a.key).textContent = fmt(m + (saveProf ? pb : 0));
+      });
 
-  // O estado PRECISA existir antes do script principal executar.
-  const mainScript = doc.querySelector('body > script:not(#embeddedStateScript)');
-  const stateScript = doc.ownerDocument.createElement('script');
-  stateScript.id = 'embeddedStateScript';
-  stateScript.textContent = 'window.__EMBEDDED_STATE__ = ' +
-    JSON.stringify(state).replace(/</g, '\\u003c') + ';';
+      SKILLS.forEach((s, i) => {
+        const m = mod(getAttrVal(s.attr));
+        const prof = document.getElementById('skillProf_' + i).checked;
+        document.getElementById('skillBonus_' + i).textContent = fmt(m + (prof ? pb : 0));
+      });
 
-  if(mainScript) mainScript.parentNode.insertBefore(stateScript, mainScript);
-  else doc.body.appendChild(stateScript);
+      updateSpellDC();
+      saveState();
+    }
 
-  // Limpa somente os elementos que o script recria dinamicamente.
-  ['attrGrid','saveList','skillList','slotBody','progressionBody',
-   'spellbookGrid'].forEach(id=>{
-    const el = doc.querySelector('#'+id);
-    if(el) el.innerHTML = '';
-  });
-  const attackBody = doc.querySelector('#attackTable tbody');
-  if(attackBody) attackBody.innerHTML = '';
+    function onLevelChange() {
+      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const pb = profBonus(level);
+      document.getElementById('profBonusDisplay').textContent = fmt(pb);
 
-  const history = doc.querySelector('#historyDiv');
-  if(history) history.innerHTML = '';
+      for (let l = 1; l <= 20; l++) {
+        document.getElementById('prog_prof_' + l).textContent = fmt(profBonus(l));
+        document.getElementById('prog_row_' + l).classList.toggle('current-lvl', l === level);
+      }
 
-  const html = '<!DOCTYPE html>\n' + doc.outerHTML;
+      applyCasterTable();
+      onAttrChange();
+    }
 
-  const name = (document.getElementById('charName').value || 'ficha_dnd5e')
-    .trim().replace(/\s+/g,'_');
-  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name + '_preenchida.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  flashIndicator('Cópia preenchida exportada');
-}
-function resetSheet(){
-  if(!confirm('Tem certeza que deseja limpar toda a ficha?')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-}
+    function applyCasterTable() {
+      const type = document.getElementById('casterType').value;
+      const level = parseInt(document.getElementById('level').value || 1, 10);
+      if (type === 'none') { saveState(); return; }
+      const row = CASTER_TABLES[type][Math.min(level, 20) - 1];
+      row.forEach((val, idx) => {
+        const i = idx + 1;
+        document.getElementById('slotMax_' + i).value = val;
+      });
+      saveState();
+    }
 
-/* ---------------------------------------------------------
-   INICIALIZAÇÃO
---------------------------------------------------------- */
-const embeddedState = window.__EMBEDDED_STATE__;
-if(embeddedState){
-  applyState(embeddedState);
-  saveState();
-}else{
-  loadState();
-  // Tenta carregar do Firebase
-  setTimeout(async () => {
-    const carregou = await window.carregarFirebase();
-    if (!carregou) {
+    /* ---------------------------------------------------------
+       CONJURAÇÃO (Página 2)
+    --------------------------------------------------------- */
+    function updateSpellDC() {
+      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const pb = profBonus(level);
+      const ability = document.getElementById('castAbility').value;
+      const m = mod(getAttrVal(ability));
+      document.getElementById('spellDC').value = 8 + pb + m;
+      document.getElementById('spellAtk').value = fmt(pb + m);
+    }
+
+    /* ---------------------------------------------------------
+       NOME sincronizado entre páginas
+    --------------------------------------------------------- */
+    function syncName() { document.getElementById('charName2').value = document.getElementById('charName').value; }
+
+    function syncNameBack() { document.getElementById('charName').value = document.getElementById('charName2').value; }
+
+    /* ---------------------------------------------------------
+       GRIMÓRIO
+    --------------------------------------------------------- */
+    const SPELL_LEVELS = ['Truques', '1º Nível', '2º Nível', '3º Nível', '4º Nível', '5º Nível', '6º Nível', '7º Nível', '8º Nível', '9º Nível'];
+    const spellbookGrid = document.getElementById('spellbookGrid');
+    const colLeft = document.createElement('div');
+    const colRight = document.createElement('div');
+    spellbookGrid.appendChild(colLeft);
+    spellbookGrid.appendChild(colRight);
+
+    SPELL_LEVELS.forEach((label, idx) => {
+      const col = idx < 5 ? colLeft : colRight;
+      const section = document.createElement('div');
+      section.className = 'spell-level-section';
+      section.id = 'spellsection_' + idx;
+      section.innerHTML = `
+        <h4><span>${label}</span><button class="small-btn add-spell-btn" onclick="addSpell(${idx})">+ Add</button></h4>
+        <div class="spell-cards" id="spellcards_${idx}"></div>`;
+      col.appendChild(section);
+    });
+
+    function addSpell(levelIdx, data) {
+      let name, metaText, descText, prepared;
+      if (data) {
+        name = data.name;
+        metaText = data.meta;
+        descText = data.desc;
+        prepared = !!data.prepared;
+      } else {
+        name = prompt('Nome da magia:');
+        if (!name) return;
+        const time = prompt('Tempo de conjuração (ex: 1 ação):', '1 ação') || '';
+        const range = prompt('Alcance (ex: 18m):', '18m') || '';
+        const comp = prompt('Componentes (ex: V, S, M):', 'V, S') || '';
+        const dur = prompt('Duração (ex: Instantânea):', 'Instantânea') || '';
+        descText = prompt('Descrição do efeito:') || '';
+        metaText = `${time} · ${range} · ${comp} · ${dur}`;
+        prepared = false;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'spell-card';
+      card.innerHTML = `
+        <button class="x-btn" onclick="removeSpell(this)">✕</button>
+        <div class="spell-top">
+          <span class="spell-name">${escapeHtml(name)}</span>
+          <button class="status-btn ${prepared ? 'prepared' : ''}" onclick="toggleSpellStatus(this)">${prepared ? 'Preparada' : 'Conhecida'}</button>
+        </div>
+        <div class="meta">${escapeHtml(metaText)}</div>
+        <div class="desc">${escapeHtml(descText)}</div>`;
+      document.getElementById('spellcards_' + levelIdx).appendChild(card);
+      updatePreparedCount();
+      saveState();
+    }
+
+    function removeSpell(btn) {
+      const card = btn.closest('.spell-card');
+      card.remove();
+      updatePreparedCount();
+      saveState();
+    }
+
+    function toggleSpellStatus(btn) {
+      btn.classList.toggle('prepared');
+      btn.textContent = btn.classList.contains('prepared') ? 'Preparada' : 'Conhecida';
+      updatePreparedCount();
+      saveState();
+    }
+
+    function updatePreparedCount() {
+      const count = document.querySelectorAll('.status-btn.prepared').length;
+      document.getElementById('preparedCount').textContent = count;
+    }
+
+    /* ---------------------------------------------------------
+       PERSISTÊNCIA (somente Firebase)
+    --------------------------------------------------------- */
+    const SIMPLE_IDS = ['charName', 'level', 'raceInput', 'charClass', 'backgroundInput', 'alignmentInput',
+      'originsText', 'inspiration', 'casterType', 'ca', 'initiative', 'speed', 'hitDice', 'hpCur', 'hpMax', 'hpTemp',
+      'specialResource', 'equipmentText', 'flightNote', 'castAbility', 'preparedMax'
+    ];
+
+    function collectState() {
+      const state = {};
+      SIMPLE_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        state[id] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+
+      state.attrs = {};
+      ATTRS.forEach(a => { state.attrs[a.key] = document.getElementById('attr_' + a.key).value; });
+      state.saveProf = {};
+      ATTRS.forEach(a => { state.saveProf[a.key] = document.getElementById('saveProf_' + a.key).checked; });
+      state.skillProf = SKILLS.map((s, i) => document.getElementById('skillProf_' + i).checked);
+
+      state.slotMax = [];
+      state.slotCur = [];
+      for (let i = 1; i <= 9; i++) {
+        state.slotMax.push(document.getElementById('slotMax_' + i).value);
+        state.slotCur.push(document.getElementById('slotCur_' + i).value);
+      }
+
+      state.progression = [];
+      for (let l = 1; l <= 20; l++) {
+        state.progression.push({
+          truques: document.getElementById('prog_truques_' + l).value,
+          slots: document.getElementById('prog_slots_' + l).value,
+          resources: document.getElementById('prog_resources_' + l).value
+        });
+      }
+
+      state.attacks = Array.from(document.querySelectorAll('#attackTable tbody tr')).map(tr => {
+        const inputs = tr.querySelectorAll('input');
+        return { name: inputs[0].value, bonus: inputs[1].value, damage: inputs[2].value, props: inputs[3].value };
+      });
+
+      state.spells = {};
+      SPELL_LEVELS.forEach((label, idx) => {
+        const container = document.getElementById('spellcards_' + idx);
+        state.spells[idx] = container ? Array.from(container.querySelectorAll('.spell-card')).map(card => ({
+          name: card.querySelector('.spell-name').textContent,
+          prepared: card.querySelector('.status-btn').classList.contains('prepared'),
+          meta: card.querySelector('.meta').textContent,
+          desc: card.querySelector('.desc').textContent
+        })) : [];
+      });
+
+      const hd = document.getElementById('historyDiv');
+      state.history = hd ? hd.innerHTML : '';
+
+      return state;
+    }
+
+    function saveState() {
+      if (window.salvarFirebase) {
+        window.salvarFirebase();
+      }
+      flashIndicator('Salvo ✓');
+    }
+
+    function flashIndicator(msg) {
+      const ind = document.getElementById('saveIndicator');
+      if (!ind) return;
+      ind.textContent = msg;
+      clearTimeout(window._indTimeout);
+      window._indTimeout = setTimeout(() => { ind.textContent = ''; }, 1800);
+    }
+
+    function applyState(state) {
+      if (!state) return;
+      SIMPLE_IDS.forEach(id => {
+        if (!(id in state)) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = state[id];
+        else el.value = state[id];
+      });
+
+      if (state.attrs) ATTRS.forEach(a => {
+        if (state.attrs[a.key] !== undefined) document.getElementById('attr_' + a.key).value = state.attrs[a.key];
+      });
+      if (state.saveProf) ATTRS.forEach(a => {
+        if (state.saveProf[a.key] !== undefined) document.getElementById('saveProf_' + a.key).checked = state.saveProf[a
+        .key];
+      });
+      if (state.skillProf) state.skillProf.forEach((v, i) => {
+        const el = document.getElementById('skillProf_' + i);
+        if (el) el.checked = v;
+      });
+
+      if (state.slotMax) state.slotMax.forEach((v, i) => {
+        const el = document.getElementById('slotMax_' + (i + 1));
+        if (el) el.value = v;
+      });
+      if (state.slotCur) state.slotCur.forEach((v, i) => {
+        const el = document.getElementById('slotCur_' + (i + 1));
+        if (el) el.value = v;
+      });
+
+      if (state.progression) state.progression.forEach((p, idx) => {
+        const l = idx + 1;
+        const t = document.getElementById('prog_truques_' + l);
+        if (t) t.value = p.truques || '';
+        const s = document.getElementById('prog_slots_' + l);
+        if (s) s.value = p.slots || '';
+        const r = document.getElementById('prog_resources_' + l);
+        if (r) r.value = p.resources || '';
+      });
+
+      if (state.attacks) {
+        document.querySelector('#attackTable tbody').innerHTML = '';
+        if (state.attacks.length) {
+          state.attacks.forEach(a => addAttackRow(a));
+        } else {
+          addAttackRow();
+          addAttackRow();
+          addAttackRow();
+        }
+      }
+
+      if (state.spells) {
+        Object.keys(state.spells).forEach(idx => {
+          const container = document.getElementById('spellcards_' + idx);
+          if (!container) return;
+          container.innerHTML = '';
+          state.spells[idx].forEach(sp => addSpell(idx, sp));
+        });
+      }
+
+      const hd = document.getElementById('historyDiv');
+      if (hd && state.history !== undefined) hd.innerHTML = state.history;
+
+      syncName();
       onLevelChange();
       updatePreparedCount();
     }
-  }, 1500);
-}
-</script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-  import {
-    getFirestore,
-    doc,
-    setDoc,
-    getDoc,
-    collection,
-    getDocs,
-    deleteDoc
-  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    /* ---------------------------------------------------------
+       EXPORTAR HTML (mantido para compatibilidade)
+    --------------------------------------------------------- */
+    function exportFilledHTML() {
+      const state = collectState();
+      const doc = document.documentElement.cloneNode(true);
+      doc.querySelectorAll('#embeddedStateScript').forEach(el => el.remove());
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBBtWP8VD8hVjZLt6etxzawdqHZjsBuxMc",
-    authDomain: "ficha-dnd-a97ac.firebaseapp.com",
-    projectId: "ficha-dnd-a97ac",
-    storageBucket: "ficha-dnd-a97ac.firebasestorage.app",
-    messagingSenderId: "751440270245",
-    appId: "1:751440270245:web:64503168dec8e3242b8e4c"
-  };
+      const mainScript = doc.querySelector('body > script:not(#embeddedStateScript)');
+      const stateScript = doc.ownerDocument.createElement('script');
+      stateScript.id = 'embeddedStateScript';
+      stateScript.textContent = 'window.__EMBEDDED_STATE__ = ' +
+        JSON.stringify(state).replace(/</g, '\\u003c') + ';';
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+      if (mainScript) mainScript.parentNode.insertBefore(stateScript, mainScript);
+      else doc.body.appendChild(stateScript);
 
-  window.firebaseDB = db;
-  window.firebaseDoc = doc;
-  window.firebaseSetDoc = setDoc;
-  window.firebaseGetDoc = getDoc;
-  window.firebaseCollection = collection;
-  window.firebaseGetDocs = getDocs;
-
-  console.log("✅ Firebase conectado!");
-
-  // ============================================
-  // FUNÇÃO: Pegar ID da ficha
-  // ============================================
-  function getSheetId() {
-    const name = document.getElementById('charName').value || 'personagem_sem_nome';
-    return name.toLowerCase().replace(/\s+/g, '_');
-  }
-
-  // ============================================
-  // FUNÇÃO: Salvar no Firebase
-  // ============================================
-  window.salvarFirebase = async function() {
-    try {
-      const sheetId = getSheetId();
-      const docRef = doc(db, 'fichas', sheetId);
-      
-      const dados = collectState();
-      
-      await setDoc(docRef, {
-        ...dados,
-        ultimaAtualizacao: new Date().toISOString(),
-        nomePersonagem: document.getElementById('charName').value
+      ['attrGrid', 'saveList', 'skillList', 'slotBody', 'progressionBody',
+        'spellbookGrid'
+      ].forEach(id => {
+        const el = doc.querySelector('#' + id);
+        if (el) el.innerHTML = '';
       });
-      
-      console.log('✅ Ficha salva no Firebase! ID:', sheetId);
-      flashIndicator('Salvo no Firebase ✓');
-      
-      setTimeout(window.listarFichas, 1000);
-      
-      return true;
-    } catch(e) {
-      console.error('❌ Erro ao salvar:', e);
-      flashIndicator('Erro ao salvar!');
-      return false;
-    }
-  };
+      const attackBody = doc.querySelector('#attackTable tbody');
+      if (attackBody) attackBody.innerHTML = '';
 
-  // ============================================
-  // FUNÇÃO: Carregar do Firebase
-  // ============================================
-  window.carregarFirebase = async function() {
-    try {
-      const sheetId = getSheetId();
-      const docRef = doc(db, 'fichas', sheetId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        applyState(data);
-        console.log('✅ Ficha carregada do Firebase!');
-        flashIndicator('Carregado do Firebase ✓');
-        onLevelChange();
-        updatePreparedCount();
+      const history = doc.querySelector('#historyDiv');
+      if (history) history.innerHTML = '';
+
+      const html = '<!DOCTYPE html>\n' + doc.outerHTML;
+
+      const name = (document.getElementById('charName').value || 'ficha_dnd5e')
+        .trim().replace(/\s+/g, '_');
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name + '_preenchida.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      flashIndicator('Cópia exportada');
+    }
+
+    /* ---------------------------------------------------------
+       INICIALIZAÇÃO
+    --------------------------------------------------------- */
+    const embeddedState = window.__EMBEDDED_STATE__;
+    if (embeddedState) {
+      applyState(embeddedState);
+      saveState();
+    } else {
+      // Tenta carregar do Firebase após 1.5 segundos
+      setTimeout(async () => {
+        const carregou = await window.carregarFirebase();
+        if (!carregou) {
+          onLevelChange();
+          updatePreparedCount();
+        }
+      }, 1500);
+    }
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBBtWP8VD8hVjZLt6etxzawdqHZjsBuxMc",
+      authDomain: "ficha-dnd-a97ac.firebaseapp.com",
+      projectId: "ficha-dnd-a97ac",
+      storageBucket: "ficha-dnd-a97ac.firebasestorage.app",
+      messagingSenderId: "751440270245",
+      appId: "1:751440270245:web:64503168dec8e3242b8e4c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.firebaseDB = db;
+
+    console.log("✅ Firebase conectado!");
+
+    // ============================================
+    // FUNÇÃO: Pegar ID da ficha
+    // ============================================
+    function getSheetId() {
+      const name = document.getElementById('charName').value || 'personagem_sem_nome';
+      return name.toLowerCase().replace(/\s+/g, '_');
+    }
+
+    // ============================================
+    // FUNÇÃO: Salvar no Firebase
+    // ============================================
+    window.salvarFirebase = async function() {
+      try {
+        const sheetId = getSheetId();
+        const docRef = doc(db, 'fichas', sheetId);
+
+        const dados = collectState();
+
+        await setDoc(docRef, {
+          ...dados,
+          ultimaAtualizacao: new Date().toISOString(),
+          nomePersonagem: document.getElementById('charName').value
+        });
+
+        console.log('✅ Ficha salva no Firebase! ID:', sheetId);
+        flashIndicator('Salvo no Firebase ✓');
+
+        setTimeout(window.listarFichas, 1000);
+
         return true;
-      } else {
-        console.log('ℹ️ Nenhuma ficha encontrada para:', sheetId);
-        flashIndicator('Nenhuma ficha salva');
+      } catch (e) {
+        console.error('❌ Erro ao salvar:', e);
+        flashIndicator('Erro ao salvar!');
         return false;
       }
-    } catch(e) {
-      console.error('❌ Erro ao carregar:', e);
-      flashIndicator('Erro ao carregar!');
-      return false;
-    }
-  };
+    };
 
-  // ============================================
-  // FUNÇÃO: Listar todas as fichas
-  // ============================================
-  window.listarFichas = async function() {
-    try {
-      console.log('🔍 Iniciando listagem...');
-      
-      const select = document.getElementById('fichaSelector');
-      const info = document.getElementById('fichaInfo');
-      const infoText = document.getElementById('fichaInfoText');
-      
-      select.innerHTML = '<option value="">🔄 Carregando...</option>';
-      info.style.display = 'none';
-      
-      const collectionRef = collection(db, 'fichas');
-      const querySnapshot = await getDocs(collectionRef);
-      
-      select.innerHTML = '<option value="">-- Selecione uma ficha --</option>';
-      
-      if (querySnapshot.empty) {
-        select.innerHTML = '<option value="">😕 Nenhuma ficha encontrada</option>';
-        infoText.textContent = 'Nenhuma ficha salva ainda. Crie uma nova!';
+    // ============================================
+    // FUNÇÃO: Carregar do Firebase
+    // ============================================
+    window.carregarFirebase = async function() {
+      try {
+        const sheetId = getSheetId();
+        const docRef = doc(db, 'fichas', sheetId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          applyState(data);
+          console.log('✅ Ficha carregada do Firebase!');
+          flashIndicator('Carregado do Firebase ✓');
+          onLevelChange();
+          updatePreparedCount();
+          return true;
+        } else {
+          console.log('ℹ️ Nenhuma ficha encontrada para:', sheetId);
+          flashIndicator('Nenhuma ficha salva');
+          return false;
+        }
+      } catch (e) {
+        console.error('❌ Erro ao carregar:', e);
+        flashIndicator('Erro ao carregar!');
+        return false;
+      }
+    };
+
+    // ============================================
+    // FUNÇÃO: Listar todas as fichas
+    // ============================================
+    window.listarFichas = async function() {
+      try {
+        const select = document.getElementById('fichaSelector');
+        const info = document.getElementById('fichaInfo');
+        const infoText = document.getElementById('fichaInfoText');
+
+        select.innerHTML = '<option value="">🔄 Carregando...</option>';
+        info.style.display = 'none';
+
+        const collectionRef = collection(db, 'fichas');
+        const querySnapshot = await getDocs(collectionRef);
+
+        select.innerHTML = '<option value="">-- Selecione uma ficha --</option>';
+
+        if (querySnapshot.empty) {
+          select.innerHTML = '<option value="">😕 Nenhuma ficha encontrada</option>';
+          infoText.textContent = 'Nenhuma ficha salva ainda. Crie uma nova!';
+          info.style.display = 'block';
+          return;
+        }
+
+        let count = 0;
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const nome = data.nomePersonagem || data.nome || doc.id;
+          const nivel = data.nivel || '?';
+          const classe = data.classe || data.charClass || '?';
+          const atualizado = data.ultimaAtualizacao ? new Date(data.ultimaAtualizacao).toLocaleDateString('pt-BR') :
+            'data desconhecida';
+
+          const option = document.createElement('option');
+          option.value = doc.id;
+          option.textContent = `${nome} (Nv${nivel} ${classe}) - ${atualizado}`;
+          select.appendChild(option);
+          count++;
+        });
+
+        infoText.textContent = `${count} ficha(s) encontrada(s)`;
         info.style.display = 'block';
+
+        flashIndicator(`${count} fichas carregadas`);
+        console.log(`✅ ${count} fichas encontradas`);
+
+      } catch (e) {
+        console.error('❌ Erro ao listar fichas:', e);
+        flashIndicator('Erro ao listar fichas!');
+        const select = document.getElementById('fichaSelector');
+        select.innerHTML = '<option value="">❌ Erro ao carregar</option>';
+      }
+    };
+
+    // ============================================
+    // FUNÇÃO: Carregar ficha selecionada
+    // ============================================
+    window.carregarFichaSelecionada = async function() {
+      const select = document.getElementById('fichaSelector');
+      const fichaId = select.value;
+
+      if (!fichaId) {
+        alert('Selecione uma ficha primeiro!');
         return;
       }
-      
-      let count = 0;
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const nome = data.nomePersonagem || data.nome || doc.id;
-        const nivel = data.nivel || '?';
-        const classe = data.classe || data.charClass || '?';
-        const atualizado = data.ultimaAtualizacao ? new Date(data.ultimaAtualizacao).toLocaleDateString('pt-BR') : 'data desconhecida';
-        
-        const option = document.createElement('option');
-        option.value = doc.id;
-        option.textContent = `${nome} (Nv${nivel} ${classe}) - ${atualizado}`;
-        select.appendChild(option);
-        count++;
-      });
-      
-      infoText.textContent = `${count} ficha(s) encontrada(s)`;
-      info.style.display = 'block';
-      
-      flashIndicator(`${count} fichas carregadas`);
-      console.log(`✅ ${count} fichas encontradas`);
-      
-    } catch(e) {
-      console.error('❌ Erro ao listar fichas:', e);
-      flashIndicator('Erro ao listar fichas!');
-      const select = document.getElementById('fichaSelector');
-      select.innerHTML = '<option value="">❌ Erro ao carregar</option>';
-    }
-  };
 
-  // ============================================
-  // FUNÇÃO: Carregar ficha selecionada
-  // ============================================
-  window.carregarFichaSelecionada = async function() {
-    const select = document.getElementById('fichaSelector');
-    const fichaId = select.value;
-    
-    if (!fichaId) {
-      alert('Selecione uma ficha primeiro!');
-      return;
-    }
-    
-    try {
-      const docRef = doc(db, 'fichas', fichaId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        applyState(data);
-        
-        const infoText = document.getElementById('fichaInfoText');
-        const nome = data.nomePersonagem || data.nome || fichaId;
-        infoText.textContent = `✅ Ficha "${nome}" carregada!`;
-        document.getElementById('fichaInfo').style.display = 'block';
-        
-        flashIndicator(`✅ Ficha carregada: ${nome}`);
-        console.log('✅ Ficha carregada:', data);
-        
-        onLevelChange();
-        updatePreparedCount();
-        saveState();
-        
-      } else {
-        alert('Ficha não encontrada!');
-      }
-    } catch(e) {
-      console.error('Erro ao carregar ficha:', e);
-      alert('Erro ao carregar ficha!');
-    }
-  };
+      try {
+        const docRef = doc(db, 'fichas', fichaId);
+        const docSnap = await getDoc(docRef);
 
-  // ============================================
-  // FUNÇÃO: Criar nova ficha
-  // ============================================
-  window.criarNovaFicha = function() {
-    const nome = prompt('Digite o nome do novo personagem:');
-    if (!nome) return;
-    
-    if (confirm('A ficha atual será limpa. Continuar?')) {
-      location.reload();
-      setTimeout(() => {
-        const nomeInput = document.getElementById('charName');
-        if (nomeInput) {
-          nomeInput.value = nome;
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          applyState(data);
+
+          const infoText = document.getElementById('fichaInfoText');
+          const nome = data.nomePersonagem || data.nome || fichaId;
+          infoText.textContent = `✅ Ficha "${nome}" carregada!`;
+          document.getElementById('fichaInfo').style.display = 'block';
+
+          flashIndicator(`✅ Ficha carregada: ${nome}`);
+          console.log('✅ Ficha carregada:', data);
+
+          onLevelChange();
+          updatePreparedCount();
+
+        } else {
+          alert('Ficha não encontrada!');
         }
-        flashIndicator(`Nova ficha: ${nome}`);
-      }, 500);
-    }
-  };
+      } catch (e) {
+        console.error('Erro ao carregar ficha:', e);
+        alert('Erro ao carregar ficha!');
+      }
+    };
 
-  // ============================================
-  // FUNÇÃO: Gerar link
-  // ============================================
-  window.gerarLinkFicha = function() {
-    const nome = document.getElementById('charName').value;
-    if (!nome) {
-      alert('Digite o nome do personagem primeiro!');
-      return;
-    }
-    
-    const id = nome.toLowerCase().replace(/\s+/g, '_');
-    const url = window.location.href.split('?')[0] + '?ficha=' + id;
-    
-    navigator.clipboard.writeText(url).then(() => {
-      flashIndicator('Link copiado!');
-      alert('Link copiado!\n\n' + url + '\n\nEnvie para seu mestre!');
-    }).catch(() => {
-      prompt('Copie este link:', url);
-    });
-  };
+    // ============================================
+    // FUNÇÃO: Criar nova ficha
+    // ============================================
+    window.criarNovaFicha = function() {
+      const nome = prompt('Digite o nome do novo personagem:');
+      if (!nome) return;
 
-  // ============================================
-  // FUNÇÃO: Carregar primeira ficha automaticamente
-  // ============================================
-  window.carregarPrimeiraFicha = async function() {
-    const nome = document.getElementById('charName')?.value;
-    if (nome && nome.trim()) {
-      console.log('ℹ️ Já tem uma ficha carregada:', nome);
-      return;
-    }
-    
-    try {
-      const collectionRef = collection(db, 'fichas');
-      const querySnapshot = await getDocs(collectionRef);
-      
-      if (!querySnapshot.empty) {
-        const primeiroDoc = querySnapshot.docs[0];
-        const data = primeiroDoc.data();
-        applyState(data);
-        flashIndicator(`Carregado: ${data.nomePersonagem || primeiroDoc.id}`);
+      if (confirm('A ficha atual será limpa. Continuar?')) {
+        // Limpa todos os campos manualmente
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+        inputs.forEach(el => {
+          if (el.id !== 'charName' && el.id !== 'charName2') {
+            el.value = '';
+          }
+        });
+        
+        // Reseta atributos
+        ATTRS.forEach(a => {
+          document.getElementById('attr_' + a.key).value = 10;
+        });
+        
+        // Reseta checkboxes
+        document.querySelectorAll('input[type="checkbox"]').forEach(el => {
+          el.checked = false;
+        });
+        
+        // Reseta slots
+        for (let i = 1; i <= 9; i++) {
+          document.getElementById('slotMax_' + i).value = 0;
+          document.getElementById('slotCur_' + i).value = 0;
+        }
+        
+        // Define o nome
+        document.getElementById('charName').value = nome;
+        document.getElementById('charName2').value = nome;
+        
+        // Remove magias
+        document.querySelectorAll('.spell-cards').forEach(el => {
+          el.innerHTML = '';
+        });
+        
+        // Atualiza
         onLevelChange();
         updatePreparedCount();
-        console.log('✅ Primeira ficha carregada automaticamente');
+        flashIndicator(`Nova ficha: ${nome}`);
       }
-    } catch(e) {
-      console.error('Erro ao carregar primeira ficha:', e);
-    }
-  };
+    };
 
-  // ============================================
-  // ADICIONAR BOTÕES NA BARRA
-  // ============================================
-  setTimeout(() => {
-    const barra = document.querySelector('.save-bar');
-    if (barra) {
-      // Botão Salvar Firebase
-      const btnFirebase = document.createElement('button');
-      btnFirebase.className = 'small-btn';
-      btnFirebase.style.background = '#4a7aa8';
-      btnFirebase.style.color = 'white';
-      btnFirebase.textContent = '💾 Salvar Firebase';
-      btnFirebase.onclick = window.salvarFirebase;
-      barra.insertBefore(btnFirebase, barra.querySelector('#saveIndicator')?.nextSibling || barra.firstChild);
-      
-      // Botão Carregar Firebase
-      const btnCarregar = document.createElement('button');
-      btnCarregar.className = 'small-btn';
-      btnCarregar.style.background = '#7a8a4a';
-      btnCarregar.style.color = 'white';
-      btnCarregar.textContent = '📂 Carregar Firebase';
-      btnCarregar.onclick = window.carregarFirebase;
-      barra.insertBefore(btnCarregar, btnFirebase.nextSibling);
-    }
-  }, 100);
+    // ============================================
+    // FUNÇÃO: Gerar link
+    // ============================================
+    window.gerarLinkFicha = function() {
+      const nome = document.getElementById('charName').value;
+      if (!nome) {
+        alert('Digite o nome do personagem primeiro!');
+        return;
+      }
 
-  // ============================================
-  // INICIALIZAÇÃO
-  // ============================================
-  setTimeout(() => {
-    window.listarFichas();
-    
-    const nomeAtual = document.getElementById('charName')?.value;
-    if (!nomeAtual || !nomeAtual.trim()) {
-      setTimeout(window.carregarPrimeiraFicha, 1000);
-    }
-  }, 500);
+      const id = nome.toLowerCase().replace(/\s+/g, '_');
+      const url = window.location.href.split('?')[0] + '?ficha=' + id;
 
-  console.log('✅ Seletor de fichas inicializado!');
-</script>
-</body></html>
+      navigator.clipboard.writeText(url).then(() => {
+        flashIndicator('Link copiado!');
+        alert('Link copiado!\n\n' + url + '\n\nEnvie para seu mestre!');
+      }).catch(() => {
+        prompt('Copie este link:', url);
+      });
+    };
+
+    // ============================================
+    // INICIALIZAÇÃO
+    // ============================================
+    setTimeout(() => {
+      window.listarFichas();
+    }, 500);
+
+    console.log('✅ Seletor de fichas inicializado!');
+  </script>
+</body>
+</html>
