@@ -718,24 +718,6 @@
   </div>
 </div>
 
-  <!-- ============ SELETOR DE FICHAS ============ -->
-  <div style="max-width:210mm; margin:0 auto 20px; background:linear-gradient(135deg, #f0f4ed, #e3ecdd); border-radius:12px; padding:16px 20px; border:2px solid var(--moss); box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-      <span style="font-weight:bold; color:var(--moss); font-size:16px;">📂 Minhas Fichas</span>
-      <select id="fichaSelector" style="flex:1; min-width:200px; padding:8px 12px; border:2px solid var(--sage); border-radius:8px; background:#fff; font-size:14px; font-family:inherit; color:var(--ink);">
-        <option value="">-- Selecione uma ficha --</option>
-      </select>
-      <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss); color:white; padding:6px 16px; border-radius:8px;">Abrir</button>
-      <button class="small-btn" onclick="listarFichas()" style="background:var(--sage); color:white; padding:6px 16px; border-radius:8px;">🔄 Atualizar</button>
-      <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white; padding:6px 16px; border-radius:8px;">✨ Nova</button>
-      <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white; padding:6px 16px; border-radius:8px;">🔗 Compartilhar</button>
-      <button class="small-btn" onclick="excluirFicha()" style="background:#a15c4a; color:white; padding:6px 16px; border-radius:8px;">🗑️ Excluir</button>
-    </div>
-    <div id="fichaInfo" style="margin-top:10px; font-size:13px; color:#4a5a44; display:none; background:rgba(255,255,255,0.5); padding:6px 12px; border-radius:6px;">
-      <span id="fichaInfoText"></span>
-    </div>
-  </div>
-
   <script>
     /* ---------------------------------------------------------
        DADOS BASE
@@ -1407,7 +1389,7 @@
         console.log('✅ Ficha salva no Firebase! ID:', sheetId);
         flashIndicator('Salvo no Firebase ✓');
 
-        setTimeout(window.listarFichas, 1000);
+        setTimeout(window.listarPersonagens, 1000);  // ← MUDOU AQUI
 
         return true;
       } catch (e) {
@@ -1443,60 +1425,6 @@
         console.error('❌ Erro ao carregar:', e);
         flashIndicator('Erro ao carregar!');
         return false;
-      }
-    };
-
-    // ============================================
-    // FUNÇÃO: Listar todas as fichas
-    // ============================================
-    window.listarFichas = async function() {
-      try {
-        const select = document.getElementById('fichaSelector');
-        const info = document.getElementById('fichaInfo');
-        const infoText = document.getElementById('fichaInfoText');
-
-        select.innerHTML = '<option value="">🔄 Carregando...</option>';
-        info.style.display = 'none';
-
-        const collectionRef = collection(db, 'fichas');
-        const querySnapshot = await getDocs(collectionRef);
-
-        select.innerHTML = '<option value="">-- Selecione uma ficha --</option>';
-
-        if (querySnapshot.empty) {
-          select.innerHTML = '<option value="">😕 Nenhuma ficha encontrada</option>';
-          infoText.textContent = 'Nenhuma ficha salva ainda. Crie uma nova!';
-          info.style.display = 'block';
-          return;
-        }
-
-        let count = 0;
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const nome = data.nomePersonagem || data.nome || doc.id;
-          const nivel = data.nivel || '?';
-          const classe = data.classe || data.charClass || '?';
-          const atualizado = data.ultimaAtualizacao ? new Date(data.ultimaAtualizacao).toLocaleDateString('pt-BR') :
-            'data desconhecida';
-
-          const option = document.createElement('option');
-          option.value = doc.id;
-          option.textContent = `${nome} (Nv${nivel} ${classe}) - ${atualizado}`;
-          select.appendChild(option);
-          count++;
-        });
-
-        infoText.textContent = `${count} ficha(s) encontrada(s)`;
-        info.style.display = 'block';
-
-        flashIndicator(`${count} fichas carregadas`);
-        console.log(`✅ ${count} fichas encontradas`);
-
-      } catch (e) {
-        console.error('❌ Erro ao listar fichas:', e);
-        flashIndicator('Erro ao listar fichas!');
-        const select = document.getElementById('fichaSelector');
-        select.innerHTML = '<option value="">❌ Erro ao carregar</option>';
       }
     };
 
@@ -1666,94 +1594,6 @@ window.carregarFichaPorId = async function(fichaId) {
   }
 };
 
-// ============================================
-// FUNÇÃO: Criar nova ficha (modificada)
-// ============================================
-const criarNovaFichaOriginal = window.criarNovaFicha;
-window.criarNovaFicha = function() {
-  const nome = prompt('Digite o nome do novo personagem:');
-  if (!nome) return;
-  
-  // Limpa a ficha atual
-  const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
-  inputs.forEach(el => {
-    if (el.id !== 'charName' && el.id !== 'charName2') {
-      el.value = '';
-    }
-  });
-  
-  ATTRS.forEach(a => {
-    document.getElementById('attr_' + a.key).value = 10;
-  });
-  
-  document.querySelectorAll('input[type="checkbox"]').forEach(el => {
-    el.checked = false;
-  });
-  
-  for (let i = 1; i <= 9; i++) {
-    document.getElementById('slotMax_' + i).value = 0;
-    document.getElementById('slotCur_' + i).value = 0;
-  }
-  
-  document.querySelectorAll('.spell-cards').forEach(el => {
-    el.innerHTML = '';
-  });
-  
-  document.getElementById('charName').value = nome;
-  document.getElementById('charName2').value = nome;
-  
-  onLevelChange();
-  updatePreparedCount();
-  
-  // Salva imediatamente
-  saveState();
-  
-  flashIndicator(`Nova ficha: ${nome}`);
-  
-  // Mostra a ficha
-  window.mostrarFicha();
-};
-
-    // ============================================
-    // FUNÇÃO: Carregar ficha selecionada
-    // ============================================
-    window.carregarFichaSelecionada = async function() {
-      const select = document.getElementById('fichaSelector');
-      const fichaId = select.value;
-
-      if (!fichaId) {
-        alert('Selecione uma ficha primeiro!');
-        return;
-      }
-
-      try {
-        const docRef = doc(db, 'fichas', fichaId);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          applyState(data);
-
-          const infoText = document.getElementById('fichaInfoText');
-          const nome = data.nomePersonagem || data.nome || fichaId;
-          infoText.textContent = `✅ Ficha "${nome}" carregada!`;
-          document.getElementById('fichaInfo').style.display = 'block';
-
-          flashIndicator(`✅ Ficha carregada: ${nome}`);
-          console.log('✅ Ficha carregada:', data);
-
-          onLevelChange();
-          updatePreparedCount();
-
-        } else {
-          alert('Ficha não encontrada!');
-        }
-      } catch (e) {
-        console.error('Erro ao carregar ficha:', e);
-        alert('Erro ao carregar ficha!');
-      }
-    };
-
     // ============================================
     // FUNÇÃO: Criar nova ficha
     // ============================================
@@ -1823,63 +1663,55 @@ window.criarNovaFicha = function() {
       });
     };
 
-// ============================================
-// FUNÇÃO: Excluir ficha
-// ============================================
-window.excluirFicha = async function() {
-  const select = document.getElementById('fichaSelector');
-  const fichaId = select.value;
-  
-  if (!fichaId) {
-    alert('Selecione uma ficha para excluir!');
-    return;
-  }
-  
-  // Pega o nome da ficha para mostrar no aviso
-  const option = select.options[select.selectedIndex];
-  const nomeFicha = option.textContent || fichaId;
-  
-  // CONFIRMAÇÃO DUPLA (segurança!)
-  const confirmar1 = confirm(`⚠️ Tem certeza que quer excluir a ficha:\n\n"${nomeFicha}"\n\nEsta ação não pode ser desfeita!`);
-  if (!confirmar1) return;
-  
-  const confirmar2 = confirm(`🔄 ÚLTIMA CHANCE!\n\nDeseja realmente APAGAR PERMANENTEMENTE a ficha "${nomeFicha}"?\n\nTodos os dados serão perdidos!`);
-  if (!confirmar2) return;
-  
-  try {
-    // Importa a função deleteDoc
-    const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js");
-    
-    const docRef = doc(db, 'fichas', fichaId);
-    await deleteDoc(docRef);
-    
-    console.log(`🗑️ Ficha "${fichaId}" excluída!`);
-    flashIndicator(`Ficha excluída!`);
-    
-    // Remove a opção do select
-    option.remove();
-    
-    // Se a ficha atual for a que foi excluída, limpa a tela
-    const nomeAtual = document.getElementById('charName').value;
-    if (nomeAtual && nomeAtual.toLowerCase().replace(/\s+/g, '_') === fichaId) {
-      if (confirm('A ficha que você excluiu está aberta. Deseja limpar a tela?')) {
-        // Limpa a ficha atual
-        document.getElementById('charName').value = '';
-        document.getElementById('charName2').value = '';
-        // Recarrega a página para limpar tudo
-        location.reload();
+    // ============================================
+    // FUNÇÃO: Excluir ficha
+    // ============================================
+    window.excluirFicha = async function() {
+      const select = document.getElementById('fichaSelector');
+      const fichaId = select.value;
+      
+      if (!fichaId) {
+        alert('Selecione uma ficha para excluir!');
+        return;
       }
-    }
-    
-    // Atualiza a lista
-    setTimeout(window.listarFichas, 500);
-    
-  } catch (e) {
-    console.error('❌ Erro ao excluir ficha:', e);
-    alert('Erro ao excluir ficha! Verifique o console (F12) para mais detalhes.');
-    flashIndicator('Erro ao excluir!');
-  }
-};
+      
+      const option = select.options[select.selectedIndex];
+      const nomeFicha = option.textContent || fichaId;
+      
+      const confirmar1 = confirm(`⚠️ Tem certeza que quer excluir a ficha:\n\n"${nomeFicha}"\n\nEsta ação não pode ser desfeita!`);
+      if (!confirmar1) return;
+      
+      const confirmar2 = confirm(`🔄 ÚLTIMA CHANCE!\n\nDeseja realmente APAGAR PERMANENTEMENTE a ficha "${nomeFicha}"?\n\nTodos os dados serão perdidos!`);
+      if (!confirmar2) return;
+      
+      try {
+        const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js");
+        
+        const docRef = doc(db, 'fichas', fichaId);
+        await deleteDoc(docRef);
+        
+        console.log(`🗑️ Ficha "${fichaId}" excluída!`);
+        flashIndicator(`Ficha excluída!`);
+        
+        option.remove();
+        
+        const nomeAtual = document.getElementById('charName').value;
+        if (nomeAtual && nomeAtual.toLowerCase().replace(/\s+/g, '_') === fichaId) {
+          if (confirm('A ficha que você excluiu está aberta. Deseja limpar a tela?')) {
+            document.getElementById('charName').value = '';
+            document.getElementById('charName2').value = '';
+            location.reload();
+          }
+        }
+        
+        setTimeout(window.listarPersonagens, 500);  // ← MUDOU AQUI
+        
+      } catch (e) {
+        console.error('❌ Erro ao excluir ficha:', e);
+        alert('Erro ao excluir ficha! Verifique o console (F12) para mais detalhes.');
+        flashIndicator('Erro ao excluir!');
+      }
+    };
 
 // ============================================
 // INICIALIZAÇÃO - Mostra tela de seleção
