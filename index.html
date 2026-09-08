@@ -239,6 +239,7 @@ textarea.freeform{width:100%;min-height:80px;border:1px solid var(--line);border
     <button class="small-btn" onclick="carregarFichaSelecionada()" style="background:var(--moss);">Abrir</button>
     <button class="small-btn" onclick="listarFichas()" style="background:var(--sage);">🔄 Atualizar Lista</button>
     <button class="small-btn" onclick="criarNovaFicha()" style="background:#4a7aa8; color:white;">✨ Nova Ficha</button>
+    <button class="small-btn" onclick="gerarLinkFicha()" style="background:#7a4a8a; color:white;">🔗 Gerar Link</button>
   </div>
   <div id="fichaInfo" style="margin-top:8px; font-size:12px; color:#55604f; display:none;">
     <span id="fichaInfoText"></span>
@@ -961,15 +962,14 @@ if(embeddedState){
   saveState();
 }else{
   loadState();
-  // Tenta carregar do Firebase depois de 1 segundo
+  // Tenta carregar do Firebase
   setTimeout(async () => {
     const carregou = await window.carregarFirebase();
     if (!carregou) {
-      // Se não tem nada no Firebase, usa o local
       onLevelChange();
       updatePreparedCount();
     }
-  }, 1000);
+  }, 1500);
 }
 </script>
 
@@ -979,7 +979,10 @@ if(embeddedState){
     getFirestore,
     doc,
     setDoc,
-    getDoc
+    getDoc,
+    collection,   // <-- NOVO
+    getDocs,      // <-- NOVO
+    deleteDoc     // <-- NOVO (opcional, para excluir)
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -998,26 +1001,27 @@ if(embeddedState){
   window.firebaseDoc = doc;
   window.firebaseSetDoc = setDoc;
   window.firebaseGetDoc = getDoc;
+  window.firebaseCollection = collection;  // <-- NOVO
+  window.firebaseGetDocs = getDocs;        // <-- NOVO
 
-  console.log("Firebase conectado!");
+  console.log("✅ Firebase conectado!");
 
   // ============================================
-  // FUNÇÕES NOVAS PARA SALVAR NO FIREBASE
+  // FUNÇÃO: Pegar ID da ficha
   // ============================================
-
-  // Pega o ID da ficha baseado no nome do personagem
   function getSheetId() {
     const name = document.getElementById('charName').value || 'personagem_sem_nome';
     return name.toLowerCase().replace(/\s+/g, '_');
   }
 
-  // Salva a ficha no Firebase
+  // ============================================
+  // FUNÇÃO: Salvar no Firebase
+  // ============================================
   window.salvarFirebase = async function() {
     try {
       const sheetId = getSheetId();
       const docRef = doc(db, 'fichas', sheetId);
       
-      // Coleta todos os dados da ficha
       const dados = collectState();
       
       await setDoc(docRef, {
@@ -1028,6 +1032,10 @@ if(embeddedState){
       
       console.log('✅ Ficha salva no Firebase! ID:', sheetId);
       flashIndicator('Salvo no Firebase ✓');
+      
+      // Atualiza a lista
+      setTimeout(window.listarFichas, 1000);
+      
       return true;
     } catch(e) {
       console.error('❌ Erro ao salvar:', e);
@@ -1036,7 +1044,9 @@ if(embeddedState){
     }
   };
 
-  // Carrega a ficha do Firebase
+  // ============================================
+  // FUNÇÃO: Carregar do Firebase
+  // ============================================
   window.carregarFirebase = async function() {
     try {
       const sheetId = getSheetId();
@@ -1048,6 +1058,8 @@ if(embeddedState){
         applyState(data);
         console.log('✅ Ficha carregada do Firebase!');
         flashIndicator('Carregado do Firebase ✓');
+        onLevelChange();
+        updatePreparedCount();
         return true;
       } else {
         console.log('ℹ️ Nenhuma ficha encontrada para:', sheetId);
@@ -1061,21 +1073,159 @@ if(embeddedState){
     }
   };
 
-  // MODIFICA A FUNÇÃO saveState ORIGINAL para também salvar no Firebase
+  // ============================================
+  // FUNÇÕES DO SELETOR DE FICHAS (NOVAS)
+  // ============================================
+
+  // Lista todas as fichas
+  window.listarFichas = async function() {
+    try {
+      const select = document.getElementById('fichaSelector');
+      const info = document.getElementById('fichaInfo');
+      const infoText = document.getElementById('fichaInfoText');
+      
+      select.innerHTML = '<option value="">🔄 Carregando...</option>';
+      info.style.display = 'none';
+      
+      const collectionRef = collection(db, 'fichas');
+      const querySnapshot = await getDocs(collectionRef);
+      
+      select.innerHTML = '<option value="">-- Selecione uma ficha --</option>';
+      
+      if (querySnapshot.empty) {
+        select.innerHTML = '<option value="">😕 Nenhuma ficha encontrada</option>';
+        infoText.textContent = 'Nenhuma ficha salva ainda. Crie uma nova!';
+        info.style.display = 'block';
+        return;
+      }
+      
+      let count = 0;
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const nome = data.nomePersonagem || data.nome || doc.id;
+        const nivel = data.nivel || '?';
+        const classe = data.classe || data.charClass || '?';
+        const atualizado = data.ultimaAtualizacao ? new Date(data.ultimaAtualizacao).toLocaleDateString('pt-BR') : 'data desconhecida';
+        
+        const option = document.createElement('option');
+        option.value = doc.id;
+        option.textContent = `${nome} (Nv${nivel} ${classe}) - ${atualizado}`;
+        select.appendChild(option);
+        count++;
+      });
+      
+      infoText.textContent = `${count} ficha(s) encontrada(s)`;
+      info.style.display = 'block';
+      
+      flashIndicator(`${count} fichas carregadas`);
+      console.log(`✅ ${count} fichas encontradas`);
+      
+    } catch(e) {
+      console.error('Erro ao listar fichas:', e);
+      flashIndicator('Erro ao listar fichas!');
+      const select = document.getElementById('fichaSelector');
+      select.innerHTML = '<option value="">❌ Erro ao carregar</option>';
+    }
+  };
+
+  // Carrega a ficha selecionada
+  window.carregarFichaSelecionada = async function() {
+    const select = document.getElementById('fichaSelector');
+    const fichaId = select.value;
+    
+    if (!fichaId) {
+      alert('Selecione uma ficha primeiro!');
+      return;
+    }
+    
+    try {
+      const docRef = doc(db, 'fichas', fichaId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        applyState(data);
+        
+        const infoText = document.getElementById('fichaInfoText');
+        const nome = data.nomePersonagem || data.nome || fichaId;
+        infoText.textContent = `✅ Ficha "${nome}" carregada!`;
+        document.getElementById('fichaInfo').style.display = 'block';
+        
+        flashIndicator(`✅ Ficha carregada: ${nome}`);
+        console.log('✅ Ficha carregada:', data);
+        
+        onLevelChange();
+        updatePreparedCount();
+        saveState();
+        
+      } else {
+        alert('Ficha não encontrada!');
+      }
+    } catch(e) {
+      console.error('Erro ao carregar ficha:', e);
+      alert('Erro ao carregar ficha!');
+    }
+  };
+
+  // Cria uma nova ficha
+  window.criarNovaFicha = function() {
+    const nome = prompt('Digite o nome do novo personagem:');
+    if (!nome) return;
+    
+    if (confirm('A ficha atual será limpa. Continuar?')) {
+      location.reload();
+      setTimeout(() => {
+        const nomeInput = document.getElementById('charName');
+        if (nomeInput) {
+          nomeInput.value = nome;
+        }
+        flashIndicator(`Nova ficha: ${nome}`);
+      }, 500);
+    }
+  };
+
+  // Carrega a primeira ficha automaticamente
+  window.carregarPrimeiraFicha = async function() {
+    const nome = document.getElementById('charName')?.value;
+    if (nome && nome.trim()) {
+      console.log('ℹ️ Já tem uma ficha carregada:', nome);
+      return;
+    }
+    
+    try {
+      const collectionRef = collection(db, 'fichas');
+      const querySnapshot = await getDocs(collectionRef);
+      
+      if (!querySnapshot.empty) {
+        const primeiroDoc = querySnapshot.docs[0];
+        const data = primeiroDoc.data();
+        applyState(data);
+        flashIndicator(`Carregado: ${data.nomePersonagem || primeiroDoc.id}`);
+        onLevelChange();
+        updatePreparedCount();
+        console.log('✅ Primeira ficha carregada automaticamente');
+      }
+    } catch(e) {
+      console.error('Erro ao carregar primeira ficha:', e);
+    }
+  };
+
+  // MODIFICA A FUNÇÃO saveState ORIGINAL
   const saveStateOriginal = window.saveState;
   window.saveState = async function() {
-    // Salva localmente (como antes)
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+      flashIndicator('Salvo ✓');
     } catch(e) {
       console.error('Erro ao salvar local:', e);
     }
     
-    // Salva no Firebase
     await window.salvarFirebase();
   };
 
-  // Adiciona botões extras na barra
+  // ============================================
+  // ADICIONAR BOTÕES NA BARRA
+  // ============================================
   setTimeout(() => {
     const barra = document.querySelector('.save-bar');
     if (barra) {
@@ -1083,22 +1233,57 @@ if(embeddedState){
       const btnFirebase = document.createElement('button');
       btnFirebase.className = 'small-btn';
       btnFirebase.style.background = '#4a7aa8';
+      btnFirebase.style.color = 'white';
       btnFirebase.textContent = '💾 Salvar Firebase';
       btnFirebase.onclick = window.salvarFirebase;
-      barra.insertBefore(btnFirebase, barra.querySelector('#saveIndicator').nextSibling);
+      barra.insertBefore(btnFirebase, barra.querySelector('#saveIndicator')?.nextSibling || barra.firstChild);
       
       // Botão Carregar Firebase
       const btnCarregar = document.createElement('button');
       btnCarregar.className = 'small-btn';
       btnCarregar.style.background = '#7a8a4a';
+      btnCarregar.style.color = 'white';
       btnCarregar.textContent = '📂 Carregar Firebase';
       btnCarregar.onclick = window.carregarFirebase;
       barra.insertBefore(btnCarregar, btnFirebase.nextSibling);
     }
   }, 100);
 
-  console.log('✅ Firebase pronto! Use:');
-  console.log('  - salvarFirebase()  para salvar');
-  console.log('  - carregarFirebase() para carregar');
-</script>
+  // ============================================
+  // INICIALIZAÇÃO
+  // ============================================
+  setTimeout(() => {
+    window.listarFichas();
+    
+    const nomeAtual = document.getElementById('charName')?.value;
+    if (!nomeAtual || !nomeAtual.trim()) {
+      setTimeout(window.carregarPrimeiraFicha, 1000);
+    }
+  }, 500);
+
+  console.log('✅ Seletor de fichas inicializado!');
+  
+  // ============================================
+  // FUNÇÃO: GERAR LINK (OPCIONAL)
+  // ============================================
+  window.gerarLinkFicha = function() {
+    const nome = document.getElementById('charName').value;
+    if (!nome) {
+      alert('Digite o nome do personagem primeiro!');
+      return;
+    }
+    
+    const id = nome.toLowerCase().replace(/\s+/g, '_');
+    const url = window.location.href.split('?')[0] + '?ficha=' + id;
+    
+    navigator.clipboard.writeText(url).then(() => {
+      flashIndicator('Link copiado!');
+      alert('Link copiado!\n\n' + url + '\n\nEnvie para seu mestre!');
+    }).catch(() => {
+      prompt('Copie este link:', url);
+    });
+  };
+
+  console.log('✅ Seletor de fichas inicializado!');
+</script>  <!-- ← FECHA AQUI -->
 </body></html>
