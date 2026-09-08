@@ -1367,7 +1367,11 @@
     // FUNÇÃO: Pegar ID da ficha
     // ============================================
     function getSheetId() {
-      const name = document.getElementById('charName').value || 'personagem_sem_nome';
+      const name = document.getElementById('charName').value;
+      if (!name || name.trim() === '') {
+        alert('⚠️ Digite um nome para o personagem antes de salvar!');
+        return null;
+      }
       return name.toLowerCase().replace(/\s+/g, '_');
     }
 
@@ -1377,8 +1381,9 @@
     window.salvarFirebase = async function() {
       try {
         const sheetId = getSheetId();
+        if (!sheetId) return false; // Sai se não tiver nome
+        
         const docRef = doc(db, 'fichas', sheetId);
-
         const dados = collectState();
 
         await setDoc(docRef, {
@@ -1390,8 +1395,7 @@
         console.log('✅ Ficha salva no Firebase! ID:', sheetId);
         flashIndicator('Salvo no Firebase ✓');
 
-        setTimeout(window.listarPersonagens, 1000);  // ← MUDOU AQUI
-
+        setTimeout(window.listarPersonagens, 1000);
         return true;
       } catch (e) {
         console.error('❌ Erro ao salvar:', e);
@@ -1405,7 +1409,15 @@
     // ============================================
     window.carregarFirebase = async function() {
       try {
+        const nome = document.getElementById('charName').value;
+        if (!nome || nome.trim() === '') {
+          flashIndicator('Digite um nome primeiro!');
+          return false;
+        }
+        
         const sheetId = getSheetId();
+        if (!sheetId) return false;
+        
         const docRef = doc(db, 'fichas', sheetId);
         const docSnap = await getDoc(docRef);
 
@@ -1610,47 +1622,53 @@ window.carregarFichaPorId = async function(fichaId) {
     // ============================================
     window.criarNovaFicha = function() {
       const nome = prompt('Digite o nome do novo personagem:');
-      if (!nome) return;
-
-      if (confirm('A ficha atual será limpa. Continuar?')) {
-        // Limpa todos os campos manualmente
-        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
-        inputs.forEach(el => {
-          if (el.id !== 'charName' && el.id !== 'charName2') {
-            el.value = '';
-          }
-        });
-        
-        // Reseta atributos
-        ATTRS.forEach(a => {
-          document.getElementById('attr_' + a.key).value = 10;
-        });
-        
-        // Reseta checkboxes
-        document.querySelectorAll('input[type="checkbox"]').forEach(el => {
-          el.checked = false;
-        });
-        
-        // Reseta slots
-        for (let i = 1; i <= 9; i++) {
-          document.getElementById('slotMax_' + i).value = 0;
-          document.getElementById('slotCur_' + i).value = 0;
-        }
-        
-        // Define o nome
-        document.getElementById('charName').value = nome;
-        document.getElementById('charName2').value = nome;
-        
-        // Remove magias
-        document.querySelectorAll('.spell-cards').forEach(el => {
-          el.innerHTML = '';
-        });
-        
-        // Atualiza
-        onLevelChange();
-        updatePreparedCount();
-        flashIndicator(`Nova ficha: ${nome}`);
+      if (!nome || nome.trim() === '') {
+        alert('Nome é obrigatório!');
+        return;
       }
+
+      // Limpa todos os campos manualmente
+      const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+      inputs.forEach(el => {
+        if (el.id !== 'charName' && el.id !== 'charName2') {
+          el.value = '';
+        }
+      });
+      
+      // Reseta atributos
+      ATTRS.forEach(a => {
+        document.getElementById('attr_' + a.key).value = 10;
+      });
+      
+      // Reseta checkboxes
+      document.querySelectorAll('input[type="checkbox"]').forEach(el => {
+        el.checked = false;
+      });
+      
+      // Reseta slots
+      for (let i = 1; i <= 9; i++) {
+        document.getElementById('slotMax_' + i).value = 0;
+        document.getElementById('slotCur_' + i).value = 0;
+      }
+      
+      // Define o nome
+      document.getElementById('charName').value = nome.trim();
+      document.getElementById('charName2').value = nome.trim();
+      
+      // Remove magias
+      document.querySelectorAll('.spell-cards').forEach(el => {
+        el.innerHTML = '';
+      });
+      
+      // Atualiza
+      onLevelChange();
+      updatePreparedCount();
+      
+      // Salva imediatamente
+      saveState();
+      
+      flashIndicator(`Nova ficha: ${nome.trim()}`);
+      window.mostrarFicha();
     };
 
     // ============================================
