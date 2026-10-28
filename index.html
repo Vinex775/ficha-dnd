@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- (VERSÃO ATUAL) 1.1 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -323,6 +324,36 @@
       text-align: right;
     }
 
+    /* Campos de texto que crescem conforme o conteúdo (Ataques e Progressão) */
+    table.data-table td textarea.autogrow {
+      display: block;
+      resize: none;
+      overflow: hidden;
+      line-height: 1.3;
+      padding: 2px 0;
+    }
+    table.attack-table {
+      table-layout: fixed;
+      font-size: 12.5px;
+    }
+    table.attack-table td {
+      vertical-align: top;
+      padding: 5px 4px;
+    }
+    table.attack-table td input,
+    table.attack-table td textarea {
+      font-size: 12.5px;
+    }
+    table.attack-table td textarea {
+      min-height: 2.8em;
+    }
+    table#progressionTable {
+      table-layout: fixed;
+    }
+    table#progressionTable td {
+      vertical-align: top;
+    }
+
     textarea.freeform {
       width: 100%;
       min-height: 80px;
@@ -523,7 +554,8 @@
   <!-- ============ BARRA DE SALVAR ============ -->
   <div class="save-bar">
     <span id="saveIndicator"></span>
-    <button class="small-btn" onclick="saveState()" style="background:#4a7aa8; color:white;">💾 Salvar</button>
+    <span id="versaoFicha" style="color:#c4d4c0; font-size:11px; margin-left:auto;"></span>
+    <button class="small-btn" onclick="saveState(true)" style="background:#4a7aa8; color:white;">💾 Salvar</button>
     <button class="small-btn" onclick="window.carregarFirebase()" style="background:#7a8a4a; color:white;">📂 Carregar</button>
     <button class="small-btn" onclick="exportFilledHTML()" style="background:#e2b93b; color:#26332c;">📥 Baixar HTML</button>
     <button class="small-btn" onclick="excluirFichaAtual()" style="background:#a15c4a; color:white;">🗑️ Excluir</button>
@@ -554,14 +586,14 @@
   </div>
   
   <!-- A ficha em si -->
-  <div class="page" id="paginaFicha">
+  <div id="paginaFicha">
   <!-- ============ PÁGINA 1 ============ -->
   <div class="page">
 
     <div class="sheet-header">
       <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
       <div class="field"><label>Raça / Sub-raça</label><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
-      <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse()"></div>
+      <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse(true); saveState();"></div>
       <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
       <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
       <div class="field"><label>Alinhamento</label><input id="alignmentInput" type="text" placeholder="Ex: Neutro e Bom"></div>
@@ -626,7 +658,7 @@
             <div class="combat-stat"><label>CA</label><input id="ca" type="number" value="10"></div>
             <div class="combat-stat">
               <label>Iniciativa</label>
-              <input id="initiative" type="number" value="0" style="width:100%; text-align:center; border:none; background:transparent; font-size:16px; border-bottom:1px solid var(--line);">
+              <input id="initiative" type="number" value="0" oninput="onInitiativeInput(this)" title="Automático (Destreza). Digite para sobrescrever; apague para voltar ao automático." style="width:100%; text-align:center; border:none; background:transparent; font-size:16px; border-bottom:1px solid var(--line);">
             </div>
             <div class="combat-stat"><label>Deslocamento</label><input id="speed" type="text" value="9m"></div>
             <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8"></div>
@@ -637,24 +669,16 @@
             <div class="combat-stat"><label>PV Temporário</label><input id="hpTemp" type="number" value="0"></div>
           </div>
 
+        </div>
+
         <div class="box">
           <h3>Ataques &amp; Armas</h3>
-          <table class="data-table" id="attackTable">
-            <thead><tr><th style="width:32%;">Nome</th><th style="width:14%;">Bônus</th><th style="width:24%;">Dano / Tipo</th><th style="width:24%;">Propriedades</th><th></th></tr></thead>
+          <table class="data-table attack-table" id="attackTable">
+            <thead><tr><th style="width:24%;">Nome</th><th style="width:10%;">Bônus</th><th style="width:24%;">Dano / Tipo</th><th style="width:34%;">Propriedades</th><th style="width:8%;"></th></tr></thead>
             <tbody></tbody>
           </table>
           <div class="table-actions">
             <button class="small-btn" onclick="addAttackRow()">+ Adicionar Ataque</button>
-          </div>
-        </div>
-
-        <div class="box">
-          <h3>Progressão de Classe</h3>
-          <div style="max-height:340px;overflow-y:auto;">
-            <table class="data-table" id="progressionTable">
-              <thead><tr><th>Nv</th><th>Prof.</th><th>Truques</th><th>Espaços de Magia</th><th>Recursos Desbloqueados</th></tr></thead>
-              <tbody id="progressionBody"></tbody>
-            </table>
           </div>
         </div>
 
@@ -666,6 +690,14 @@
         <div class="box">
           <h3>Equipamento &amp; Inventário</h3>
           <textarea id="equipmentText" class="freeform" style="min-height:110px;" placeholder="Liste equipamentos, pacotes de aventureiro, moedas e itens de interpretação..."></textarea>
+        </div>
+
+        <div class="box">
+          <h3>Progressão de Classe</h3>
+          <table class="data-table" id="progressionTable">
+            <thead><tr><th style="width:6%;">Nv</th><th style="width:8%;">Prof.</th><th style="width:13%;">Truques</th><th style="width:21%;" title="Espaços do 1º ao 9º círculo (ex: 4/3/2)">Espaços de Magia</th><th>Recursos Desbloqueados</th></tr></thead>
+            <tbody id="progressionBody"></tbody>
+          </table>
         </div>
 
       </div>
@@ -712,6 +744,20 @@
 </div>
 
   <script>
+    // (VERSÃO ATUAL) 1.1
+    //
+    // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
+    // 1.0 - versão original
+    // 1.1 - Ataques & Armas maiores (campos que quebram linha, 5 linhas); Progressão de Classe movida para o fim;
+    //       corrigida estrutura de <div> (página 2 aninhada na 1); tabelas de classe/espaços de magia corrigidas
+    //       (Completo estava errado); Monge e Feiticeiro agora detectados; salvamento sem gravar dados pela metade;
+    //       Nova ficha limpa tudo e avisa se o nome já existir; Iniciativa acompanha Destreza; código morto removido.
+    const FICHA_VERSAO = '1.1';
+
+    // Enquanto uma ficha está sendo carregada, nada é salvo (evita gravar dados pela metade).
+    let carregando = false;
+    let _saveTimer = null;
+
     /* ---------------------------------------------------------
        DADOS BASE
     --------------------------------------------------------- */
@@ -747,407 +793,269 @@
 
     /* ---------------------------------------------------------
       CONFIGURAÇÃO DE CLASSES
+      (rótulos das colunas da Progressão + tipo de conjurador)
     --------------------------------------------------------- */
     const CLASS_CONFIG = {
-      barbaro: {
-        nome: 'Bárbaro',
-        recursos: {
-          progressao: 'Fúrias por Descanso',
-          truques: 'Fúrias',
-          slots: 'Dano de Fúria',
-          especial: 'Dano de Fúria'
-        },
-        usaMagia: false,
-        dadoVida: 'd12'
-      },
-      bardo: {
-        nome: 'Bardo',
-        recursos: {
-          progressao: 'Inspiração de Bardo (d6)',
-          truques: 'Truques Conhecidos',
-          slots: 'Espaços de Magia',
-          especial: 'Inspiração de Bardo'
-        },
-        usaMagia: true,
-        dadoVida: 'd8'
-      },
-      clerigo: {
-        nome: 'Clérigo',
-        recursos: {
-          progressao: 'Canais Divinos',
-          truques: 'Truques',
-          slots: 'Espaços de Magia',
-          especial: 'Canal Divino'
-        },
-        usaMagia: true,
-        dadoVida: 'd8'
-      },
-      druida: {
-        nome: 'Druida',
-        recursos: {
-          progressao: 'Formas Selvagens',
-          truques: 'Truques',
-          slots: 'Espaços de Magia',
-          especial: 'Forma Selvagem'
-        },
-        usaMagia: true,
-        dadoVida: 'd8'
-      },
-      guerreiro: {
-        nome: 'Guerreiro',
-        recursos: {
-          progressao: 'Surto de Ação',
-          truques: 'Estilos de Luta',
-          slots: 'Surto de Ação',
-          especial: 'Surto de Ação'
-        },
-        usaMagia: false,
-        dadoVida: 'd10'
-      },
-      ladino: {
-        nome: 'Ladino',
-        recursos: {
-          progressao: 'Ataque Furtivo',
-          truques: 'Perícias Especializadas',
-          slots: 'Ataque Furtivo',
-          especial: 'Ataque Furtivo'
-        },
-        usaMagia: false,
-        dadoVida: 'd8'
-      },
-      mago: {
-        nome: 'Mago',
-        recursos: {
-          progressao: 'Recuperação Arcana',
-          truques: 'Truques',
-          slots: 'Espaços de Magia',
-          especial: 'Recuperação Arcana'
-        },
-        usaMagia: true,
-        dadoVida: 'd6'
-      },
-      monge: {
-        nome: 'Monge',
-        recursos: {
-          progressao: 'Pontos de Ki',
-          truques: 'Pontos de Ki',
-          slots: 'Pontos de Ki',
-          especial: 'Pontos de Ki'
-        },
-        usaMagia: false,
-        dadoVida: 'd8'
-      },
-      paladino: {
-        nome: 'Paladino',
-        recursos: {
-          progressao: 'Imposição de Mãos',
-          truques: 'Truques (opcional)',
-          slots: 'Espaços de Magia',
-          especial: 'Imposição de Mãos'
-        },
-        usaMagia: true,
-        dadoVida: 'd10'
-      },
-      patrulheiro: {
-        nome: 'Patrulheiro',
-        recursos: {
-          progressao: 'Favores da Natureza',
-          truques: 'Truques (opcional)',
-          slots: 'Espaços de Magia',
-          especial: 'Favores da Natureza'
-        },
-        usaMagia: true,
-        dadoVida: 'd10'
-      },
-      bruxo: {
-        nome: 'Bruxo',
-        recursos: {
-          progressao: 'Invocações Místicas',
-          truques: 'Truques',
-          slots: 'Espaços de Pacto',
-          especial: 'Invocações Místicas'
-        },
-        usaMagia: true,
-        dadoVida: 'd8'
-      },
-      feiticeiro: {
-        nome: 'Feiticeiro',
-        recursos: {
-          progressao: 'Pontos de Feitiçaria',
-          truques: 'Truques',
-          slots: 'Espaços de Magia',
-          especial: 'Pontos de Feitiçaria'
-        },
-        usaMagia: true,
-        dadoVida: 'd6'
-      }
+      barbaro:     { nome: 'Bárbaro',     recursos: { progressao: 'Características', truques: 'Fúrias',                 slots: 'Dano de Fúria',     especial: 'Fúria' },              usaMagia: false, conjurador: 'none', dadoVida: 'd12' },
+      bardo:       { nome: 'Bardo',       recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Magia',  especial: 'Inspiração de Bardo' }, usaMagia: true,  conjurador: 'full', dadoVida: 'd8' },
+      clerigo:     { nome: 'Clérigo',     recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Magia',  especial: 'Canalizar Divindade' }, usaMagia: true,  conjurador: 'full', dadoVida: 'd8' },
+      druida:      { nome: 'Druida',      recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Magia',  especial: 'Forma Selvagem' },      usaMagia: true,  conjurador: 'full', dadoVida: 'd8' },
+      guerreiro:   { nome: 'Guerreiro',   recursos: { progressao: 'Características', truques: 'Ataques por Ação',       slots: 'Surtos de Ação',    especial: 'Surto de Ação' },       usaMagia: false, conjurador: 'none', dadoVida: 'd10' },
+      ladino:      { nome: 'Ladino',      recursos: { progressao: 'Características', truques: 'Ataque Furtivo',         slots: 'Anotações',         especial: 'Ataque Furtivo' },      usaMagia: false, conjurador: 'none', dadoVida: 'd8' },
+      mago:        { nome: 'Mago',        recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Magia',  especial: 'Recuperação Arcana' },  usaMagia: true,  conjurador: 'full', dadoVida: 'd6' },
+      monge:       { nome: 'Monge',       recursos: { progressao: 'Características', truques: 'Pontos de Ki',           slots: 'Artes Marciais',    especial: 'Pontos de Ki' },        usaMagia: false, conjurador: 'none', dadoVida: 'd8' },
+      paladino:    { nome: 'Paladino',    recursos: { progressao: 'Características', truques: 'Imposição de Mãos (PV)', slots: 'Espaços de Magia',  especial: 'Imposição de Mãos' },   usaMagia: true,  conjurador: 'half', dadoVida: 'd10' },
+      patrulheiro: { nome: 'Patrulheiro', recursos: { progressao: 'Características', truques: 'Magias Conhecidas',      slots: 'Espaços de Magia',  especial: 'Patrulheiro' },        usaMagia: true,  conjurador: 'half', dadoVida: 'd10' },
+      bruxo:       { nome: 'Bruxo',       recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Pacto',  especial: 'Invocações Místicas' }, usaMagia: true,  conjurador: 'pact', dadoVida: 'd8' },
+      feiticeiro:  { nome: 'Feiticeiro',  recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Magia',  especial: 'Pontos de Feitiçaria' }, usaMagia: true, conjurador: 'full', dadoVida: 'd6' }
     };
 
-    // Detecta a classe baseada no texto do campo
+    // Detecta a classe pelo texto do campo. Vale a palavra que aparece PRIMEIRO no texto
+    // (assim "Clérigo (Domínio da Guerra)" não vira Guerreiro) e ignora acentos.
     function detectarClasse(texto) {
       if (!texto) return null;
-      const lower = texto.toLowerCase();
-      
-      // Lista de palavras-chave para cada classe
+      const lower = texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
       const palavrasChave = {
-        barbaro: ['bárbaro', 'barbaro', 'barbarian'],
+        barbaro: ['barbaro', 'barbarian'],
         bardo: ['bardo', 'bard'],
-        clerigo: ['clérigo', 'clerigo', 'cleric'],
+        clerigo: ['clerigo', 'cleric'],
         druida: ['druida', 'druid'],
         guerreiro: ['guerreiro', 'fighter', 'lutador'],
-        ladino: ['ladino', 'rogue', 'ladrao', 'ladrão'],
-        mago: ['mago', 'wizard', 'feiticeiro', 'sorcerer'],
-        monges: ['monge', 'monk'],
+        ladino: ['ladino', 'rogue', 'ladrao'],
+        mago: ['mago', 'wizard'],
+        monge: ['monge', 'monk'],
         paladino: ['paladino', 'paladin'],
-        patrulheiro: ['patrulheiro', 'ranger', 'caçador'],
+        patrulheiro: ['patrulheiro', 'ranger', 'cacador'],
         bruxo: ['bruxo', 'warlock'],
-        feiticeiro: ['feiticeiro', 'sorcerer']
+        feiticeiro: ['feiticeiro', 'feiticeira', 'sorcerer']
       };
-      
+      let melhor = null;
+      let melhorPos = Infinity;
       for (const [classe, palavras] of Object.entries(palavrasChave)) {
         for (const palavra of palavras) {
-          if (lower.includes(palavra)) {
-            return classe;
+          const pos = lower.indexOf(palavra);
+          if (pos !== -1 && pos < melhorPos) {
+            melhor = classe;
+            melhorPos = pos;
           }
         }
       }
-      return null;
+      return melhor;
     }
 
-    // Aplica a configuração da classe na ficha
-    function aplicarConfiguracaoClasse() {
+    const DADOS_VIDA_PADRAO = ['', '1d8', 'd6', 'd8', 'd10', 'd12'];
+    const TITULOS_PADRAO = { truques: 'Truques', slots: 'Espaços de Magia', progressao: 'Recursos Desbloqueados', especial: 'Recurso Especial de Classe / Subclasse' };
+    let classeAplicada = null; // classe cuja tabela está preenchida agora
+
+    function definirTitulosProgressao(t) {
+      const h3 = document.querySelector('#progressionTable thead th:nth-child(3)');
+      const h4 = document.querySelector('#progressionTable thead th:nth-child(4)');
+      const h5 = document.querySelector('#progressionTable thead th:nth-child(5)');
+      if (h3) h3.textContent = t.truques;
+      if (h4) h4.textContent = t.slots;
+      if (h5) h5.textContent = t.progressao;
+      const especial = document.querySelector('.box:has(#specialResource) h3');
+      if (especial) especial.textContent = t.especial;
+    }
+
+    // Mostra a tabela de espaços de magia se a classe usa magia OU se o tipo de conjurador foi escolhido
+    function atualizarVisibilidadeSlots() {
+      const slotBox = document.querySelector('.box:has(.slot-table)');
+      if (!slotBox) return;
+      const classeId = detectarClasse(document.getElementById('charClass').value);
+      const usaMagia = classeId ? CLASS_CONFIG[classeId].usaMagia : true;
+      const tipo = document.getElementById('casterType').value;
+      const table = slotBox.querySelector('.slot-table');
+      if (table) table.style.display = (usaMagia || tipo !== 'none') ? '' : 'none';
+    }
+
+    // Aplica a configuração da classe na ficha.
+    // deUsuario = true quando veio de digitação no campo Classe (aí também sugere o tipo de conjurador)
+    function aplicarConfiguracaoClasse(deUsuario) {
       const classeInput = document.getElementById('charClass');
       if (!classeInput) return;
-      
-      const classeTexto = classeInput.value;
-      const classeId = detectarClasse(classeTexto);
-      
+
+      const classeId = detectarClasse(classeInput.value);
+
       if (!classeId || !CLASS_CONFIG[classeId]) {
-        // Se não detectar classe, volta ao padrão (Druida)
-        aplicarConfiguracaoPadrao();
+        // Classe não reconhecida (ou campo vazio): títulos padrão e tabela livre para edição manual
+        definirTitulosProgressao(TITULOS_PADRAO);
+        if (classeAplicada !== null) limparTabelaProgressao();
+        classeAplicada = null;
+        atualizarVisibilidadeSlots();
         return;
       }
-      
+
       const config = CLASS_CONFIG[classeId];
-      
-      // 1. Altera o título "Truques" na Progressão
-      const truquesHeader = document.querySelector('#progressionTable thead th:nth-child(3)');
-      if (truquesHeader) {
-        truquesHeader.textContent = config.recursos.truques;
-      }
-      
-      // 2. Altera o título "Espaços de Magia" na Progressão
-      const slotsHeader = document.querySelector('#progressionTable thead th:nth-child(4)');
-      if (slotsHeader) {
-        slotsHeader.textContent = config.recursos.slots;
-      }
-      
-      // 3. Altera o título "Recursos Desbloqueados" na Progressão
-      const recursosHeader = document.querySelector('#progressionTable thead th:nth-child(5)');
-      if (recursosHeader) {
-        recursosHeader.textContent = config.recursos.progressao;
-      }
-      
-      // 4. Altera o título "Recurso Especial de Classe / Subclasse"
-      const specialBox = document.querySelector('.box:has(#specialResource) h3');
-      if (specialBox) {
-        specialBox.textContent = `Recurso: ${config.recursos.especial}`;
-      }
-      
-      // 5. Altera o Dado de Vida
+      definirTitulosProgressao({
+        truques: config.recursos.truques,
+        slots: config.recursos.slots,
+        progressao: config.recursos.progressao,
+        especial: `Recurso: ${config.recursos.especial}`
+      });
+
+      // Dado de vida: só troca se estiver vazio ou com um valor "de fábrica"
       const hitDiceInput = document.getElementById('hitDice');
-      if (hitDiceInput && config.dadoVida) {
-        // Só muda se estiver vazio ou for o padrão
-        if (!hitDiceInput.value || hitDiceInput.value === '' || hitDiceInput.value === '1d8') {
-          hitDiceInput.value = config.dadoVida;
-        }
+      if (hitDiceInput && DADOS_VIDA_PADRAO.includes(hitDiceInput.value.trim())) {
+        hitDiceInput.value = config.dadoVida;
       }
-      
-      // 6. Se a classe usa magia, mostra os espaços; se não, esconde ou renomeia
-      const slotBox = document.querySelector('.box:has(.slot-table)');
-      if (slotBox) {
-        const slotLabel = slotBox.querySelector('h3');
-        if (slotLabel) {
-          if (config.usaMagia) {
-            slotLabel.textContent = 'Espaços de Magia';
-            // Mostra a tabela
-            const table = slotBox.querySelector('.slot-table');
-            if (table) table.style.display = '';
-            const casterSelect = slotBox.querySelector('.caster-type');
-            if (casterSelect) casterSelect.style.display = '';
-          } else {
-            // Classes sem magia
-            slotLabel.textContent = config.recursos.slots || 'Recursos de Classe';
-            // Esconde a tabela e o seletor
-            const table = slotBox.querySelector('.slot-table');
-            if (table) table.style.display = 'none';
-            const casterSelect = slotBox.querySelector('.caster-type');
-            if (casterSelect) casterSelect.style.display = 'none';
-          }
-        }
+
+      // Ao digitar a classe, sugere o tipo de conjurador (só se ainda estiver em "Manual")
+      const casterSel = document.getElementById('casterType');
+      if (deUsuario === true && casterSel && casterSel.value === 'none' && config.conjurador !== 'none') {
+        casterSel.value = config.conjurador;
+        applyCasterTable();
       }
+
+      atualizarVisibilidadeSlots();
       preencherTabelaProgressao(classeId);
-
-      console.log(`✅ Configuração aplicada: ${config.nome}`);
-    }
-
-        function aplicarConfiguracaoPadrao() {
-      // Restaura os títulos padrão (Druida)
-      const truquesHeader = document.querySelector('#progressionTable thead th:nth-child(3)');
-      if (truquesHeader) truquesHeader.textContent = 'Truques';
-      
-      const slotsHeader = document.querySelector('#progressionTable thead th:nth-child(4)');
-      if (slotsHeader) slotsHeader.textContent = 'Espaços de Magia';
-      
-      const recursosHeader = document.querySelector('#progressionTable thead th:nth-child(5)');
-      if (recursosHeader) recursosHeader.textContent = 'Recursos Desbloqueados';
-      
-      const specialBox = document.querySelector('.box:has(#specialResource) h3');
-      if (specialBox) specialBox.textContent = 'Recurso Especial de Classe / Subclasse';
-      
-      const slotBox = document.querySelector('.box:has(.slot-table)');
-      if (slotBox) {
-        const slotLabel = slotBox.querySelector('h3');
-        if (slotLabel) slotLabel.textContent = 'Espaços de Magia';
-        const table = slotBox.querySelector('.slot-table');
-        if (table) table.style.display = '';
-        const casterSelect = slotBox.querySelector('.caster-type');
-        if (casterSelect) casterSelect.style.display = '';
-      }
-      preencherTabelaProgressao('druida');
+      classeAplicada = classeId;
     }
 
     /* ---------------------------------------------------------
-      TABELAS DE PROGRESSÃO POR CLASSE
+      TABELAS DE PROGRESSÃO POR CLASSE (Livro do Jogador 5e)
+      t = coluna 3, s = coluna 4 (texto, função ou tipo de conjurador), f = características por nível
     --------------------------------------------------------- */
-    const PROGRESSION_TABLES = {
+    const ASI = 'Aumento de Atributo';
+    const faixa = (tab) => (l) => { let v = ''; tab.forEach(([n, x]) => { if (l >= n) v = x; }); return v; };
+    function comAsi(feats, niveis) {
+      (niveis || [4, 8, 12, 16, 19]).forEach(n => { feats[n] = feats[n] ? feats[n] + ', ' + ASI : ASI; });
+      return feats;
+    }
+
+    const PROGRESSAO = {
       barbaro: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        recursos: ['Fúria (2)', 'Fúria (2), Ataque Temerário', 'Fúria (3)', 'Caminho Primordial', 'Fúria (3), Ataque Extra', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)', 'Fúria (4)']
+        t: faixa([[1, 2], [3, 3], [6, 4], [12, 5], [17, 6], [20, '∞']]),
+        s: faixa([[1, '+2'], [9, '+3'], [16, '+4']]),
+        f: comAsi({ 1: 'Fúria, Defesa sem Armadura', 2: 'Ataque Descuidado, Sentido de Perigo', 3: 'Caminho Primitivo', 5: 'Ataque Extra, Movimento Rápido', 6: 'Característica do Caminho', 7: 'Instinto Selvagem', 9: 'Crítico Brutal (1 dado)', 10: 'Característica do Caminho', 11: 'Fúria Implacável', 13: 'Crítico Brutal (2 dados)', 14: 'Característica do Caminho', 15: 'Fúria Persistente', 17: 'Crítico Brutal (3 dados)', 18: 'Força Indomável', 20: 'Campeão Primitivo' })
       },
       bardo: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        truques: [2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: faixa([[1, 2], [4, 3], [10, 4]]), s: 'full',
+        f: comAsi({ 1: 'Inspiração de Bardo (d6), Conjuração', 2: 'Pau para Toda Obra, Canção de Descanso (d6)', 3: 'Colégio de Bardo, Especialização', 5: 'Inspiração de Bardo (d8), Fonte de Inspiração', 6: 'Contracanto, Característica do Colégio', 9: 'Canção de Descanso (d8)', 10: 'Inspiração de Bardo (d10), Especialização, Segredos Mágicos', 13: 'Canção de Descanso (d10)', 14: 'Segredos Mágicos, Característica do Colégio', 15: 'Inspiração de Bardo (d12)', 17: 'Canção de Descanso (d12)', 18: 'Segredos Mágicos', 20: 'Inspiração Superior' })
       },
       clerigo: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        truques: [3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: faixa([[1, 3], [4, 4], [10, 5]]), s: 'full',
+        f: comAsi({ 1: 'Conjuração, Domínio Divino', 2: 'Canalizar Divindade (1/descanso), Característica do Domínio', 5: 'Destruir Mortos-Vivos (ND 1/2)', 6: 'Canalizar Divindade (2/descanso), Característica do Domínio', 8: 'Destruir Mortos-Vivos (ND 1), Característica do Domínio', 10: 'Intervenção Divina', 11: 'Destruir Mortos-Vivos (ND 2)', 14: 'Destruir Mortos-Vivos (ND 3)', 17: 'Destruir Mortos-Vivos (ND 4), Característica do Domínio', 18: 'Canalizar Divindade (3/descanso)', 20: 'Intervenção Divina Aprimorada' })
       },
       druida: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        truques: [2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: faixa([[1, 2], [4, 3], [10, 4]]), s: 'full',
+        f: comAsi({ 1: 'Druídico, Conjuração', 2: 'Forma Selvagem (ND 1/4, sem nadar/voar), Círculo Druídico', 4: 'Forma Selvagem (ND 1/2, pode nadar)', 6: 'Característica do Círculo', 8: 'Forma Selvagem (ND 1, pode voar)', 10: 'Característica do Círculo', 14: 'Característica do Círculo', 18: 'Corpo Atemporal, Conjuração Bestial', 20: 'Arquidruida' })
       },
       guerreiro: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        recursos: ['Estilo de Luta', 'Surto de Ação (1)', 'Caminho Arcano', 'Aumento de Atributo', 'Ataque Extra', 'Aumento de Atributo', 'Caminho Arcano', 'Aumento de Atributo', 'Indomável (1)', 'Caminho Arcano', 'Ataque Extra (2)', 'Aumento de Atributo', 'Indomável (2)', 'Aumento de Atributo', 'Caminho Arcano', 'Aumento de Atributo', 'Surto de Ação (2)', 'Aumento de Atributo', 'Aumento de Atributo', 'Ataque Extra (3)']
+        t: faixa([[1, 1], [5, 2], [11, 3], [20, 4]]),
+        s: faixa([[1, '-'], [2, 1], [17, 2]]),
+        f: comAsi({ 1: 'Estilo de Luta, Retomar o Fôlego', 2: 'Surto de Ação', 3: 'Arquétipo Marcial', 5: 'Ataque Extra', 7: 'Característica do Arquétipo', 9: 'Indomável (1 uso)', 10: 'Característica do Arquétipo', 11: 'Ataque Extra (2)', 13: 'Indomável (2 usos)', 15: 'Característica do Arquétipo', 17: 'Surto de Ação (2 usos), Indomável (3 usos)', 18: 'Característica do Arquétipo', 20: 'Ataque Extra (3)' }, [4, 6, 8, 12, 14, 16, 19])
       },
       ladino: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        recursos: ['Ataque Furtivo (1d6)', 'Ação Astuta', 'Ataque Furtivo (2d6)', 'Esquiva Cautelosa', 'Ataque Furtivo (3d6)', 'Perícias Especializadas', 'Ataque Furtivo (4d6)', 'Esquiva Sobrenatural', 'Ataque Furtivo (5d6)', 'Aumento de Atributo', 'Ataque Furtivo (6d6)', 'Aumento de Atributo', 'Ataque Furtivo (7d6)', 'Sentidos Cegos', 'Ataque Furtivo (8d6)', 'Aumento de Atributo', 'Ataque Furtivo (9d6)', 'Sombra Furtiva', 'Ataque Furtivo (10d6)', 'Golpe de Mestre']
+        t: (l) => Math.ceil(l / 2) + 'd6', s: null,
+        f: comAsi({ 1: 'Especialização, Ataque Furtivo, Gíria de Ladrão', 2: 'Ação Astuta', 3: 'Arquétipo de Ladino', 5: 'Esquiva Sobrenatural', 6: 'Especialização', 7: 'Evasão', 9: 'Característica do Arquétipo', 11: 'Talento Confiável', 13: 'Característica do Arquétipo', 14: 'Sentido Cego', 15: 'Mente Escorregadia', 17: 'Característica do Arquétipo', 18: 'Elusivo', 20: 'Golpe de Sorte' }, [4, 8, 10, 12, 16, 19])
       },
       mago: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        truques: [3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: faixa([[1, 3], [4, 4], [10, 5]]), s: 'full',
+        f: comAsi({ 1: 'Conjuração, Recuperação Arcana', 2: 'Tradição Arcana', 6: 'Característica da Tradição', 10: 'Característica da Tradição', 14: 'Característica da Tradição', 18: 'Maestria de Magias', 20: 'Assinatura de Magias' })
       },
       monge: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        recursos: ['Ki (2)', 'Ki (3)', 'Ki (4)', 'Ki (5)', 'Ki (6)', 'Ki (7)', 'Ki (8)', 'Ki (9)', 'Ki (10)', 'Ki (11)', 'Ki (12)', 'Ki (13)', 'Ki (14)', 'Ki (15)', 'Ki (16)', 'Ki (17)', 'Ki (18)', 'Ki (19)', 'Ki (20)']
+        t: (l) => (l < 2 ? '-' : l),
+        s: faixa([[1, 'd4'], [5, 'd6'], [11, 'd8'], [17, 'd10']]),
+        f: comAsi({ 1: 'Defesa sem Armadura, Artes Marciais', 2: 'Ki, Movimento sem Armadura', 3: 'Tradição Monástica, Defletir Projéteis', 4: 'Queda Lenta', 5: 'Ataque Extra, Golpe Atordoante', 6: 'Golpes de Ki, Característica da Tradição', 7: 'Evasão, Mente Tranquila', 10: 'Pureza Corporal', 11: 'Característica da Tradição', 13: 'Língua do Sol e da Lua', 14: 'Alma de Diamante', 15: 'Corpo Atemporal', 17: 'Característica da Tradição', 18: 'Corpo Vazio', 20: 'Perfeição Interior' })
       },
       paladino: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: (l) => 5 * l, s: 'half',
+        f: comAsi({ 1: 'Sentido Divino, Imposição de Mãos', 2: 'Estilo de Luta, Conjuração, Destruição Divina', 3: 'Saúde Divina, Juramento Sagrado', 5: 'Ataque Extra', 6: 'Aura de Proteção', 7: 'Característica do Juramento', 10: 'Aura de Coragem', 11: 'Destruição Divina Aprimorada', 14: 'Toque Purificador', 15: 'Característica do Juramento', 18: 'Aprimoramento de Auras', 20: 'Característica do Juramento' })
       },
       patrulheiro: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: faixa([[1, '-'], [2, 2], [3, 3], [5, 4], [7, 5], [9, 6], [11, 7], [13, 8], [15, 9], [17, 10], [19, 11]]), s: 'half',
+        f: comAsi({ 1: 'Inimigo Favorito, Explorador Natural', 2: 'Estilo de Luta, Conjuração', 3: 'Arquétipo de Patrulheiro, Consciência Primitiva', 5: 'Ataque Extra', 6: 'Inimigo Favorito e Explorador Aprimorados', 7: 'Característica do Arquétipo', 8: 'Passos de Terreno', 10: 'Explorador Aprimorado, Camuflagem Natural', 11: 'Característica do Arquétipo', 14: 'Inimigo Favorito Aprimorado, Desaparecer', 15: 'Característica do Arquétipo', 18: 'Sentidos Selvagens', 20: 'Matador de Inimigos' })
       },
       bruxo: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        truques: [2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-        slots: ['1º:1','1º:2','2º:2','2º:2','3º:2','3º:2','4º:2','4º:2','5º:2','5º:2','5º:3','5º:3','5º:3','5º:3','5º:3','5º:3','5º:4','5º:4','5º:4','5º:4']
+        t: faixa([[1, 2], [4, 3], [10, 4]]), s: 'pact',
+        f: comAsi({ 1: 'Patrono Transcendental, Magia de Pacto', 2: 'Invocações Místicas', 3: 'Dádiva do Pacto', 6: 'Característica do Patrono', 10: 'Característica do Patrono', 11: 'Arcana Mística (6º)', 13: 'Arcana Mística (7º)', 14: 'Característica do Patrono', 15: 'Arcana Mística (8º)', 17: 'Arcana Mística (9º)', 20: 'Mestre Transcendental' })
       },
       feiticeiro: {
-        prof: [2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6],
-        truques: [4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-        slots: ['1º:2','1º:3','1º:4','2º:3','2º:4','3º:3','3º:4','4º:3','4º:4','5º:3','5º:4','6º:3','6º:4','7º:3','7º:4','8º:3','8º:4','9º:3','9º:4','9º:4']
+        t: faixa([[1, 4], [4, 5], [10, 6]]), s: 'full',
+        f: comAsi({ 1: 'Conjuração, Origem de Feitiçaria', 2: 'Fonte de Magia (pontos = nível)', 3: 'Metamagia', 6: 'Característica da Origem', 10: 'Metamagia', 14: 'Característica da Origem', 17: 'Metamagia', 18: 'Característica da Origem', 20: 'Restauração Feiticeira' })
       }
     };
 
+    // "4/3/2" = espaços do 1º, 2º e 3º círculo. Bruxo: "2× 1º".
+    function slotsTexto(tipo, lvl) {
+      const linha = CASTER_TABLES[tipo] && CASTER_TABLES[tipo][lvl - 1];
+      if (!linha) return '';
+      if (tipo === 'pact') {
+        const i = linha.findIndex(n => n > 0);
+        return i < 0 ? '-' : `${linha[i]}× ${i + 1}º`;
+      }
+      const vals = linha.filter(n => n > 0);
+      return vals.length ? vals.join('/') : '-';
+    }
+
+    function dadosProgressao(classeId, lvl) {
+      const p = PROGRESSAO[classeId];
+      if (!p) return null;
+      const t = p.t ? p.t(lvl) : null;
+      let s = null;
+      if (typeof p.s === 'string') s = slotsTexto(p.s, lvl);
+      else if (typeof p.s === 'function') s = p.s(lvl);
+      return { t, s, f: p.f[lvl] || '' };
+    }
+
+    function definirCampoProg(el, valor) {
+      if (!el) return;
+      if (valor === null || valor === undefined) {
+        // coluna sem dados nessa classe: fica livre para anotações
+        el.value = '';
+        el.readOnly = false;
+      } else {
+        el.value = String(valor);
+        el.readOnly = true;
+      }
+    }
+
     // Preenche a tabela de progressão automaticamente
     function preencherTabelaProgressao(classeId) {
-      const config = PROGRESSION_TABLES[classeId];
-      if (!config) return;
-      
+      if (!PROGRESSAO[classeId]) return;
       for (let lvl = 1; lvl <= 20; lvl++) {
-        const idx = lvl - 1;
-        
-        // Proficiência (sempre igual para todas as classes)
-        const profEl = document.getElementById('prog_prof_' + lvl);
-        if (profEl) profEl.textContent = '+' + config.prof[idx];
-        
-        // Truques (se existir)
-        const truquesEl = document.getElementById('prog_truques_' + lvl);
-        if (truquesEl) {
-          if (config.truques && config.truques[idx]) {
-            truquesEl.value = config.truques[idx];
-          } else {
-            truquesEl.value = '-';
-          }
-          truquesEl.readOnly = true;
-        }
-        
-        // Espaços de Magia (se existir)
-        const slotsEl = document.getElementById('prog_slots_' + lvl);
-        if (slotsEl) {
-          if (config.slots && config.slots[idx]) {
-            slotsEl.value = config.slots[idx];
-          } else {
-            slotsEl.value = '-';
-          }
-          slotsEl.readOnly = true;
-        }
-        
-        // Recursos Desbloqueados
-        const recursosEl = document.getElementById('prog_resources_' + lvl);
-        if (recursosEl) {
-          if (config.recursos && config.recursos[idx]) {
-            recursosEl.value = config.recursos[idx];
-          } else {
-            recursosEl.value = '-';
-          }
-          recursosEl.readOnly = true;
-        }
+        const d = dadosProgressao(classeId, lvl);
+        definirCampoProg(document.getElementById('prog_truques_' + lvl), d.t);
+        definirCampoProg(document.getElementById('prog_slots_' + lvl), d.s);
+        definirCampoProg(document.getElementById('prog_resources_' + lvl), d.f);
       }
-      
-      console.log(`✅ Tabela de progressão preenchida para: ${classeId}`);
+      growAll();
+    }
+
+    function limparTabelaProgressao() {
+      for (let lvl = 1; lvl <= 20; lvl++) {
+        ['truques', 'slots', 'resources'].forEach(k => {
+          const el = document.getElementById('prog_' + k + '_' + lvl);
+          if (el) { el.value = ''; el.readOnly = false; }
+        });
+      }
+      growAll();
     }
 
     const CASTER_TABLES = {
+      // Cada linha = um nível de personagem; cada coluna = espaços do 1º ao 9º círculo
       full: [
-        [1, 2, 0, 0, 0, 0, 0, 0, 0],
-        [2, 3, 0, 0, 0, 0, 0, 0, 0],
-        [3, 4, 2, 0, 0, 0, 0, 0, 0],
-        [4, 4, 3, 0, 0, 0, 0, 0, 0],
-        [4, 4, 3, 2, 0, 0, 0, 0, 0],
-        [4, 4, 3, 3, 0, 0, 0, 0, 0],
-        [4, 4, 3, 3, 1, 0, 0, 0, 0],
-        [4, 4, 3, 3, 2, 0, 0, 0, 0],
-        [4, 4, 3, 3, 3, 1, 0, 0, 0],
-        [4, 4, 3, 3, 3, 2, 0, 0, 0],
-        [4, 4, 3, 3, 3, 2, 1, 0, 0],
-        [4, 4, 3, 3, 3, 2, 1, 0, 0],
-        [4, 4, 3, 3, 3, 2, 1, 1, 0],
-        [4, 4, 3, 3, 3, 2, 1, 1, 0],
-        [4, 4, 3, 3, 3, 2, 1, 1, 1],
-        [4, 4, 3, 3, 3, 2, 1, 1, 1],
-        [4, 4, 3, 3, 3, 2, 1, 1, 1],
-        [4, 4, 3, 3, 3, 3, 1, 1, 1],
-        [4, 4, 3, 3, 3, 3, 2, 1, 1],
-        [4, 4, 3, 3, 3, 3, 2, 2, 1]
+        [2, 0, 0, 0, 0, 0, 0, 0, 0],
+        [3, 0, 0, 0, 0, 0, 0, 0, 0],
+        [4, 2, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 0, 0, 0, 0, 0, 0, 0],
+        [4, 3, 2, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 0, 0, 0, 0, 0, 0],
+        [4, 3, 3, 1, 0, 0, 0, 0, 0],
+        [4, 3, 3, 2, 0, 0, 0, 0, 0],
+        [4, 3, 3, 3, 1, 0, 0, 0, 0],
+        [4, 3, 3, 3, 2, 0, 0, 0, 0],
+        [4, 3, 3, 3, 2, 1, 0, 0, 0],
+        [4, 3, 3, 3, 2, 1, 0, 0, 0],
+        [4, 3, 3, 3, 2, 1, 1, 0, 0],
+        [4, 3, 3, 3, 2, 1, 1, 0, 0],
+        [4, 3, 3, 3, 2, 1, 1, 1, 0],
+        [4, 3, 3, 3, 2, 1, 1, 1, 0],
+        [4, 3, 3, 3, 2, 1, 1, 1, 1],
+        [4, 3, 3, 3, 3, 1, 1, 1, 1],
+        [4, 3, 3, 3, 3, 2, 1, 1, 1],
+        [4, 3, 3, 3, 3, 2, 2, 1, 1]
       ],
       half: [
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -1226,6 +1134,12 @@
 
     function profBonus(level) { return Math.ceil(level / 4) + 1; }
 
+    // Nível sempre entre 1 e 20 (evita erro com campo vazio, 0 ou 99)
+    function getLevel() {
+      const n = parseInt(document.getElementById('level').value, 10);
+      return Math.max(1, Math.min(20, isNaN(n) ? 1 : n));
+    }
+
     function getAttrVal(key) {
       const el = document.getElementById('attr_' + key);
       return el ? parseInt(el.value || 10, 10) : 10;
@@ -1298,8 +1212,8 @@
         <td>${lvl}</td>
         <td id="prog_prof_${lvl}">+${profBonus(lvl)}</td>
         <td><input type="text" id="prog_truques_${lvl}" placeholder="-"></td>
-        <td><input type="text" id="prog_slots_${lvl}" placeholder="-"></td>
-        <td><input type="text" id="prog_resources_${lvl}" placeholder="-"></td>`;
+        <td><textarea rows="1" class="autogrow" id="prog_slots_${lvl}" placeholder="-" oninput="autoGrow(this)"></textarea></td>
+        <td><textarea rows="1" class="autogrow" id="prog_resources_${lvl}" placeholder="-" oninput="autoGrow(this)"></textarea></td>`;
       progressionBody.appendChild(tr);
     }
 
@@ -1312,28 +1226,42 @@
       return d.innerHTML;
     }
 
+    // Faz um <textarea> crescer conforme o texto (não faz nada se a ficha estiver escondida)
+    function autoGrow(el) {
+      el.style.height = 'auto';
+      if (el.scrollHeight) el.style.height = el.scrollHeight + 'px';
+    }
+    function growAll() {
+      document.querySelectorAll('textarea.autogrow').forEach(autoGrow);
+    }
+
+    const ATAQUES_PADRAO = 5;
+
     function addAttackRow(data) {
       const tbody = document.querySelector('#attackTable tbody');
       const tr = document.createElement('tr');
       const v = data || {};
       tr.innerHTML = `
-        <td><input type="text" placeholder="Nome da arma" value="${escapeHtml(v.name)}"></td>
-        <td><input type="text" placeholder="+0" value="${escapeHtml(v.bonus)}"></td>
-        <td><input type="text" placeholder="1d6 cortante" value="${escapeHtml(v.damage)}"></td>
-        <td><input type="text" placeholder="Leve, acuidade..." value="${escapeHtml(v.props)}"></td>
+        <td><textarea class="autogrow" rows="2" placeholder="Nome da arma" oninput="autoGrow(this)">${escapeHtml(v.name)}</textarea></td>
+        <td><textarea class="autogrow" rows="2" placeholder="+0" oninput="autoGrow(this)">${escapeHtml(v.bonus)}</textarea></td>
+        <td><textarea class="autogrow" rows="2" placeholder="1d6 cortante" oninput="autoGrow(this)">${escapeHtml(v.damage)}</textarea></td>
+        <td><textarea class="autogrow" rows="2" placeholder="Leve, acuidade, arremesso (6/18m)..." oninput="autoGrow(this)">${escapeHtml(v.props)}</textarea></td>
         <td><button class="small-btn remove-btn" onclick="this.closest('tr').remove(); saveState();">X</button></td>`;
       tbody.appendChild(tr);
+      tr.querySelectorAll('textarea').forEach(autoGrow);
       saveState();
     }
-    addAttackRow();
-    addAttackRow();
-    addAttackRow();
+    function resetAttackRows() {
+      document.querySelector('#attackTable tbody').innerHTML = '';
+      for (let i = 0; i < ATAQUES_PADRAO; i++) addAttackRow();
+    }
+    resetAttackRows();
 
     /* ---------------------------------------------------------
        RECALCULO GERAL
     --------------------------------------------------------- */
     function onAttrChange() {
-      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const level = getLevel();
       const pb = profBonus(level);
 
       ATTRS.forEach(a => {
@@ -1359,21 +1287,22 @@
       CALCULAR INICIATIVA
     --------------------------------------------------------- */
     function calcularIniciativa() {
-      const dex = getAttrVal('DES');
-      const dexMod = mod(dex);
-      
+      const dexMod = mod(getAttrVal('DES'));
       const initiativeInput = document.getElementById('initiative');
-      if (initiativeInput) {
-        // Se o campo estiver vazio ou for 0, coloca o modificador
-        if (!initiativeInput.value || initiativeInput.value === '0') {
-          initiativeInput.value = dexMod;
-        }
-        // Se tiver um valor diferente, mantém (permite ajuste manual)
+      // Acompanha o modificador de Destreza, a menos que você tenha digitado um valor próprio.
+      // Para voltar ao automático, apague o campo.
+      if (initiativeInput && initiativeInput.dataset.manual !== '1') {
+        initiativeInput.value = dexMod;
       }
     }
 
+    function onInitiativeInput(el) {
+      el.dataset.manual = el.value.trim() === '' ? '' : '1';
+      saveState();
+    }
+
     function onLevelChange() {
-      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const level = getLevel();
       const pb = profBonus(level);
       document.getElementById('profBonusDisplay').textContent = fmt(pb);
 
@@ -1388,9 +1317,10 @@
 
     function applyCasterTable() {
       const type = document.getElementById('casterType').value;
-      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const level = getLevel();
+      atualizarVisibilidadeSlots();
       if (type === 'none') { saveState(); return; }
-      const row = CASTER_TABLES[type][Math.min(level, 20) - 1];
+      const row = CASTER_TABLES[type][level - 1];
       row.forEach((val, idx) => {
         const i = idx + 1;
         document.getElementById('slotMax_' + i).value = val;
@@ -1402,7 +1332,7 @@
        CONJURAÇÃO (Página 2)
     --------------------------------------------------------- */
     function updateSpellDC() {
-      const level = parseInt(document.getElementById('level').value || 1, 10);
+      const level = getLevel();
       const pb = profBonus(level);
       const ability = document.getElementById('castAbility').value;
       const m = mod(getAttrVal(ability));
@@ -1530,9 +1460,11 @@
       }
 
       state.attacks = Array.from(document.querySelectorAll('#attackTable tbody tr')).map(tr => {
-        const inputs = tr.querySelectorAll('input');
-        return { name: inputs[0].value, bonus: inputs[1].value, damage: inputs[2].value, props: inputs[3].value };
+        const campos = tr.querySelectorAll('textarea, input');
+        return { name: campos[0].value, bonus: campos[1].value, damage: campos[2].value, props: campos[3].value };
       });
+
+      state.initiativeManual = document.getElementById('initiative').dataset.manual === '1';
 
       state.spells = {};
       SPELL_LEVELS.forEach((label, idx) => {
@@ -1551,11 +1483,16 @@
       return state;
     }
 
-    function saveState() {
-      if (window.salvarFirebase) {
-        window.salvarFirebase();
+    // saveState()    -> salvamento automático (espera 0,8s sem mexer, e fica quieto se não houver nome)
+    // saveState(true)  -> salvamento manual (botão 💾): salva na hora e avisa se faltar o nome
+    function saveState(manual) {
+      if (carregando || !window.salvarFirebase) return;
+      clearTimeout(_saveTimer);
+      if (manual === true) {
+        window.salvarFirebase(false);
+      } else {
+        _saveTimer = setTimeout(() => window.salvarFirebase(true), 800);
       }
-      flashIndicator('Salvo ✓');
     }
 
     function flashIndicator(msg) {
@@ -1568,6 +1505,16 @@
 
     function applyState(state) {
       if (!state) return;
+      carregando = true;
+      clearTimeout(_saveTimer);
+      try {
+        aplicarEstado(state);
+      } finally {
+        carregando = false;
+      }
+    }
+
+    function aplicarEstado(state) {
       SIMPLE_IDS.forEach(id => {
         if (!(id in state)) return;
         const el = document.getElementById(id);
@@ -1579,6 +1526,18 @@
       if (state.attrs) ATTRS.forEach(a => {
         if (state.attrs[a.key] !== undefined) document.getElementById('attr_' + a.key).value = state.attrs[a.key];
       });
+      // Iniciativa: manual se foi marcada assim; em fichas antigas, manual só se diferir da Destreza
+      const iniEl = document.getElementById('initiative');
+      if (iniEl) {
+        let manual;
+        if (state.initiativeManual !== undefined) {
+          manual = !!state.initiativeManual;
+        } else {
+          const ini = String(state.initiative === undefined ? '' : state.initiative).trim();
+          manual = ini !== '' && ini !== String(mod(getAttrVal('DES')));
+        }
+        iniEl.dataset.manual = manual ? '1' : '';
+      }
       if (state.saveProf) ATTRS.forEach(a => {
         if (state.saveProf[a.key] !== undefined) document.getElementById('saveProf_' + a.key).checked = state.saveProf[a
         .key];
@@ -1600,11 +1559,11 @@
       if (state.progression) state.progression.forEach((p, idx) => {
         const l = idx + 1;
         const t = document.getElementById('prog_truques_' + l);
-        if (t) t.value = p.truques || '';
+        if (t) { t.value = p.truques || ''; t.readOnly = false; }
         const s = document.getElementById('prog_slots_' + l);
-        if (s) s.value = p.slots || '';
+        if (s) { s.value = p.slots || ''; s.readOnly = false; }
         const r = document.getElementById('prog_resources_' + l);
-        if (r) r.value = p.resources || '';
+        if (r) { r.value = p.resources || ''; r.readOnly = false; }
       });
 
       if (state.attacks) {
@@ -1612,9 +1571,7 @@
         if (state.attacks.length) {
           state.attacks.forEach(a => addAttackRow(a));
         } else {
-          addAttackRow();
-          addAttackRow();
-          addAttackRow();
+          resetAttackRows();
         }
       }
 
@@ -1633,7 +1590,10 @@
       syncName();
       onLevelChange();
       updatePreparedCount();
+      // Ficha recém-carregada: se a classe for reconhecida a tabela é refeita; se não, mantém o que foi salvo
+      classeAplicada = null;
       aplicarConfiguracaoClasse();
+      growAll();
     }
 
     /* ---------------------------------------------------------
@@ -1684,6 +1644,9 @@
 /* ---------------------------------------------------------
    INICIALIZAÇÃO
 --------------------------------------------------------- */
+const versaoEl = document.getElementById('versaoFicha');
+if (versaoEl) versaoEl.textContent = 'v' + FICHA_VERSAO;
+
 const embeddedState = window.__EMBEDDED_STATE__;
 if (embeddedState) {
   applyState(embeddedState);
@@ -1733,21 +1696,27 @@ if (embeddedState) {
     // ============================================
     // FUNÇÃO: Pegar ID da ficha
     // ============================================
-    function getSheetId() {
+    // ID do documento a partir do nome ("/" não é permitido em IDs do Firestore)
+    function idDaFicha(nome) {
+      return String(nome).toLowerCase().replace(/\s+/g, '_').replace(/\//g, '-');
+    }
+
+    function getSheetId(silencioso) {
       const name = document.getElementById('charName').value;
       if (!name || name.trim() === '') {
-        alert('⚠️ Digite um nome para o personagem antes de salvar!');
+        if (!silencioso) alert('⚠️ Digite um nome para o personagem antes de salvar!');
         return null;
       }
-      return name.toLowerCase().replace(/\s+/g, '_');
+      return idDaFicha(name);
     }
 
     // ============================================
     // FUNÇÃO: Salvar no Firebase
     // ============================================
-    window.salvarFirebase = async function() {
+    // silencioso = true (salvamento automático): não mostra alerta se faltar o nome
+    window.salvarFirebase = async function(silencioso) {
       try {
-        const sheetId = getSheetId();
+        const sheetId = getSheetId(silencioso === true);
         if (!sheetId) return false; // Sai se não tiver nome
         
         const docRef = doc(db, 'fichas', sheetId);
@@ -1793,8 +1762,6 @@ if (embeddedState) {
           applyState(data);
           console.log('✅ Ficha carregada do Firebase!');
           flashIndicator('Carregado do Firebase ✓');
-          onLevelChange();
-          updatePreparedCount();
           return true;
         } else {
           console.log('ℹ️ Nenhuma ficha encontrada para:', sheetId);
@@ -1823,6 +1790,7 @@ if (embeddedState) {
     window.mostrarFicha = function() {
       document.getElementById('telaSelecao').style.display = 'none';
       document.getElementById('telaFicha').style.display = 'block';
+      growAll(); // os campos só conseguem medir a altura com a ficha visível
     };
 
     // ============================================
@@ -1969,9 +1937,8 @@ window.carregarFichaPorId = async function(fichaId) {
       flashIndicator(`✅ Ficha carregada: ${nome}`);
       console.log('✅ Ficha carregada:', data);
       
-      onLevelChange();
-      updatePreparedCount();
-      
+      // (applyState já recalcula tudo; não chamar onLevelChange aqui evita regravar a ficha só por abri-la)
+
       // Mostra a ficha
       window.mostrarFicha();
       
@@ -1987,127 +1954,72 @@ window.carregarFichaPorId = async function(fichaId) {
     // ============================================
     // FUNÇÃO: Criar nova ficha
     // ============================================
-    window.criarNovaFicha = function() {
+    window.criarNovaFicha = async function() {
       const nome = prompt('Digite o nome do novo personagem:');
       if (!nome || nome.trim() === '') {
         alert('Nome é obrigatório!');
         return;
       }
 
-      // Limpa todos os campos manualmente
-      const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
-      inputs.forEach(el => {
-        if (el.id !== 'charName' && el.id !== 'charName2') {
-          el.value = '';
+      // Não deixa sobrescrever sem avisar uma ficha que já existe com esse nome
+      try {
+        const existente = await getDoc(doc(db, 'fichas', idDaFicha(nome)));
+        if (existente.exists() && !confirm(`Já existe um personagem chamado "${nome.trim()}".\n\nCriar uma ficha nova vai SUBSTITUIR a antiga. Continuar?`)) {
+          return;
         }
-      });
-      
-      // Reseta atributos
-      ATTRS.forEach(a => {
-        document.getElementById('attr_' + a.key).value = 10;
-      });
-      
-      // Reseta checkboxes
-      document.querySelectorAll('input[type="checkbox"]').forEach(el => {
-        el.checked = false;
-      });
-      
-      // Reseta slots
-      for (let i = 1; i <= 9; i++) {
-        document.getElementById('slotMax_' + i).value = 0;
-        document.getElementById('slotCur_' + i).value = 0;
+      } catch (e) {
+        console.error('Erro ao verificar ficha existente:', e);
+        if (!confirm('Não consegui verificar se já existe um personagem com esse nome. Criar mesmo assim?')) return;
       }
-      
-      // Define o nome
-      document.getElementById('charName').value = nome.trim();
-      document.getElementById('charName2').value = nome.trim();
-      
-      // Remove magias
-      document.querySelectorAll('.spell-cards').forEach(el => {
-        el.innerHTML = '';
-      });
-      
-      // Atualiza
-      onLevelChange();
-      updatePreparedCount();
-      
-      // Salva imediatamente
-      saveState();
-      
+
+      carregando = true; // nada é salvo enquanto a ficha é zerada
+      try {
+        // Limpa campos de texto, números e áreas de texto
+        document.querySelectorAll('#telaFicha input[type="text"], #telaFicha input[type="number"], #telaFicha textarea').forEach(el => {
+          if (el.id !== 'charName' && el.id !== 'charName2') el.value = '';
+        });
+
+        // Valores iniciais
+        document.getElementById('level').value = 1;
+        document.getElementById('ca').value = 10;
+        document.getElementById('speed').value = '9m';
+        document.getElementById('hpCur').value = 0;
+        document.getElementById('hpMax').value = 0;
+        document.getElementById('hpTemp').value = 0;
+        document.getElementById('preparedMax').value = 0;
+        document.getElementById('initiative').dataset.manual = '';
+        ATTRS.forEach(a => { document.getElementById('attr_' + a.key).value = 10; });
+        document.getElementById('casterType').value = 'none';
+        document.getElementById('castAbility').value = 'SAB';
+
+        // Checkboxes, espaços de magia, magias, história e ataques
+        document.querySelectorAll('#telaFicha input[type="checkbox"]').forEach(el => { el.checked = false; });
+        for (let i = 1; i <= 9; i++) {
+          document.getElementById('slotMax_' + i).value = 0;
+          document.getElementById('slotCur_' + i).value = 0;
+        }
+        document.querySelectorAll('.spell-cards').forEach(el => { el.innerHTML = ''; });
+        document.getElementById('historyDiv').innerHTML = '';
+        resetAttackRows();
+
+        document.getElementById('charName').value = nome.trim();
+        document.getElementById('charName2').value = nome.trim();
+
+        classeAplicada = null;
+        aplicarConfiguracaoClasse();
+        limparTabelaProgressao();
+        onLevelChange();
+        updatePreparedCount();
+      } finally {
+        carregando = false;
+      }
+
+      // Salva a ficha nova (agora sim)
+      await window.salvarFirebase(false);
       flashIndicator(`Nova ficha: ${nome.trim()}`);
       window.mostrarFicha();
     };
 
-    // ============================================
-    // FUNÇÃO: Gerar link
-    // ============================================
-    window.gerarLinkFicha = function() {
-      const nome = document.getElementById('charName').value;
-      if (!nome) {
-        alert('Digite o nome do personagem primeiro!');
-        return;
-      }
-
-      const id = nome.toLowerCase().replace(/\s+/g, '_');
-      const url = window.location.href.split('?')[0] + '?ficha=' + id;
-
-      navigator.clipboard.writeText(url).then(() => {
-        flashIndicator('Link copiado!');
-        alert('Link copiado!\n\n' + url + '\n\nEnvie para seu mestre!');
-      }).catch(() => {
-        prompt('Copie este link:', url);
-      });
-    };
-
-    // ============================================
-    // FUNÇÃO: Excluir ficha
-    // ============================================
-    window.excluirFicha = async function() {
-      const select = document.getElementById('fichaSelector');
-      const fichaId = select.value;
-      
-      if (!fichaId) {
-        alert('Selecione uma ficha para excluir!');
-        return;
-      }
-      
-      const option = select.options[select.selectedIndex];
-      const nomeFicha = option.textContent || fichaId;
-      
-      const confirmar1 = confirm(`⚠️ Tem certeza que quer excluir a ficha:\n\n"${nomeFicha}"\n\nEsta ação não pode ser desfeita!`);
-      if (!confirmar1) return;
-      
-      const confirmar2 = confirm(`🔄 ÚLTIMA CHANCE!\n\nDeseja realmente APAGAR PERMANENTEMENTE a ficha "${nomeFicha}"?\n\nTodos os dados serão perdidos!`);
-      if (!confirmar2) return;
-      
-      try {
-        const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js");
-        
-        const docRef = doc(db, 'fichas', fichaId);
-        await deleteDoc(docRef);
-        
-        console.log(`🗑️ Ficha "${fichaId}" excluída!`);
-        flashIndicator(`Ficha excluída!`);
-        
-        option.remove();
-        
-        const nomeAtual = document.getElementById('charName').value;
-        if (nomeAtual && nomeAtual.toLowerCase().replace(/\s+/g, '_') === fichaId) {
-          if (confirm('A ficha que você excluiu está aberta. Deseja limpar a tela?')) {
-            document.getElementById('charName').value = '';
-            document.getElementById('charName2').value = '';
-            location.reload();
-          }
-        }
-        
-        setTimeout(window.listarPersonagens, 500);  // ← MUDOU AQUI
-        
-      } catch (e) {
-        console.error('❌ Erro ao excluir ficha:', e);
-        alert('Erro ao excluir ficha! Verifique o console (F12) para mais detalhes.');
-        flashIndicator('Erro ao excluir!');
-      }
-    };
     // ============================================
     // FUNÇÃO: Excluir a ficha que está aberta
     // ============================================
