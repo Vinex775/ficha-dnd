@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.1 -->
+<!-- (VERSÃO ATUAL) 1.2 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -510,6 +510,151 @@
       min-width: 100px;
     }
 
+    /* ---------- Referências, retratos e painel lateral (v1.2) ---------- */
+    .ref-btn {
+      font-size: 13px;
+      line-height: 1;
+      border: 1px solid var(--sage);
+      background: #fff;
+      color: var(--moss);
+      border-radius: 6px;
+      padding: 5px 7px;
+      cursor: pointer;
+      opacity: .65;
+    }
+    .ref-btn:hover { opacity: 1; }
+    .ref-btn.ligado { background: var(--moss); color: #fff; border-color: var(--moss); opacity: 1; }
+    .ref-btn.canto { position: absolute; z-index: 2; }
+    .field.rel { position: relative; }
+    .field.rel .ref-btn.canto { right: 0; top: -5px; }
+    .box.rel { position: relative; }
+    .box.rel > .ref-btn.canto { right: 10px; top: 6px; padding: 3px 6px; }
+    .attack-acoes { display: flex; gap: 4px; justify-content: flex-end; align-items: flex-start; }
+
+    .refs-topo { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .refs-topo input {
+      flex: 1; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px;
+      font-family: inherit; font-size: 13px; background: #fff;
+    }
+    .ref-item {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px;
+      border: 1px solid var(--line); margin-bottom: 5px; background: var(--paper-dark);
+    }
+    .ref-item .ref-titulo { flex: 1; font-weight: bold; color: var(--moss); font-size: 13.5px; cursor: pointer; }
+    .ref-item .ref-titulo:hover { text-decoration: underline; }
+    .ref-cat {
+      font-family: Arial, Helvetica, sans-serif; font-size: 9px; text-transform: uppercase; letter-spacing: .4px;
+      color: #fff; background: var(--sage); padding: 2px 7px; border-radius: 8px; white-space: nowrap;
+    }
+    .ref-vazio { color: #8a9a84; font-size: 12.5px; padding: 8px 2px; font-family: Arial, Helvetica, sans-serif; }
+
+    #boxRetratos { margin-top: 14px; }
+    .retratos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .retrato-img {
+      aspect-ratio: 3 / 4; border: 2px dashed var(--line); border-radius: 8px; background: var(--paper-dark);
+      display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;
+    }
+    .retrato-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .retrato-img.alvo, .retrato-img:focus { outline: 2px solid var(--sage); outline-offset: 2px; }
+    .retrato-vazio { color: #8a9a84; font-family: Arial, Helvetica, sans-serif; font-size: 13px; text-align: center; padding: 8px; }
+    .retrato-rotulo {
+      width: 100%; margin-top: 6px; border: none; border-bottom: 1px solid var(--line); background: transparent;
+      font-family: inherit; font-size: 14px; text-align: center; color: var(--moss); font-weight: bold;
+    }
+    .retrato-acoes { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+
+    #painelRef {
+      position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); background: #fff;
+      border-left: 3px solid var(--moss); box-shadow: -4px 0 20px rgba(0, 0, 0, .15); z-index: 900;
+      display: none; flex-direction: column; font-family: Georgia, 'Times New Roman', serif; color: var(--ink);
+    }
+    #painelRef.aberto { display: flex; }
+    .pr-barra { display: flex; align-items: flex-end; background: var(--moss); padding: 6px 6px 0; gap: 2px; }
+    #prAbas { display: flex; gap: 2px; overflow-x: auto; flex: 1; }
+    .pr-aba {
+      border: none; background: rgba(255, 255, 255, .18); color: #fff; font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px; padding: 8px 10px; border-radius: 6px 6px 0 0; cursor: pointer; white-space: nowrap;
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pr-aba.ativa { background: #fff; color: var(--moss); font-weight: bold; }
+    .pr-aba .x { margin-left: 8px; opacity: .7; }
+    .pr-fechar {
+      border: none; background: transparent; color: #fff; font-size: 18px; cursor: pointer; padding: 4px 10px 8px;
+    }
+    #prCorpo { overflow-y: auto; padding: 14px 16px 60px; flex: 1; }
+    .pr-topo { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .pr-topo h2 { margin: 0; font-size: 19px; color: var(--moss); flex: 1; }
+    .pr-acoes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+    .pr-acoes a { color: #2f6f9f; }
+    .pr-secao { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; background: var(--paper); }
+    .pr-secao > summary {
+      cursor: pointer; padding: 8px 10px; font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; font-weight: bold;
+      color: var(--moss); text-transform: uppercase; letter-spacing: .4px;
+    }
+    .pr-secao .pr-texto { padding: 0 12px 10px; }
+    .pr-texto { white-space: pre-wrap; font-size: 14px; line-height: 1.55; margin-bottom: 8px; }
+    .pr-imgs { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    .pr-img { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--paper-dark); }
+    .pr-img img { width: 100%; display: block; cursor: zoom-in; }
+    .pr-img span { display: block; padding: 14px; color: #8a9a84; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+    @media (min-width: 1100px) {
+      body.painel-aberto { padding-right: 470px; }
+    }
+
+    #lightbox {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, .9); display: none; overflow: auto; z-index: 1300;
+    }
+    #lightbox.aberto { display: block; }
+    #lightbox img { display: block; margin: 40px auto; max-width: 100%; cursor: zoom-in; }
+    #lightbox img.zoom { max-width: none; width: auto; cursor: zoom-out; }
+    #lightbox .lb-fechar {
+      position: fixed; top: 10px; right: 14px; z-index: 2; border: none; background: rgba(255, 255, 255, .2);
+      color: #fff; font-size: 20px; border-radius: 8px; padding: 6px 12px; cursor: pointer;
+    }
+
+    #edModal {
+      position: fixed; inset: 0; background: rgba(20, 30, 25, .55); display: none; align-items: flex-start;
+      justify-content: center; padding: 24px 12px; overflow: auto; z-index: 1100;
+    }
+    #edModal.aberto { display: flex; }
+    .ed-card {
+      background: var(--paper); border-radius: 12px; width: min(640px, 100%); padding: 18px 20px 20px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .3);
+    }
+    .ed-card h3 { margin: 0 0 12px; }
+    .ed-card .field { margin-bottom: 12px; }
+    .ed-linha { display: flex; gap: 12px; }
+    .ed-drop { border: 2px dashed var(--line); border-radius: 8px; padding: 10px; background: #fff; }
+    .ed-drop.sobre { border-color: var(--moss); background: var(--paper-dark); }
+    .ed-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .ed-thumb { position: relative; width: 90px; height: 90px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--paper-dark); }
+    .ed-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ed-thumb button {
+      position: absolute; top: 2px; right: 2px; border: none; background: rgba(161, 92, 74, .9); color: #fff;
+      border-radius: 50%; width: 20px; height: 20px; line-height: 20px; font-size: 11px; cursor: pointer; padding: 0;
+    }
+    .ed-botoes { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+
+    .menu-ref {
+      position: fixed; z-index: 1200; background: #fff; border: 1px solid var(--moss); border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .2); min-width: 220px; max-width: 300px; max-height: 60vh; overflow: auto;
+      font-family: Arial, Helvetica, sans-serif; font-size: 13px;
+    }
+    .menu-ref button {
+      display: block; width: 100%; text-align: left; background: none; border: none; padding: 9px 12px;
+      cursor: pointer; color: var(--ink); font-family: inherit; font-size: 13px;
+    }
+    .menu-ref button:hover { background: var(--paper-dark); }
+    .menu-ref small { color: #7a8a74; margin-left: 4px; }
+    .menu-sep { padding: 7px 12px 3px; font-size: 10px; text-transform: uppercase; color: var(--moss); letter-spacing: .5px; border-top: 1px solid var(--line); }
+    .menu-vazio { padding: 6px 12px 10px; color: #8a9a84; font-size: 12px; }
+
+    @media print {
+      .ref-btn, .retrato-acoes, #painelRef, #lightbox, #edModal, .menu-ref, #boxRefs { display: none !important; }
+      .retrato-img:has(.retrato-vazio) { display: none; }
+      body.painel-aberto { padding-right: 0; }
+    }
+
     @media print {
       body {
         background: #fff;
@@ -592,7 +737,7 @@
 
     <div class="sheet-header">
       <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
-      <div class="field"><label>Raça / Sub-raça</label><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
+      <div class="field rel"><label>Raça / Sub-raça</label><button class="ref-btn canto" id="btnRefRaca" title="Cartão da raça · clique: abrir · botão direito/segurar: trocar vínculo" onclick="cliqueRefFixo(this, 'raca')" oncontextmenu="menuRefFixo(this, 'raca', event)">📎</button><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
       <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse(true); saveState();"></div>
       <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
       <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
@@ -674,7 +819,7 @@
         <div class="box">
           <h3>Ataques &amp; Armas</h3>
           <table class="data-table attack-table" id="attackTable">
-            <thead><tr><th style="width:24%;">Nome</th><th style="width:10%;">Bônus</th><th style="width:24%;">Dano / Tipo</th><th style="width:34%;">Propriedades</th><th style="width:8%;"></th></tr></thead>
+            <thead><tr><th style="width:21%;">Nome</th><th style="width:8%;">Bônus</th><th style="width:21%;">Dano / Tipo</th><th style="width:30%;">Propriedades</th><th style="width:20%;"></th></tr></thead>
             <tbody></tbody>
           </table>
           <div class="table-actions">
@@ -682,7 +827,8 @@
           </div>
         </div>
 
-        <div class="box">
+        <div class="box rel">
+          <button class="ref-btn canto" id="btnRefEspecial" title="Cartão do recurso/poder · clique: abrir · botão direito/segurar: trocar vínculo" onclick="cliqueRefFixo(this, 'especial')" oncontextmenu="menuRefFixo(this, 'especial', event)">📎</button>
           <h3>Recurso Especial de Classe / Subclasse</h3>
           <textarea id="specialResource" class="freeform" placeholder="Descreva aqui as regras do recurso especial (ex: Forma Selvagem, Fúria, Ki, etc): usos por descanso, efeitos, restrições..."></textarea>
         </div>
@@ -690,6 +836,12 @@
         <div class="box">
           <h3>Equipamento &amp; Inventário</h3>
           <textarea id="equipmentText" class="freeform" style="min-height:110px;" placeholder="Liste equipamentos, pacotes de aventureiro, moedas e itens de interpretação..."></textarea>
+        </div>
+
+        <div class="box" id="boxRefs">
+          <h3>Referências (homebrew, poderes, imagens)</h3>
+          <div class="refs-topo"><input type="text" id="refsFiltro" placeholder="Buscar cartão..." oninput="renderRefs()"><button class="small-btn" onclick="editarCartao(null)">+ Novo cartão</button></div>
+          <div id="refsLista"></div>
         </div>
 
         <div class="box">
@@ -734,6 +886,11 @@
 
     <div class="spellbook-grid" id="spellbookGrid"></div>
 
+    <div class="box" id="boxRetratos">
+      <h3>Retratos do Personagem</h3>
+      <div class="retratos-grid" id="retratosGrid"></div>
+    </div>
+
     <div class="box history-box">
       <h3>História do Personagem</h3>
       <div id="historyDiv" contenteditable="true" style="outline:none;"></div>
@@ -743,8 +900,38 @@
   </div>
 </div>
 
+  <!-- ============ PAINEL LATERAL, EDITOR, LIGHTBOX (v1.2) ============ -->
+  <aside id="painelRef">
+    <div class="pr-barra"><div id="prAbas"></div><button class="pr-fechar" title="Fechar painel" onclick="fecharPainel()">✕</button></div>
+    <div id="prCorpo"></div>
+  </aside>
+
+  <div id="edModal" onmousedown="if(event.target===this) fecharEditor()">
+    <div class="ed-card">
+      <h3 id="edTituloModal">Novo cartão</h3>
+      <div class="ed-linha">
+        <div class="field" style="flex:2"><label>Título</label><input id="edTitulo" type="text" placeholder="Ex: Martelo Meteoro"></div>
+        <div class="field" style="flex:1"><label>Categoria</label><select id="edCategoria"></select></div>
+      </div>
+      <div class="field"><label>Link de origem (opcional)</label><input id="edOrigem" type="text" placeholder="https://..."></div>
+      <div class="field"><label>Texto (linhas começando com # viram seções que abrem e fecham; **negrito** funciona)</label>
+        <textarea id="edTexto" class="freeform" style="min-height:220px;" placeholder="Cole aqui o texto da homebrew.&#10;&#10;# Habilidades&#10;**Golpe Estendido.** Você pode usar..."></textarea></div>
+      <div class="field"><label>Imagens (cole com Ctrl+V, arraste ou escolha arquivos)</label>
+        <div class="ed-drop" id="edDrop"><div class="ed-thumbs" id="edImgs"></div>
+          <button class="small-btn" type="button" onclick="escolherImagensEditor()">＋ Adicionar imagem</button></div></div>
+      <div class="ed-botoes">
+        <button class="small-btn remove-btn" id="edExcluir" onclick="excluirCartao()">Excluir cartão</button>
+        <span style="flex:1"></span>
+        <button class="small-btn" style="background:#6a7a64" onclick="fecharEditor()">Cancelar</button>
+        <button class="small-btn" id="edSalvar" onclick="salvarCartao()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
+
   <script>
-    // (VERSÃO ATUAL) 1.1
+    // (VERSÃO ATUAL) 1.2
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -752,11 +939,26 @@
     //       corrigida estrutura de <div> (página 2 aninhada na 1); tabelas de classe/espaços de magia corrigidas
     //       (Completo estava errado); Monge e Feiticeiro agora detectados; salvamento sem gravar dados pela metade;
     //       Nova ficha limpa tudo e avisa se o nome já existir; Iniciativa acompanha Destreza; código morto removido.
-    const FICHA_VERSAO = '1.1';
+    // 1.2 - Referências: cartões com texto longo e imagens (homebrew, poderes), painel lateral com abas e zoom,
+    //       botão 📎 nos ataques, na raça e no recurso especial; dois retratos do personagem (página 2).
+    const FICHA_VERSAO = '1.2';
 
     // Enquanto uma ficha está sendo carregada, nada é salvo (evita gravar dados pela metade).
     let carregando = false;
     let _saveTimer = null;
+
+    // Referências, retratos e anexos (v1.2)
+    let ANEXOS_DE = null; // id fixo da ficha sob o qual as imagens são guardadas
+    let REFS = [];
+    let REFS_FIXAS = { raca: '', especial: '' };
+    let RETRATOS = [{ rotulo: 'Versão 1', anexo: '' }, { rotulo: 'Versão 2', anexo: '' }];
+    const CATEGORIAS_REF = ['Arma', 'Raça', 'Poder', 'Talento', 'Item', 'Outro'];
+    const cacheAnexos = new Map();
+
+    // ID do documento a partir do nome ("/" não é permitido em IDs do Firestore)
+    function idDaFicha(nome) {
+      return String(nome).toLowerCase().replace(/\s+/g, '_').replace(/\//g, '-');
+    }
 
     /* ---------------------------------------------------------
        DADOS BASE
@@ -1246,8 +1448,10 @@
         <td><textarea class="autogrow" rows="2" placeholder="+0" oninput="autoGrow(this)">${escapeHtml(v.bonus)}</textarea></td>
         <td><textarea class="autogrow" rows="2" placeholder="1d6 cortante" oninput="autoGrow(this)">${escapeHtml(v.damage)}</textarea></td>
         <td><textarea class="autogrow" rows="2" placeholder="Leve, acuidade, arremesso (6/18m)..." oninput="autoGrow(this)">${escapeHtml(v.props)}</textarea></td>
-        <td><button class="small-btn remove-btn" onclick="this.closest('tr').remove(); saveState();">X</button></td>`;
+        <td><div class="attack-acoes"><button class="ref-btn" title="Cartão da arma · clique: abrir · botão direito/segurar: trocar vínculo" onclick="cliqueRefAtaque(this)" oncontextmenu="menuRefAtaque(this, event)">📎</button><button class="small-btn remove-btn" onclick="this.closest('tr').remove(); saveState();">X</button></div></td>`;
+      tr.dataset.ref = v.ref || '';
       tbody.appendChild(tr);
+      atualizarBotoesRef();
       tr.querySelectorAll('textarea').forEach(autoGrow);
       saveState();
     }
@@ -1461,10 +1665,16 @@
 
       state.attacks = Array.from(document.querySelectorAll('#attackTable tbody tr')).map(tr => {
         const campos = tr.querySelectorAll('textarea, input');
-        return { name: campos[0].value, bonus: campos[1].value, damage: campos[2].value, props: campos[3].value };
+        return { name: campos[0].value, bonus: campos[1].value, damage: campos[2].value, props: campos[3].value, ref: tr.dataset.ref || '' };
       });
 
       state.initiativeManual = document.getElementById('initiative').dataset.manual === '1';
+
+      // v1.2: referências, retratos e anexos (as imagens em si ficam em fichas/{anexosDe}/anexos)
+      state.anexosDe = ANEXOS_DE || '';
+      state.retratos = RETRATOS.map(r => ({ rotulo: r.rotulo || '', anexo: r.anexo || '' }));
+      state.referencias = REFS.map(r => ({ id: r.id, titulo: r.titulo, categoria: r.categoria, origem: r.origem, texto: r.texto, imagens: r.imagens.slice() }));
+      state.refsFixas = { raca: REFS_FIXAS.raca || '', especial: REFS_FIXAS.especial || '' };
 
       state.spells = {};
       SPELL_LEVELS.forEach((label, idx) => {
@@ -1590,6 +1800,23 @@
       syncName();
       onLevelChange();
       updatePreparedCount();
+      // v1.2: referências, retratos e anexos
+      ANEXOS_DE = state.anexosDe || null;
+      RETRATOS = [0, 1].map(i => {
+        const r = (state.retratos && state.retratos[i]) || {};
+        return { rotulo: r.rotulo || ('Versão ' + (i + 1)), anexo: r.anexo || '' };
+      });
+      REFS = Array.isArray(state.referencias) ? state.referencias.map(r => ({
+        id: String(r.id), titulo: r.titulo || '', categoria: r.categoria || 'Outro', origem: r.origem || '',
+        texto: r.texto || '', imagens: Array.isArray(r.imagens) ? r.imagens.map(String) : []
+      })) : [];
+      REFS_FIXAS = { raca: (state.refsFixas && state.refsFixas.raca) || '', especial: (state.refsFixas && state.refsFixas.especial) || '' };
+      ABERTOS = [];
+      ATIVO = null;
+      renderPainel();
+      renderRetratos();
+      renderRefs();
+
       // Ficha recém-carregada: se a classe for reconhecida a tabela é refeita; se não, mantém o que foi salvo
       classeAplicada = null;
       aplicarConfiguracaoClasse();
@@ -1614,7 +1841,7 @@
       else doc.body.appendChild(stateScript);
 
       ['attrGrid', 'saveList', 'skillList', 'slotBody', 'progressionBody',
-        'spellbookGrid'
+        'spellbookGrid', 'retratosGrid', 'refsLista', 'prAbas', 'prCorpo'
       ].forEach(id => {
         const el = doc.querySelector('#' + id);
         if (el) el.innerHTML = '';
@@ -1640,6 +1867,650 @@
       URL.revokeObjectURL(url);
       flashIndicator('Cópia exportada');
     }
+
+/* ---------------------------------------------------------
+   REFERÊNCIAS, RETRATOS E ANEXOS (v1.2)
+   - Textos dos cartões ficam no documento da ficha.
+   - Imagens ficam em documentos separados: fichas/{anexosDe}/anexos/{id}
+--------------------------------------------------------- */
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/"/g, '&quot;');
+}
+
+function novoId(prefixo) {
+  return prefixo + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function urlSegura(u) {
+  return /^https?:\/\//i.test(String(u || '').trim());
+}
+
+// ---- Anexos (imagens) ----
+function paiAnexos() {
+  if (!ANEXOS_DE) {
+    const nome = document.getElementById('charName').value.trim();
+    if (!nome) {
+      alert('⚠️ Dê um nome ao personagem antes de anexar imagens.');
+      return null;
+    }
+    ANEXOS_DE = idDaFicha(nome); // fica fixo mesmo que o nome mude depois
+  }
+  return ANEXOS_DE;
+}
+
+async function obterAnexo(id) {
+  if (!id) return null;
+  if (cacheAnexos.has(id)) return cacheAnexos.get(id);
+  if (!ANEXOS_DE || !window.anexoCarregar) return null;
+  try {
+    const d = await window.anexoCarregar(ANEXOS_DE, id);
+    if (d) cacheAnexos.set(id, d);
+    return d;
+  } catch (e) {
+    console.error('Erro ao carregar anexo', id, e);
+    return null;
+  }
+}
+
+async function guardarAnexo(id, dataUrl) {
+  const pai = paiAnexos();
+  if (!pai) throw new Error('sem-nome');
+  if (!window.anexoSalvar) throw new Error('O Firebase ainda não conectou. Tente de novo em instantes.');
+  await window.anexoSalvar(pai, id, dataUrl);
+  cacheAnexos.set(id, dataUrl);
+}
+
+async function apagarAnexo(id) {
+  if (!id) return;
+  cacheAnexos.delete(id);
+  if (!ANEXOS_DE || !window.anexoExcluir) return;
+  try { await window.anexoExcluir(ANEXOS_DE, id); } catch (e) { console.error('Erro ao apagar anexo', id, e); }
+}
+
+// Apaga todas as imagens ligadas a um estado de ficha (usado ao excluir/substituir uma ficha)
+async function apagarAnexosDoEstado(st) {
+  if (!st || !st.anexosDe || !window.anexoExcluir) return;
+  const ids = [];
+  (st.retratos || []).forEach(r => { if (r && r.anexo) ids.push(r.anexo); });
+  (st.referencias || []).forEach(r => (r.imagens || []).forEach(i => ids.push(i)));
+  for (const id of ids) {
+    try { await window.anexoExcluir(st.anexosDe, id); } catch (e) { console.error('Erro ao apagar anexo', id, e); }
+  }
+}
+
+function erroAnexo(e) {
+  console.error(e);
+  const m = (e && e.message) || String(e);
+  if (m === 'sem-nome') return;
+  const permissao = /permission|insufficient/i.test(m);
+  alert('Não consegui salvar a imagem: ' + (permissao
+    ? 'o Firebase recusou (permissão). Confira as regras do Firestore para o caminho fichas/{id}/anexos/{id}.'
+    : m));
+}
+
+// ---- Compressão de imagem no navegador (cabe no limite de 1 MB por documento do Firestore) ----
+function lerArquivoComoDataUrl(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = () => rej(new Error('Não consegui ler o arquivo'));
+    fr.readAsDataURL(file);
+  });
+}
+
+function carregarImagem(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => rej(new Error('Esse arquivo não é uma imagem válida'));
+    img.src = src;
+  });
+}
+
+async function comprimirImagem(file, maxLado, qualidade) {
+  const img = await carregarImagem(await lerArquivoComoDataUrl(file));
+  const LIMITE = 900000; // caracteres do data URL (~900 KB)
+  let escala = Math.min(1, maxLado / Math.max(img.naturalWidth, img.naturalHeight));
+  for (let tentativa = 0; tentativa < 6; tentativa++) {
+    const w = Math.max(1, Math.round(img.naturalWidth * escala));
+    const h = Math.max(1, Math.round(img.naturalHeight * escala));
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext('2d');
+    let q = qualidade;
+    for (let i = 0; i < 4; i++) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      let url = c.toDataURL('image/webp', q);
+      if (!url.startsWith('data:image/webp')) { // navegador sem WebP: usa JPEG com fundo branco
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'source-over';
+        url = c.toDataURL('image/jpeg', q);
+      }
+      if (url.length <= LIMITE) return url;
+      q -= 0.12;
+    }
+    escala *= 0.8;
+  }
+  throw new Error('A imagem é grande demais, mesmo depois de reduzida.');
+}
+
+function escolherImagens(multiplo, aoEscolher) {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.multiple = !!multiplo;
+  inp.onchange = () => aoEscolher(Array.from(inp.files || []));
+  inp.click();
+}
+
+function soImagens(files) {
+  return Array.from(files || []).filter(f => f && f.type && f.type.startsWith('image/'));
+}
+
+// ---- Colar (Ctrl+V) e arrastar ----
+let alvoColar = null; // { tipo: 'editor' } ou { tipo: 'retrato', i }
+
+document.addEventListener('paste', async (e) => {
+  if (!alvoColar) return;
+  const files = soImagens(e.clipboardData && e.clipboardData.files);
+  if (!files.length) return;
+  e.preventDefault();
+  if (alvoColar.tipo === 'editor') await adicionarImagensRascunho(files);
+  else if (alvoColar.tipo === 'retrato') await definirRetrato(alvoColar.i, files[0]);
+});
+
+// ---- Lightbox (imagem em tela cheia, clique alterna zoom) ----
+function abrirLightbox(url) {
+  const lb = document.getElementById('lightbox');
+  const im = lb.querySelector('img');
+  im.src = url;
+  im.classList.remove('zoom');
+  lb.scrollTop = 0;
+  lb.classList.add('aberto');
+}
+function fecharLightbox() {
+  document.getElementById('lightbox').classList.remove('aberto');
+}
+
+// ---- Retratos (duas versões do personagem) ----
+function renderRetratos() {
+  const grid = document.getElementById('retratosGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  RETRATOS.forEach((r, i) => {
+    const d = document.createElement('div');
+    d.className = 'retrato';
+    d.innerHTML = `
+      <div class="retrato-img" tabindex="0" title="Clique para ampliar · Ctrl+V cola uma imagem · arraste um arquivo aqui"><span class="retrato-vazio">＋ Adicionar foto<br><small>(clique, cole ou arraste)</small></span></div>
+      <input type="text" class="retrato-rotulo" value="${escapeAttr(r.rotulo)}" placeholder="Nome da versão">
+      <div class="retrato-acoes">
+        <button class="small-btn" data-acao="trocar">Trocar foto</button>
+        <button class="small-btn remove-btn" data-acao="remover">✕ Remover</button>
+      </div>`;
+    const caixa = d.querySelector('.retrato-img');
+
+    caixa.addEventListener('click', () => {
+      if (!RETRATOS[i].anexo) { escolherImagens(false, fs => fs[0] && definirRetrato(i, fs[0])); return; }
+      obterAnexo(RETRATOS[i].anexo).then(url => { if (url) abrirLightbox(url); });
+    });
+    const marcar = () => { if (!RASCUNHO) { alvoColar = { tipo: 'retrato', i }; caixa.classList.add('alvo'); } };
+    const desmarcar = () => { if (alvoColar && alvoColar.tipo === 'retrato' && alvoColar.i === i) alvoColar = null; caixa.classList.remove('alvo'); };
+    caixa.addEventListener('pointerenter', marcar);
+    caixa.addEventListener('pointerleave', desmarcar);
+    caixa.addEventListener('focus', marcar);
+    caixa.addEventListener('blur', desmarcar);
+    caixa.addEventListener('dragover', ev => ev.preventDefault());
+    caixa.addEventListener('drop', ev => {
+      ev.preventDefault();
+      const fs = soImagens(ev.dataTransfer && ev.dataTransfer.files);
+      if (fs.length) definirRetrato(i, fs[0]);
+    });
+
+    d.querySelector('[data-acao="trocar"]').addEventListener('click', () => escolherImagens(false, fs => fs[0] && definirRetrato(i, fs[0])));
+    d.querySelector('[data-acao="remover"]').addEventListener('click', () => removerRetrato(i));
+    d.querySelector('.retrato-rotulo').addEventListener('input', ev => { RETRATOS[i].rotulo = ev.target.value; saveState(); });
+    grid.appendChild(d);
+
+    if (r.anexo) {
+      caixa.innerHTML = '<span class="retrato-vazio">Carregando…</span>';
+      obterAnexo(r.anexo).then(url => {
+        if (!caixa.isConnected) return;
+        if (url) {
+          caixa.innerHTML = '';
+          const im = document.createElement('img');
+          im.src = url;
+          im.alt = r.rotulo || 'Retrato';
+          caixa.appendChild(im);
+        } else {
+          caixa.innerHTML = '<span class="retrato-vazio">⚠ Não consegui carregar a imagem</span>';
+        }
+      });
+    }
+  });
+}
+
+async function definirRetrato(i, file) {
+  if (!paiAnexos()) return;
+  try {
+    flashIndicator('Enviando foto…');
+    const url = await comprimirImagem(file, 1000, 0.85);
+    const antigo = RETRATOS[i].anexo;
+    const id = novoId('ret');
+    await guardarAnexo(id, url);
+    RETRATOS[i].anexo = id;
+    if (antigo) apagarAnexo(antigo);
+    renderRetratos();
+    saveState();
+    flashIndicator('Foto salva ✓');
+  } catch (e) {
+    erroAnexo(e);
+  }
+}
+
+function removerRetrato(i) {
+  if (!RETRATOS[i].anexo) return;
+  if (!confirm('Remover esta foto?')) return;
+  apagarAnexo(RETRATOS[i].anexo);
+  RETRATOS[i].anexo = '';
+  renderRetratos();
+  saveState();
+}
+
+// ---- Cartões de referência: lista ----
+function cartaoPorId(id) {
+  return id ? REFS.find(r => r.id === id) : undefined;
+}
+
+function renderRefs() {
+  const lista = document.getElementById('refsLista');
+  if (lista) {
+    const filtro = (document.getElementById('refsFiltro').value || '').trim().toLowerCase();
+    const itens = REFS.filter(r => !filtro || (r.titulo + ' ' + r.categoria + ' ' + r.texto).toLowerCase().includes(filtro));
+    if (!REFS.length) {
+      lista.innerHTML = '<div class="ref-vazio">Nenhum cartão ainda. Use "+ Novo cartão" (ou o 📎 ao lado de uma arma ou da raça) para guardar textos e imagens de homebrew.</div>';
+    } else if (!itens.length) {
+      lista.innerHTML = '<div class="ref-vazio">Nada encontrado.</div>';
+    } else {
+      lista.innerHTML = '';
+      itens.forEach(r => {
+        const d = document.createElement('div');
+        d.className = 'ref-item';
+        d.innerHTML = `<span class="ref-cat">${escapeHtml(r.categoria)}</span><span class="ref-titulo">${escapeHtml(r.titulo)}</span>
+          <button class="small-btn" data-acao="abrir">Abrir</button><button class="small-btn" style="background:#6a7a64" data-acao="editar">✎</button>`;
+        d.querySelector('.ref-titulo').addEventListener('click', () => abrirCartao(r.id));
+        d.querySelector('[data-acao="abrir"]').addEventListener('click', () => abrirCartao(r.id));
+        d.querySelector('[data-acao="editar"]').addEventListener('click', () => editarCartao(r.id));
+        lista.appendChild(d);
+      });
+    }
+  }
+  atualizarBotoesRef();
+}
+
+// ---- Editor de cartão (janela) ----
+let RASCUNHO = null;
+
+function editarCartao(id, prefill, aoSalvar) {
+  const base = cartaoPorId(id);
+  const p = prefill || {};
+  RASCUNHO = {
+    id: base ? base.id : null,
+    imagens: base ? base.imagens.map(x => ({ id: x, url: null, novo: false })) : [],
+    removidos: [],
+    aoSalvar: aoSalvar || null
+  };
+  const sel = document.getElementById('edCategoria');
+  sel.innerHTML = CATEGORIAS_REF.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+  document.getElementById('edTituloModal').textContent = base ? 'Editar cartão' : 'Novo cartão';
+  document.getElementById('edTitulo').value = base ? base.titulo : (p.titulo || '');
+  sel.value = base ? base.categoria : (p.categoria || 'Outro');
+  document.getElementById('edOrigem').value = base ? base.origem : '';
+  document.getElementById('edTexto').value = base ? base.texto : '';
+  document.getElementById('edExcluir').style.display = base ? '' : 'none';
+  renderThumbsRascunho();
+  document.getElementById('edModal').classList.add('aberto');
+  alvoColar = { tipo: 'editor' };
+  document.getElementById('edTitulo').focus();
+}
+
+function fecharEditor() {
+  document.getElementById('edModal').classList.remove('aberto');
+  RASCUNHO = null;
+  alvoColar = null;
+}
+
+function renderThumbsRascunho() {
+  const box = document.getElementById('edImgs');
+  box.innerHTML = '';
+  if (!RASCUNHO) return;
+  RASCUNHO.imagens.forEach((im, idx) => {
+    const t = document.createElement('div');
+    t.className = 'ed-thumb';
+    t.innerHTML = '<button title="Remover imagem">✕</button>';
+    t.querySelector('button').addEventListener('click', () => {
+      if (!im.novo) RASCUNHO.removidos.push(im.id);
+      RASCUNHO.imagens.splice(idx, 1);
+      renderThumbsRascunho();
+    });
+    box.appendChild(t);
+    const mostrar = (url) => {
+      if (!url || !t.isConnected) return;
+      const el = document.createElement('img');
+      el.src = url;
+      el.style.cursor = 'zoom-in';
+      el.addEventListener('click', () => abrirLightbox(url));
+      t.insertBefore(el, t.firstChild);
+    };
+    if (im.url) mostrar(im.url);
+    else obterAnexo(im.id).then(url => { im.url = url; mostrar(url); });
+  });
+}
+
+async function adicionarImagensRascunho(files) {
+  if (!RASCUNHO) return;
+  const rascunho = RASCUNHO;
+  for (const f of soImagens(files)) {
+    try {
+      flashIndicator('Preparando imagem…');
+      const url = await comprimirImagem(f, 2000, 0.85);
+      if (RASCUNHO !== rascunho) return; // editor foi fechado no meio
+      rascunho.imagens.push({ id: novoId('img'), url, novo: true });
+      renderThumbsRascunho();
+    } catch (e) {
+      alert('Não consegui usar a imagem: ' + e.message);
+    }
+  }
+}
+
+function escolherImagensEditor() {
+  escolherImagens(true, fs => adicionarImagensRascunho(fs));
+}
+
+async function salvarCartao() {
+  const d = RASCUNHO;
+  if (!d) return;
+  const titulo = document.getElementById('edTitulo').value.trim();
+  if (!titulo) { alert('Dê um título ao cartão.'); return; }
+  const btn = document.getElementById('edSalvar');
+  btn.disabled = true;
+  btn.textContent = 'Salvando…';
+  try {
+    const novos = d.imagens.filter(x => x.novo);
+    if (novos.length && !paiAnexos()) throw new Error('sem-nome');
+    for (const x of novos) { await guardarAnexo(x.id, x.url); x.novo = false; }
+    for (const id of d.removidos) await apagarAnexo(id);
+    d.removidos = [];
+    const dados = {
+      id: d.id || novoId('ref'),
+      titulo,
+      categoria: document.getElementById('edCategoria').value,
+      origem: document.getElementById('edOrigem').value.trim(),
+      texto: document.getElementById('edTexto').value,
+      imagens: d.imagens.map(x => x.id)
+    };
+    const i = REFS.findIndex(r => r.id === dados.id);
+    if (i >= 0) REFS[i] = dados; else REFS.push(dados);
+    const aoSalvar = d.aoSalvar;
+    fecharEditor();
+    renderRefs();
+    renderPainel();
+    saveState();
+    if (aoSalvar) aoSalvar(dados.id);
+  } catch (e) {
+    erroAnexo(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salvar';
+  }
+}
+
+async function excluirCartao() {
+  const d = RASCUNHO;
+  if (!d || !d.id) return;
+  const c = cartaoPorId(d.id);
+  if (!c || !confirm(`Excluir o cartão "${c.titulo}" e as imagens dele?`)) return;
+  for (const id of c.imagens) await apagarAnexo(id);
+  REFS = REFS.filter(r => r.id !== c.id);
+  document.querySelectorAll('#attackTable tbody tr').forEach(tr => { if (tr.dataset.ref === c.id) tr.dataset.ref = ''; });
+  Object.keys(REFS_FIXAS).forEach(k => { if (REFS_FIXAS[k] === c.id) REFS_FIXAS[k] = ''; });
+  fecharEditor();
+  renderRefs();
+  renderPainel();
+  saveState();
+}
+
+// ---- Painel lateral (abas com até 4 cartões abertos) ----
+let ABERTOS = [];
+let ATIVO = null;
+
+function abrirCartao(id) {
+  if (!cartaoPorId(id)) return;
+  if (!ABERTOS.includes(id)) {
+    ABERTOS.push(id);
+    if (ABERTOS.length > 4) ABERTOS.shift();
+  }
+  ATIVO = id;
+  renderPainel();
+}
+
+function fecharAba(id) {
+  ABERTOS = ABERTOS.filter(x => x !== id);
+  if (ATIVO === id) ATIVO = ABERTOS[ABERTOS.length - 1] || null;
+  renderPainel();
+}
+
+function fecharPainel() {
+  ABERTOS = [];
+  ATIVO = null;
+  renderPainel();
+}
+
+function formatarInline(s) {
+  return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+// Linhas iniciadas por "# " viram seções que abrem e fecham
+function renderTexto(texto) {
+  const secoes = [];
+  let atual = { titulo: null, linhas: [] };
+  const fechar = () => { if (atual.titulo !== null || atual.linhas.some(l => l.trim())) secoes.push(atual); };
+  String(texto || '').split('\n').forEach(l => {
+    const m = l.match(/^#{1,3}\s+(.*)$/);
+    if (m) { fechar(); atual = { titulo: m[1], linhas: [] }; }
+    else atual.linhas.push(l);
+  });
+  fechar();
+  const abrir = secoes.filter(s => s.titulo !== null).length <= 4;
+  return secoes.map(s => {
+    const corpo = `<div class="pr-texto">${formatarInline(s.linhas.join('\n').trim())}</div>`;
+    return s.titulo === null ? corpo
+      : `<details class="pr-secao"${abrir ? ' open' : ''}><summary>${escapeHtml(s.titulo)}</summary>${corpo}</details>`;
+  }).join('');
+}
+
+function renderPainel() {
+  const p = document.getElementById('painelRef');
+  if (!p) return;
+  ABERTOS = ABERTOS.filter(id => cartaoPorId(id));
+  if (!ABERTOS.length) {
+    p.classList.remove('aberto');
+    document.body.classList.remove('painel-aberto');
+    return;
+  }
+  if (!ABERTOS.includes(ATIVO)) ATIVO = ABERTOS[ABERTOS.length - 1];
+  p.classList.add('aberto');
+  document.body.classList.add('painel-aberto');
+
+  const abas = document.getElementById('prAbas');
+  abas.innerHTML = '';
+  ABERTOS.forEach(id => {
+    const c = cartaoPorId(id);
+    const b = document.createElement('button');
+    b.className = 'pr-aba' + (id === ATIVO ? ' ativa' : '');
+    b.innerHTML = `${escapeHtml(c.titulo)}<span class="x" title="Fechar">✕</span>`;
+    b.addEventListener('click', ev => {
+      if (ev.target.classList.contains('x')) fecharAba(id);
+      else { ATIVO = id; renderPainel(); }
+    });
+    abas.appendChild(b);
+  });
+
+  const c = cartaoPorId(ATIVO);
+  const origem = c.origem
+    ? (urlSegura(c.origem) ? `<a href="${escapeAttr(c.origem)}" target="_blank" rel="noopener noreferrer">Abrir site original ↗</a>` : `<span>${escapeHtml(c.origem)}</span>`)
+    : '';
+  const corpo = document.getElementById('prCorpo');
+  corpo.innerHTML = `
+    <div class="pr-topo"><h2>${escapeHtml(c.titulo)}</h2><span class="ref-cat">${escapeHtml(c.categoria)}</span></div>
+    <div class="pr-acoes">
+      <button class="small-btn" data-acao="editar">✎ Editar</button>
+      <button class="small-btn" style="background:#6a7a64" data-acao="expandir">Expandir tudo</button>
+      <button class="small-btn" style="background:#6a7a64" data-acao="recolher">Recolher tudo</button>
+      ${origem}
+    </div>
+    ${renderTexto(c.texto)}
+    <div class="pr-imgs">${c.imagens.map(id => `<div class="pr-img" data-anexo="${escapeAttr(id)}"><span>Carregando imagem…</span></div>`).join('')}</div>`;
+  corpo.scrollTop = 0;
+
+  const cartaoAtivo = ATIVO;
+  corpo.querySelectorAll('.pr-img').forEach(box => {
+    obterAnexo(box.dataset.anexo).then(url => {
+      if (ATIVO !== cartaoAtivo || !box.isConnected) return;
+      if (!url) { box.innerHTML = '<span>⚠ Não consegui carregar esta imagem</span>'; return; }
+      box.innerHTML = '';
+      const im = document.createElement('img');
+      im.src = url;
+      im.addEventListener('click', () => abrirLightbox(url));
+      box.appendChild(im);
+    });
+  });
+  corpo.querySelector('[data-acao="editar"]').addEventListener('click', () => editarCartao(cartaoAtivo));
+  corpo.querySelector('[data-acao="expandir"]').addEventListener('click', () => corpo.querySelectorAll('details').forEach(d => { d.open = true; }));
+  corpo.querySelector('[data-acao="recolher"]').addEventListener('click', () => corpo.querySelectorAll('details').forEach(d => { d.open = false; }));
+}
+
+// ---- Vínculos (botão 📎) ----
+// Clique: abre o cartão vinculado (ou o menu, se ainda não houver). Botão direito / segurar: menu.
+const REFS_FIXAS_CFG = {
+  raca: { categoria: 'Raça', titulo: () => document.getElementById('raceInput').value.trim() },
+  especial: { categoria: 'Poder', titulo: () => document.getElementById('charClass').value.trim() }
+};
+
+function slotAtaque(btn) {
+  const tr = btn.closest('tr');
+  return {
+    get: () => tr.dataset.ref || '',
+    set: v => { tr.dataset.ref = v; atualizarBotoesRef(); saveState(); },
+    categoria: 'Arma',
+    titulo: () => (tr.querySelector('textarea') ? tr.querySelector('textarea').value.trim() : '')
+  };
+}
+
+function slotFixo(nome) {
+  const cfg = REFS_FIXAS_CFG[nome];
+  return {
+    get: () => REFS_FIXAS[nome] || '',
+    set: v => { REFS_FIXAS[nome] = v; atualizarBotoesRef(); saveState(); },
+    categoria: cfg.categoria,
+    titulo: cfg.titulo
+  };
+}
+
+function cliqueRef(btn, slot) {
+  const id = slot.get();
+  if (id && cartaoPorId(id)) abrirCartao(id);
+  else abrirMenuRef(btn, slot);
+}
+function cliqueRefAtaque(btn) { cliqueRef(btn, slotAtaque(btn)); }
+function menuRefAtaque(btn, ev) { ev.preventDefault(); abrirMenuRef(btn, slotAtaque(btn)); }
+function cliqueRefFixo(btn, nome) { cliqueRef(btn, slotFixo(nome)); }
+function menuRefFixo(btn, nome, ev) { ev.preventDefault(); abrirMenuRef(btn, slotFixo(nome)); }
+
+function atualizarBotoesRef() {
+  document.querySelectorAll('#attackTable tbody tr').forEach(tr => {
+    const b = tr.querySelector('.ref-btn');
+    if (b) b.classList.toggle('ligado', !!cartaoPorId(tr.dataset.ref));
+  });
+  [['btnRefRaca', 'raca'], ['btnRefEspecial', 'especial']].forEach(([idBtn, nome]) => {
+    const b = document.getElementById(idBtn);
+    if (b) b.classList.toggle('ligado', !!cartaoPorId(REFS_FIXAS[nome]));
+  });
+}
+
+function fecharMenuRef() {
+  const m = document.getElementById('menuRef');
+  if (m) m.remove();
+}
+
+function abrirMenuRef(btn, slot) {
+  fecharMenuRef();
+  const atual = cartaoPorId(slot.get());
+  const sugestao = slot.titulo ? slot.titulo() : '';
+  const ordenados = REFS.slice().sort((a, b) => (b.categoria === slot.categoria) - (a.categoria === slot.categoria));
+  let html = '';
+  if (atual) html += `<button data-a="abrir"><b>Abrir:</b> ${escapeHtml(atual.titulo)}</button>`;
+  html += '<div class="menu-sep">Vincular a</div>';
+  html += ordenados.length
+    ? ordenados.map(r => `<button data-a="vincular" data-id="${escapeAttr(r.id)}">${escapeHtml(r.titulo)}<small>${escapeHtml(r.categoria)}</small></button>`).join('')
+    : '<div class="menu-vazio">Nenhum cartão ainda</div>';
+  html += `<button data-a="novo">＋ Novo cartão${sugestao ? ` "${escapeHtml(sugestao)}"` : ''}</button>`;
+  if (atual) html += '<button data-a="desvincular">Desvincular</button>';
+
+  const m = document.createElement('div');
+  m.id = 'menuRef';
+  m.className = 'menu-ref';
+  m.innerHTML = html;
+  document.body.appendChild(m);
+  const r = btn.getBoundingClientRect();
+  m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - m.offsetWidth - 8)) + 'px';
+  m.style.top = Math.min(r.bottom + 4, Math.max(8, window.innerHeight - m.offsetHeight - 8)) + 'px';
+
+  m.addEventListener('click', ev => {
+    const b = ev.target.closest('button');
+    if (!b) return;
+    const a = b.dataset.a;
+    fecharMenuRef();
+    if (a === 'abrir') abrirCartao(atual.id);
+    else if (a === 'vincular') { slot.set(b.dataset.id); abrirCartao(b.dataset.id); }
+    else if (a === 'desvincular') slot.set('');
+    else if (a === 'novo') editarCartao(null, { titulo: sugestao, categoria: slot.categoria }, id => slot.set(id));
+  });
+  setTimeout(() => {
+    const fora = ev => { if (!m.contains(ev.target)) { fecharMenuRef(); document.removeEventListener('pointerdown', fora, true); } };
+    document.addEventListener('pointerdown', fora, true);
+  }, 0);
+}
+
+// ---- Arrastar imagens para dentro do editor + atalhos de teclado ----
+(function () {
+  const drop = document.getElementById('edDrop');
+  if (drop) {
+    drop.addEventListener('dragover', ev => { ev.preventDefault(); drop.classList.add('sobre'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('sobre'));
+    drop.addEventListener('drop', ev => {
+      ev.preventDefault();
+      drop.classList.remove('sobre');
+      adicionarImagensRascunho(ev.dataTransfer && ev.dataTransfer.files);
+    });
+  }
+  const lb = document.getElementById('lightbox');
+  if (lb) {
+    lb.addEventListener('click', ev => {
+      if (ev.target.tagName === 'IMG') ev.target.classList.toggle('zoom');
+      else fecharLightbox();
+    });
+  }
+  document.addEventListener('keydown', ev => {
+    if (ev.key !== 'Escape') return;
+    if (document.getElementById('lightbox').classList.contains('aberto')) fecharLightbox();
+    else if (document.getElementById('menuRef')) fecharMenuRef();
+    else if (RASCUNHO) fecharEditor();
+  });
+})();
 
 /* ---------------------------------------------------------
    INICIALIZAÇÃO
@@ -1696,11 +2567,6 @@ if (embeddedState) {
     // ============================================
     // FUNÇÃO: Pegar ID da ficha
     // ============================================
-    // ID do documento a partir do nome ("/" não é permitido em IDs do Firestore)
-    function idDaFicha(nome) {
-      return String(nome).toLowerCase().replace(/\s+/g, '_').replace(/\//g, '-');
-    }
-
     function getSheetId(silencioso) {
       const name = document.getElementById('charName').value;
       if (!name || name.trim() === '') {
@@ -1738,6 +2604,20 @@ if (embeddedState) {
         flashIndicator('Erro ao salvar!');
         return false;
       }
+    };
+
+    // ============================================
+    // ANEXOS (imagens): fichas/{pai}/anexos/{id}  ->  { data: 'data:image/webp;base64,...' }
+    // ============================================
+    window.anexoSalvar = async function(pai, id, dataUrl) {
+      await setDoc(doc(db, 'fichas', pai, 'anexos', id), { data: dataUrl, atualizadoEm: new Date().toISOString() });
+    };
+    window.anexoCarregar = async function(pai, id) {
+      const snap = await getDoc(doc(db, 'fichas', pai, 'anexos', id));
+      return snap.exists() ? snap.data().data : null;
+    };
+    window.anexoExcluir = async function(pai, id) {
+      await deleteDoc(doc(db, 'fichas', pai, 'anexos', id));
     };
 
     // ============================================
@@ -1964,8 +2844,9 @@ window.carregarFichaPorId = async function(fichaId) {
       // Não deixa sobrescrever sem avisar uma ficha que já existe com esse nome
       try {
         const existente = await getDoc(doc(db, 'fichas', idDaFicha(nome)));
-        if (existente.exists() && !confirm(`Já existe um personagem chamado "${nome.trim()}".\n\nCriar uma ficha nova vai SUBSTITUIR a antiga. Continuar?`)) {
-          return;
+        if (existente.exists()) {
+          if (!confirm(`Já existe um personagem chamado "${nome.trim()}".\n\nCriar uma ficha nova vai SUBSTITUIR a antiga (e apagar as imagens dela). Continuar?`)) return;
+          await apagarAnexosDoEstado(existente.data());
         }
       } catch (e) {
         console.error('Erro ao verificar ficha existente:', e);
@@ -2001,6 +2882,17 @@ window.carregarFichaPorId = async function(fichaId) {
         document.querySelectorAll('.spell-cards').forEach(el => { el.innerHTML = ''; });
         document.getElementById('historyDiv').innerHTML = '';
         resetAttackRows();
+
+        // v1.2: referências, retratos e anexos
+        ANEXOS_DE = null;
+        REFS = [];
+        REFS_FIXAS = { raca: '', especial: '' };
+        RETRATOS = [{ rotulo: 'Versão 1', anexo: '' }, { rotulo: 'Versão 2', anexo: '' }];
+        ABERTOS = [];
+        ATIVO = null;
+        renderPainel();
+        renderRetratos();
+        renderRefs();
 
         document.getElementById('charName').value = nome.trim();
         document.getElementById('charName2').value = nome.trim();
@@ -2040,6 +2932,7 @@ window.carregarFichaPorId = async function(fichaId) {
       if (!confirmar2) return;
       
       try {
+        await apagarAnexosDoEstado(collectState());
         const docRef = doc(db, 'fichas', fichaId);
         await deleteDoc(docRef);
         
