@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.6 -->
+<!-- (VERSÃO ATUAL) 1.7 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -1088,7 +1088,7 @@
         <div class="field" style="flex:1"><label>Categoria</label><select id="edCategoria"></select></div>
       </div>
       <div class="field"><label>Link de origem (opcional)</label><input id="edOrigem" type="text" placeholder="https://..."></div>
-      <div class="field"><label>Texto (linhas começando com # viram seções que abrem e fecham — e cada seção pode ser vinculada sozinha ao 📎 como subcartão; **negrito** funciona)</label>
+      <div class="field"><label>Texto (linhas começando com # viram seções que abrem e fecham — e cada seção pode ser vinculada sozinha ao 📎 como subcartão; uma linha só com # encerra a seção; **negrito** funciona)</label>
         <textarea id="edTexto" class="freeform" style="min-height:220px;" placeholder="Cole aqui o texto da homebrew.&#10;&#10;# Habilidades&#10;**Golpe Estendido.** Você pode usar..."></textarea></div>
       <div class="field"><label>Imagens (cole com Ctrl+V, arraste ou escolha arquivos)</label>
         <div class="ed-drop" id="edDrop"><div class="ed-thumbs" id="edImgs"></div>
@@ -1105,7 +1105,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.6
+    // (VERSÃO ATUAL) 1.7
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1122,7 +1122,8 @@
     //       ataques em cartões, Combate/Recursos/Efeitos/Ataques no topo).
     // 1.5 - Modo Claro (azul e branco) com botão na barra do topo; a escolha fica salva no aparelho.
     // 1.6 - Subcartões: o 📎 pode vincular só uma seção (# Título) de um cartão grande; o painel mostra só aquela parte.
-    const FICHA_VERSAO = '1.6';
+    // 1.7 - Uma linha só com # encerra o subcartão (o texto abaixo dela não entra mais nele).
+    const FICHA_VERSAO = '1.7';
 
     // Modo claro / escuro: a escolha fica guardada neste aparelho (localStorage).
     function atualizarBotaoTema() {
@@ -2566,8 +2567,9 @@ function renderTexto(texto, soSecao) {
   let atual = { titulo: null, linhas: [] };
   const fechar = () => { if (atual.titulo !== null || atual.linhas.some(l => l.trim())) secoes.push(atual); };
   String(texto || '').split('\n').forEach(l => {
-    const m = l.match(/^#{1,3}\s+(.*)$/);
-    if (m) { fechar(); atual = { titulo: m[1], linhas: [] }; }
+    const m = l.match(/^#{1,3}\s+(.*\S.*)$/);
+    if (/^#{1,3}\s*$/.test(l)) { fechar(); atual = { titulo: null, linhas: [] }; } // "#" sozinho encerra a seção
+    else if (m) { fechar(); atual = { titulo: m[1], linhas: [] }; }
     else atual.linhas.push(l);
   });
   fechar();
