@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.2 -->
+<!-- (VERSÃO ATUAL) 1.3 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -655,6 +655,75 @@
       body.painel-aberto { padding-right: 0; }
     }
 
+    /* ---------- Recursos, efeitos ativos e retratos extras (v1.3) ---------- */
+    .rec-topo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; }
+    .rec-dica { font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; color: #6a7a64; flex: 1 1 220px; }
+    .rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .recurso-tile, .efeito-tile {
+      border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--paper-dark);
+      min-width: 0;
+    }
+    .rt-topo, .et-topo { display: flex; gap: 4px; align-items: center; }
+    .rt-nome, .et-nome {
+      flex: 1; min-width: 0; border: none; border-bottom: 1px solid var(--line); background: transparent;
+      font-family: inherit; font-size: 13.5px; font-weight: bold; color: var(--moss); padding: 2px 0;
+    }
+    .recurso-tile .ref-btn, .efeito-tile .ref-btn { padding: 3px 6px; font-size: 12px; }
+    .rt-linha2 { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .rt-pips-box { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .pip {
+      width: 17px; height: 17px; border-radius: 50%; border: 2px solid var(--moss); background: #fff;
+      padding: 0; cursor: pointer;
+    }
+    .pip.cheio { background: var(--moss); }
+    .pip:hover { box-shadow: 0 0 0 2px rgba(143, 168, 118, .5); }
+    .rt-txt { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; color: var(--moss); }
+    .rt-passo {
+      font-family: Arial, Helvetica, sans-serif; font-size: 12px; border: 1px solid var(--sage); background: #fff;
+      color: var(--moss); border-radius: 6px; padding: 2px 8px; cursor: pointer;
+    }
+    .rt-recarga, .et-novo select {
+      font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; border: 1px solid var(--line); border-radius: 5px;
+      background: #fff; color: var(--ink); padding: 2px 3px; margin-left: auto; max-width: 100%;
+    }
+    .rt-info { font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; color: #5c6b56; margin-top: 3px; min-height: 1px; }
+    .rt-detalhes { margin-top: 6px; border-top: 1px dashed var(--line); padding-top: 6px; }
+    .rt-detalhes label { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: var(--moss); }
+    .rt-detalhes input[type="text"], .rt-detalhes input[type="number"], .et-novo input, .et-dur {
+      border: 1px solid var(--line); border-radius: 5px; background: #fff; font-family: inherit; font-size: 12px; padding: 2px 5px;
+      min-width: 0;
+    }
+    .rt-nota { width: 100%; margin: 4px 0; }
+    .rt-base { width: 52px; }
+    .rt-aj { display: flex; gap: 4px; align-items: center; margin-bottom: 3px; }
+    .rt-aj .aj-nome { flex: 1; }
+    .rt-aj .aj-val, .rt-novo-aj .aj-val, .et-novo .mod-val { width: 46px; flex: none; }
+    .rt-novo-aj .small-btn, .et-novo .small-btn { white-space: nowrap; padding: 5px 8px; flex: none; }
+    .et-novo select { flex: 1; min-width: 0; margin-left: 0; }
+    .rt-aj input[type="checkbox"] { flex: none; }
+    .rt-novo-aj, .et-novo { display: flex; gap: 4px; align-items: center; margin-top: 4px; }
+    .rt-novo-aj .aj-nome { flex: 1; }
+    .efeito-tile.off { opacity: .6; }
+    .efeito-tile.on { border-color: var(--moss); background: #e3ecdd; }
+    .et-dur { width: 60px; flex: none; }
+    .et-desc {
+      display: block; width: 100%; margin-top: 4px; border: 1px solid var(--line); border-radius: 5px; background: #fff;
+      font-family: inherit; font-size: 12px; padding: 3px 5px; resize: none; overflow: hidden; line-height: 1.3;
+    }
+    .et-mods { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+    .chip-mod {
+      font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; font-weight: bold; color: #fff; background: var(--sage);
+      border-radius: 10px; padding: 2px 4px 2px 8px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .chip-mod.neg { background: #a15c4a; }
+    .chip-mod button { border: none; background: rgba(0, 0, 0, .2); color: #fff; border-radius: 50%; width: 15px; height: 15px; line-height: 15px; font-size: 9px; padding: 0; cursor: pointer; }
+    .eff-badge {
+      font-family: Arial, Helvetica, sans-serif; font-size: 10px; font-weight: bold; color: #2f6f9f; margin-top: 1px;
+      display: none;
+    }
+    .attr-block .eff-badge { text-align: center; }
+    @media (max-width: 700px) { .rec-grid { grid-template-columns: 1fr; } }
+
     @media print {
       body {
         background: #fff;
@@ -816,6 +885,27 @@
 
         </div>
 
+        <div class="box" id="boxRecursos">
+          <h3>Recursos &amp; Usos</h3>
+          <div class="rec-topo">
+            <button class="small-btn" onclick="descansar('curto')" title="Recarrega os recursos de descanso curto (e os espaços de Pacto do Bruxo)">☀ Descanso curto</button>
+            <button class="small-btn" onclick="descansar('longo')" title="Recarrega todos os recursos e os espaços de magia">🌙 Descanso longo</button>
+            <span style="flex:1"></span>
+            <button class="small-btn" style="background:#6a7a64" onclick="sugerirRecursosDoBotao()" title="Adiciona os recursos da classe escrita no campo Classe">⚡ Da classe</button>
+            <button class="small-btn" onclick="adicionarRecurso()">+ Recurso</button>
+          </div>
+          <div class="rec-grid" id="recursosGrid"></div>
+        </div>
+
+        <div class="box" id="boxEfeitos">
+          <h3>Efeitos Ativos</h3>
+          <div class="rec-topo">
+            <span class="rec-dica">Os bônus dos efeitos ligados são somados por fora e aparecem como "→ valor". O número que você digita (inclusive bônus que o mestre deu) nunca é alterado.</span>
+            <button class="small-btn" onclick="adicionarEfeito()">+ Efeito</button>
+          </div>
+          <div class="rec-grid" id="efeitosGrid"></div>
+        </div>
+
         <div class="box">
           <h3>Ataques &amp; Armas</h3>
           <table class="data-table attack-table" id="attackTable">
@@ -889,6 +979,7 @@
     <div class="box" id="boxRetratos">
       <h3>Retratos do Personagem</h3>
       <div class="retratos-grid" id="retratosGrid"></div>
+      <div class="table-actions"><button class="small-btn" onclick="adicionarRetrato()">+ Adicionar retrato</button></div>
     </div>
 
     <div class="box history-box">
@@ -931,7 +1022,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.2
+    // (VERSÃO ATUAL) 1.3
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -941,7 +1032,10 @@
     //       Nova ficha limpa tudo e avisa se o nome já existir; Iniciativa acompanha Destreza; código morto removido.
     // 1.2 - Referências: cartões com texto longo e imagens (homebrew, poderes), painel lateral com abas e zoom,
     //       botão 📎 nos ataques, na raça e no recurso especial; dois retratos do personagem (página 2).
-    const FICHA_VERSAO = '1.2';
+    // 1.3 - Recursos & Usos (bolinhas, recarga, ajustes, descanso curto/longo, recursos por classe); Efeitos Ativos que somam
+    //       por fora em CA, iniciativa, deslocamento, atributos, PV máx. e proficiência (sem alterar o valor digitado);
+    //       retratos: adicionar (até 8) e excluir espaços.
+    const FICHA_VERSAO = '1.3';
 
     // Enquanto uma ficha está sendo carregada, nada é salvo (evita gravar dados pela metade).
     let carregando = false;
@@ -954,6 +1048,9 @@
     let RETRATOS = [{ rotulo: 'Versão 1', anexo: '' }, { rotulo: 'Versão 2', anexo: '' }];
     const CATEGORIAS_REF = ['Arma', 'Raça', 'Poder', 'Talento', 'Item', 'Outro'];
     const cacheAnexos = new Map();
+    // v1.3
+    let RECURSOS = [];
+    let EFEITOS = [];
 
     // ID do documento a partir do nome ("/" não é permitido em IDs do Firestore)
     function idDaFicha(nome) {
@@ -1109,6 +1206,7 @@
         applyCasterTable();
       }
 
+      if (deUsuario === true) sugerirRecursosDaClasse(classeId);
       atualizarVisibilidadeSlots();
       preencherTabelaProgressao(classeId);
       classeAplicada = classeId;
@@ -1342,9 +1440,14 @@
       return Math.max(1, Math.min(20, isNaN(n) ? 1 : n));
     }
 
-    function getAttrVal(key) {
+    // Valor digitado (base) e valor efetivo (base + efeitos ligados)
+    function getAttrBase(key) {
       const el = document.getElementById('attr_' + key);
       return el ? parseInt(el.value || 10, 10) : 10;
+    }
+
+    function getAttrVal(key) {
+      return getAttrBase(key) + bonusEfeitos(key);
     }
 
     /* ---------------------------------------------------------
@@ -1357,7 +1460,8 @@
       div.innerHTML = `
         <label>${a.key}</label>
         <input type="number" id="attr_${a.key}" value="10" min="1" max="30" oninput="onAttrChange()">
-        <div class="attr-mod" id="mod_${a.key}">+0</div>`;
+        <div class="attr-mod" id="mod_${a.key}">+0</div>
+        <div class="eff-badge" id="eff_${a.key}"></div>`;
       attrGrid.appendChild(div);
     });
 
@@ -1466,7 +1570,7 @@
     --------------------------------------------------------- */
     function onAttrChange() {
       const level = getLevel();
-      const pb = profBonus(level);
+      const pb = profBonusEf(level);
 
       ATTRS.forEach(a => {
         const m = mod(getAttrVal(a.key));
@@ -1484,6 +1588,7 @@
 
       updateSpellDC();
       calcularIniciativa();
+      atualizarBadges();
       saveState();
     }
 
@@ -1502,12 +1607,13 @@
 
     function onInitiativeInput(el) {
       el.dataset.manual = el.value.trim() === '' ? '' : '1';
+      atualizarBadges();
       saveState();
     }
 
     function onLevelChange() {
       const level = getLevel();
-      const pb = profBonus(level);
+      const pb = profBonusEf(level);
       document.getElementById('profBonusDisplay').textContent = fmt(pb);
 
       for (let l = 1; l <= 20; l++) {
@@ -1516,6 +1622,7 @@
       }
 
       applyCasterTable();
+      renderRecursos();
       onAttrChange();
     }
 
@@ -1537,7 +1644,7 @@
     --------------------------------------------------------- */
     function updateSpellDC() {
       const level = getLevel();
-      const pb = profBonus(level);
+      const pb = profBonusEf(level);
       const ability = document.getElementById('castAbility').value;
       const m = mod(getAttrVal(ability));
       document.getElementById('spellDC').value = 8 + pb + m;
@@ -1676,6 +1783,10 @@
       state.referencias = REFS.map(r => ({ id: r.id, titulo: r.titulo, categoria: r.categoria, origem: r.origem, texto: r.texto, imagens: r.imagens.slice() }));
       state.refsFixas = { raca: REFS_FIXAS.raca || '', especial: REFS_FIXAS.especial || '' };
 
+      // v1.3: recursos e efeitos
+      state.recursos = RECURSOS.map(r => ({ id: r.id, nome: r.nome, base: Number(r.base) || 0, gastos: Number(r.gastos) || 0, recarga: r.recarga, nota: r.nota, ref: r.ref || '', auto: r.auto || '', ajustes: r.ajustes.map(a => ({ id: a.id, nome: a.nome, valor: Number(a.valor) || 0, ativo: !!a.ativo })) }));
+      state.efeitos = EFEITOS.map(e => ({ id: e.id, nome: e.nome, desc: e.desc, duracao: e.duracao, ativo: !!e.ativo, mods: e.mods.map(m => ({ alvo: m.alvo, valor: Number(m.valor) || 0 })) }));
+
       state.spells = {};
       SPELL_LEVELS.forEach((label, idx) => {
         const container = document.getElementById('spellcards_' + idx);
@@ -1725,6 +1836,17 @@
     }
 
     function aplicarEstado(state) {
+      // v1.3: efeitos e recursos primeiro, para os cálculos já considerarem os efeitos ligados
+      EFEITOS = Array.isArray(state.efeitos) ? state.efeitos.map(e => ({
+        id: String(e.id), nome: e.nome || '', desc: e.desc || '', duracao: e.duracao || '', ativo: !!e.ativo,
+        mods: Array.isArray(e.mods) ? e.mods.map(m => ({ alvo: m.alvo, valor: Number(m.valor) || 0 })) : []
+      })) : [];
+      RECURSOS = Array.isArray(state.recursos) ? state.recursos.map(r => ({
+        id: String(r.id), nome: r.nome || '', base: Number(r.base) || 0, gastos: Number(r.gastos) || 0,
+        recarga: r.recarga || 'longo', nota: r.nota || '', ref: r.ref || '', auto: r.auto || '',
+        ajustes: Array.isArray(r.ajustes) ? r.ajustes.map(a => ({ id: String(a.id), nome: a.nome || '', valor: Number(a.valor) || 0, ativo: !!a.ativo })) : []
+      })) : [];
+
       SIMPLE_IDS.forEach(id => {
         if (!(id in state)) return;
         const el = document.getElementById(id);
@@ -1802,10 +1924,9 @@
       updatePreparedCount();
       // v1.2: referências, retratos e anexos
       ANEXOS_DE = state.anexosDe || null;
-      RETRATOS = [0, 1].map(i => {
-        const r = (state.retratos && state.retratos[i]) || {};
-        return { rotulo: r.rotulo || ('Versão ' + (i + 1)), anexo: r.anexo || '' };
-      });
+      RETRATOS = (Array.isArray(state.retratos) ? state.retratos.slice(0, MAX_RETRATOS) : [{}, {}]).map((r, i) => ({
+        rotulo: (r && r.rotulo) || ('Versão ' + (i + 1)), anexo: (r && r.anexo) || ''
+      }));
       REFS = Array.isArray(state.referencias) ? state.referencias.map(r => ({
         id: String(r.id), titulo: r.titulo || '', categoria: r.categoria || 'Outro', origem: r.origem || '',
         texto: r.texto || '', imagens: Array.isArray(r.imagens) ? r.imagens.map(String) : []
@@ -1816,6 +1937,9 @@
       renderPainel();
       renderRetratos();
       renderRefs();
+      renderRecursos();
+      renderEfeitos();
+      atualizarBadges();
 
       // Ficha recém-carregada: se a classe for reconhecida a tabela é refeita; se não, mantém o que foi salvo
       classeAplicada = null;
@@ -1841,7 +1965,7 @@
       else doc.body.appendChild(stateScript);
 
       ['attrGrid', 'saveList', 'skillList', 'slotBody', 'progressionBody',
-        'spellbookGrid', 'retratosGrid', 'refsLista', 'prAbas', 'prCorpo'
+        'spellbookGrid', 'retratosGrid', 'refsLista', 'prAbas', 'prCorpo', 'recursosGrid', 'efeitosGrid'
       ].forEach(id => {
         const el = doc.querySelector('#' + id);
         if (el) el.innerHTML = '';
@@ -2040,7 +2164,7 @@ function fecharLightbox() {
 function renderRetratos() {
   const grid = document.getElementById('retratosGrid');
   if (!grid) return;
-  grid.innerHTML = '';
+  grid.innerHTML = RETRATOS.length ? '' : '<div class="ref-vazio" style="grid-column:1/-1">Nenhum retrato. Use "+ Adicionar retrato".</div>';
   RETRATOS.forEach((r, i) => {
     const d = document.createElement('div');
     d.className = 'retrato';
@@ -2049,7 +2173,8 @@ function renderRetratos() {
       <input type="text" class="retrato-rotulo" value="${escapeAttr(r.rotulo)}" placeholder="Nome da versão">
       <div class="retrato-acoes">
         <button class="small-btn" data-acao="trocar">Trocar foto</button>
-        <button class="small-btn remove-btn" data-acao="remover">✕ Remover</button>
+        <button class="small-btn remove-btn" data-acao="remover">Remover foto</button>
+        <button class="small-btn remove-btn" data-acao="excluir" title="Apaga o espaço e a imagem">✕ Excluir retrato</button>
       </div>`;
     const caixa = d.querySelector('.retrato-img');
 
@@ -2072,6 +2197,7 @@ function renderRetratos() {
 
     d.querySelector('[data-acao="trocar"]').addEventListener('click', () => escolherImagens(false, fs => fs[0] && definirRetrato(i, fs[0])));
     d.querySelector('[data-acao="remover"]').addEventListener('click', () => removerRetrato(i));
+    d.querySelector('[data-acao="excluir"]').addEventListener('click', () => excluirRetrato(i));
     d.querySelector('.retrato-rotulo').addEventListener('input', ev => { RETRATOS[i].rotulo = ev.target.value; saveState(); });
     grid.appendChild(d);
 
@@ -2277,6 +2403,8 @@ async function excluirCartao() {
   REFS = REFS.filter(r => r.id !== c.id);
   document.querySelectorAll('#attackTable tbody tr').forEach(tr => { if (tr.dataset.ref === c.id) tr.dataset.ref = ''; });
   Object.keys(REFS_FIXAS).forEach(k => { if (REFS_FIXAS[k] === c.id) REFS_FIXAS[k] = ''; });
+  RECURSOS.forEach(r => { if (r.ref === c.id) r.ref = ''; });
+  renderRecursos();
   fecharEditor();
   renderRefs();
   renderPainel();
@@ -2435,6 +2563,11 @@ function atualizarBotoesRef() {
     const b = tr.querySelector('.ref-btn');
     if (b) b.classList.toggle('ligado', !!cartaoPorId(tr.dataset.ref));
   });
+  document.querySelectorAll('.recurso-tile').forEach(t => {
+    const r = RECURSOS.find(x => x.id === t.dataset.id);
+    const b = t.querySelector('.rt-ref');
+    if (r && b) b.classList.toggle('ligado', !!cartaoPorId(r.ref));
+  });
   [['btnRefRaca', 'raca'], ['btnRefEspecial', 'especial']].forEach(([idBtn, nome]) => {
     const b = document.getElementById(idBtn);
     if (b) b.classList.toggle('ligado', !!cartaoPorId(REFS_FIXAS[nome]));
@@ -2509,6 +2642,392 @@ function abrirMenuRef(btn, slot) {
     if (document.getElementById('lightbox').classList.contains('aberto')) fecharLightbox();
     else if (document.getElementById('menuRef')) fecharMenuRef();
     else if (RASCUNHO) fecharEditor();
+  });
+})();
+
+/* ---------------------------------------------------------
+   RECURSOS & USOS, EFEITOS ATIVOS E RETRATOS EXTRAS (v1.3)
+   Regra de ouro: efeitos e ajustes são SOMADOS POR FORA. O número que você digita
+   (inclusive bônus que o mestre deu) nunca é alterado por eles.
+--------------------------------------------------------- */
+const ALVOS_EFEITO = [
+  ['CA', 'CA'], ['INI', 'Iniciativa'], ['DESL', 'Deslocamento (m)'],
+  ['FOR', 'Força'], ['DES', 'Destreza'], ['CON', 'Constituição'], ['INT', 'Inteligência'], ['SAB', 'Sabedoria'], ['CAR', 'Carisma'],
+  ['PV', 'PV Máximo'], ['PROF', 'Bônus de Proficiência']
+];
+const RECARGAS = [['longo', 'Descanso longo'], ['curto', 'Descanso curto'], ['manual', 'Manual'], ['nenhuma', 'Sem recarga']];
+
+// Recursos que a ficha sabe calcular sozinha por classe/nível
+const RECURSOS_AUTO = {
+  furia: { nome: 'Fúria', recarga: 'longo', max: l => (PROGRESSAO.barbaro.t(l) === '∞' ? 99 : PROGRESSAO.barbaro.t(l)), info: l => 'Dano de Fúria ' + PROGRESSAO.barbaro.s(l) + (l >= 20 ? ' · usos ilimitados' : '') },
+  ki: { nome: 'Pontos de Ki', recarga: 'curto', max: l => (l < 2 ? 0 : l), info: l => (l < 2 ? 'Disponível a partir do nível 2' : '') },
+  imposicao: { nome: 'Imposição de Mãos (PV)', recarga: 'longo', max: l => 5 * l, info: () => 'Reserva de PV para curar' },
+  canalizar: { nome: 'Canalizar Divindade', recarga: 'curto', max: l => (l >= 18 ? 3 : l >= 6 ? 2 : l >= 2 ? 1 : 0), info: () => '' },
+  forma_selvagem: { nome: 'Forma Selvagem', recarga: 'curto', max: l => (l >= 2 ? 2 : 0), info: () => '' },
+  surto: { nome: 'Surto de Ação', recarga: 'curto', max: l => (l >= 17 ? 2 : l >= 2 ? 1 : 0), info: () => '' },
+  retomar: { nome: 'Retomar o Fôlego', recarga: 'curto', max: () => 1, info: () => '' },
+  indomavel: { nome: 'Indomável', recarga: 'longo', max: l => (l >= 17 ? 3 : l >= 13 ? 2 : l >= 9 ? 1 : 0), info: () => '' },
+  feitico_pontos: { nome: 'Pontos de Feitiçaria', recarga: 'longo', max: l => (l >= 2 ? l : 0), info: () => '' },
+  recup_arcana: { nome: 'Recuperação Arcana', recarga: 'longo', max: () => 1, info: () => '' }
+};
+const RECURSOS_POR_CLASSE = {
+  barbaro: ['furia'], monge: ['ki'], paladino: ['imposicao'], clerigo: ['canalizar'], druida: ['forma_selvagem'],
+  guerreiro: ['retomar', 'surto', 'indomavel'], feiticeiro: ['feitico_pontos'], mago: ['recup_arcana']
+};
+
+function bonusEfeitos(alvo) {
+  let soma = 0;
+  EFEITOS.forEach(e => {
+    if (!e.ativo) return;
+    e.mods.forEach(m => { if (m.alvo === alvo) soma += Number(m.valor) || 0; });
+  });
+  return soma;
+}
+
+function profBonusEf(level) {
+  return profBonus(level) + bonusEfeitos('PROF');
+}
+
+function sinal(n) { return (n >= 0 ? '+' : '−') + Math.abs(n); }
+
+// ---- Valores "com efeitos" mostrados ao lado dos campos (os campos em si não mudam) ----
+function atualizarBadges() {
+  const set = (id, txt) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = txt;
+    el.style.display = txt ? 'block' : 'none';
+  };
+  const num = id => parseInt(document.getElementById(id).value, 10);
+  const comBonus = (campo, alvo) => {
+    const b = bonusEfeitos(alvo);
+    const v = num(campo);
+    return b && !isNaN(v) ? `→ ${v + b} (efeitos ${sinal(b)})` : '';
+  };
+  set('eff_ca', comBonus('ca', 'CA'));
+  set('eff_ini', comBonus('initiative', 'INI'));
+  set('eff_hpmax', comBonus('hpMax', 'PV'));
+
+  const bd = bonusEfeitos('DESL');
+  const m = String(document.getElementById('speed').value).match(/-?\d+(?:[.,]\d+)?/);
+  if (bd && m) {
+    const n = parseFloat(m[0].replace(',', '.')) + bd;
+    const resto = String(document.getElementById('speed').value).slice(m.index + m[0].length).trim() || 'm';
+    set('eff_speed', `→ ${String(Math.round(n * 100) / 100).replace('.', ',')}${resto} (efeitos ${sinal(bd)})`);
+  } else {
+    set('eff_speed', '');
+  }
+
+  ATTRS.forEach(a => {
+    const b = bonusEfeitos(a.key);
+    set('eff_' + a.key, b ? `→ ${getAttrBase(a.key) + b} (${sinal(b)})` : '');
+  });
+}
+
+// ---- Recursos & Usos ----
+function recursoMax(r) {
+  const lvl = getLevel();
+  const base = r.auto && RECURSOS_AUTO[r.auto] ? RECURSOS_AUTO[r.auto].max(lvl) : (Number(r.base) || 0);
+  const ajuste = r.ajustes.filter(a => a.ativo).reduce((s, a) => s + (Number(a.valor) || 0), 0);
+  return { base, ajuste, max: Math.max(0, base + ajuste) };
+}
+
+const DETALHES_ABERTOS = new Set();
+
+function adicionarRecurso(dados) {
+  const r = Object.assign({ id: novoId('rec'), nome: '', base: 1, gastos: 0, recarga: 'longo', nota: '', ref: '', auto: '', ajustes: [] }, dados || {});
+  RECURSOS.push(r);
+  if (!dados) DETALHES_ABERTOS.add(r.id);
+  renderRecursos();
+  saveState();
+}
+
+function sugerirRecursosDaClasse(classeId, avisar) {
+  const chaves = RECURSOS_POR_CLASSE[classeId] || [];
+  let novos = 0;
+  chaves.forEach(k => {
+    if (RECURSOS.some(r => r.auto === k)) return;
+    RECURSOS.push({ id: novoId('rec'), nome: RECURSOS_AUTO[k].nome, base: 0, gastos: 0, recarga: RECURSOS_AUTO[k].recarga, nota: '', ref: '', auto: k, ajustes: [] });
+    novos++;
+  });
+  if (novos) { renderRecursos(); saveState(); }
+  if (avisar) flashIndicator(novos ? `${novos} recurso(s) da classe adicionados` : 'Nenhum recurso novo para esta classe');
+}
+
+function sugerirRecursosDoBotao() {
+  const classeId = detectarClasse(document.getElementById('charClass').value);
+  if (!classeId) { alert('Preencha o campo Classe (ex.: Bárbaro) para eu sugerir os recursos.'); return; }
+  sugerirRecursosDaClasse(classeId, true);
+}
+
+function descansar(tipo) {
+  RECURSOS.forEach(r => {
+    if (r.recarga === 'curto' || (tipo === 'longo' && r.recarga === 'longo')) r.gastos = 0;
+  });
+  let slots = false;
+  if (tipo === 'longo' || document.getElementById('casterType').value === 'pact') {
+    for (let i = 1; i <= 9; i++) {
+      const mx = document.getElementById('slotMax_' + i).value;
+      const cur = document.getElementById('slotCur_' + i);
+      if (cur.value !== mx) { cur.value = mx; slots = true; }
+    }
+  }
+  renderRecursos();
+  saveState();
+  flashIndicator(tipo === 'longo' ? 'Descanso longo: recursos' + (slots ? ' e espaços de magia' : '') + ' recarregados' : 'Descanso curto: recursos recarregados');
+}
+
+function slotRecurso(r) {
+  return {
+    get: () => r.ref || '',
+    set: v => { r.ref = v; atualizarBotoesRef(); saveState(); },
+    categoria: 'Poder',
+    titulo: () => r.nome
+  };
+}
+
+function renderRecursos() {
+  const g = document.getElementById('recursosGrid');
+  if (!g) return;
+  g.innerHTML = '';
+  if (!RECURSOS.length) {
+    g.innerHTML = '<div class="ref-vazio" style="grid-column:1/-1">Nenhum recurso ainda. Use "+ Recurso" ou "⚡ Da classe".</div>';
+    return;
+  }
+  RECURSOS.forEach(r => g.appendChild(criarTileRecurso(r)));
+  atualizarBotoesRef();
+}
+
+function criarTileRecurso(r) {
+  const tile = document.createElement('div');
+  tile.className = 'recurso-tile';
+  tile.dataset.id = r.id;
+  const auto = r.auto && RECURSOS_AUTO[r.auto];
+  tile.innerHTML = `
+    <div class="rt-topo">
+      <input class="rt-nome" type="text" value="${escapeAttr(r.nome)}" placeholder="Nome do recurso">
+      <button class="ref-btn rt-ref" title="Cartão com a descrição · clique: abrir · botão direito/segurar: trocar vínculo">📎</button>
+      <button class="ref-btn rt-cfg" title="Ajustes, base, recarga e anotação">⚙</button>
+      <button class="ref-btn rt-del" title="Excluir recurso">✕</button>
+    </div>
+    <div class="rt-linha2">
+      <div class="rt-pips-box"></div><span class="rt-txt"></span>
+      <select class="rt-recarga" title="Quando recarrega">${RECARGAS.map(([v, n]) => `<option value="${v}"${v === r.recarga ? ' selected' : ''}>${n}</option>`).join('')}</select>
+    </div>
+    <div class="rt-info"></div>
+    <div class="rt-detalhes"${DETALHES_ABERTOS.has(r.id) ? '' : ' hidden'}>
+      ${auto ? `<div class="rt-info">Base calculada pela classe e nível. Use ajustes para somar ou subtrair usos.</div>`
+             : `<label>Usos base <input class="rt-base" type="number" min="0" value="${Number(r.base) || 0}"></label>`}
+      <input class="rt-nota" type="text" value="${escapeAttr(r.nota)}" placeholder="Anotação curta (ex.: dura até o próximo turno)">
+      <label>Ajustes (reduções e ampliações)</label>
+      <div class="rt-ajustes"></div>
+      <div class="rt-novo-aj"><input class="aj-nome" type="text" placeholder="Ex.: Eclipse"><input class="aj-val" type="number" value="1"><button class="small-btn" data-a="novo-aj">+ Ajuste</button></div>
+    </div>`;
+
+  tile.querySelector('.rt-nome').addEventListener('input', e => { r.nome = e.target.value; saveState(); });
+  tile.querySelector('.rt-nota').addEventListener('input', e => { r.nota = e.target.value; saveState(); });
+  tile.querySelector('.rt-recarga').addEventListener('change', e => { r.recarga = e.target.value; saveState(); });
+  const base = tile.querySelector('.rt-base');
+  if (base) base.addEventListener('change', e => { r.base = Number(e.target.value) || 0; atualizarTileRecurso(tile, r); saveState(); });
+
+  const btnRef = tile.querySelector('.rt-ref');
+  btnRef.addEventListener('click', () => cliqueRef(btnRef, slotRecurso(r)));
+  btnRef.addEventListener('contextmenu', e => { e.preventDefault(); abrirMenuRef(btnRef, slotRecurso(r)); });
+  tile.querySelector('.rt-cfg').addEventListener('click', () => {
+    const det = tile.querySelector('.rt-detalhes');
+    det.hidden = !det.hidden;
+    if (det.hidden) DETALHES_ABERTOS.delete(r.id); else DETALHES_ABERTOS.add(r.id);
+  });
+  tile.querySelector('.rt-del').addEventListener('click', () => {
+    if (!confirm(`Excluir o recurso "${r.nome || 'sem nome'}"?`)) return;
+    RECURSOS = RECURSOS.filter(x => x.id !== r.id);
+    renderRecursos();
+    saveState();
+  });
+  tile.querySelector('[data-a="novo-aj"]').addEventListener('click', () => {
+    const nome = tile.querySelector('.aj-nome').value.trim();
+    const valor = Number(tile.querySelector('.aj-val').value);
+    if (!valor) { alert('Informe um valor diferente de zero (ex.: +1 ou −1).'); return; }
+    r.ajustes.push({ id: novoId('aj'), nome: nome || 'Ajuste', valor, ativo: true });
+    tile.querySelector('.aj-nome').value = '';
+    renderAjustes(tile, r);
+    atualizarTileRecurso(tile, r);
+    saveState();
+  });
+  renderAjustes(tile, r);
+  atualizarTileRecurso(tile, r);
+  return tile;
+}
+
+function renderAjustes(tile, r) {
+  const box = tile.querySelector('.rt-ajustes');
+  box.innerHTML = '';
+  r.ajustes.forEach(a => {
+    const d = document.createElement('div');
+    d.className = 'rt-aj';
+    d.innerHTML = `<input type="checkbox"${a.ativo ? ' checked' : ''} title="Ligado/desligado"><input class="aj-nome" type="text" value="${escapeAttr(a.nome)}"><input class="aj-val" type="number" value="${Number(a.valor) || 0}"><button class="ref-btn" title="Remover ajuste">✕</button>`;
+    const [chk, nome, val, del] = d.querySelectorAll('input, button');
+    chk.addEventListener('change', () => { a.ativo = chk.checked; atualizarTileRecurso(tile, r); saveState(); });
+    nome.addEventListener('input', () => { a.nome = nome.value; atualizarTileRecurso(tile, r); saveState(); });
+    val.addEventListener('change', () => { a.valor = Number(val.value) || 0; atualizarTileRecurso(tile, r); saveState(); });
+    del.addEventListener('click', () => { r.ajustes = r.ajustes.filter(x => x !== a); renderAjustes(tile, r); atualizarTileRecurso(tile, r); saveState(); });
+    box.appendChild(d);
+  });
+}
+
+function atualizarTileRecurso(tile, r) {
+  const { base, ajuste, max } = recursoMax(r);
+  r.gastos = Math.min(Math.max(0, Number(r.gastos) || 0), max);
+  const disp = max - r.gastos;
+  const box = tile.querySelector('.rt-pips-box');
+  box.innerHTML = '';
+  if (max <= 12) {
+    for (let i = 0; i < max; i++) {
+      const p = document.createElement('button');
+      p.className = 'pip' + (i < disp ? ' cheio' : '');
+      p.title = i < disp ? 'Clique para gastar um uso' : 'Clique para recuperar um uso';
+      p.addEventListener('click', () => {
+        r.gastos = i < disp ? r.gastos + 1 : Math.max(0, r.gastos - 1);
+        atualizarTileRecurso(tile, r);
+        saveState();
+      });
+      box.appendChild(p);
+    }
+  } else {
+    const menos = document.createElement('button');
+    menos.className = 'rt-passo';
+    menos.textContent = '−1';
+    menos.title = 'Gastar 1';
+    menos.addEventListener('click', () => { r.gastos = Math.min(max, r.gastos + 1); atualizarTileRecurso(tile, r); saveState(); });
+    const mais = document.createElement('button');
+    mais.className = 'rt-passo';
+    mais.textContent = '+1';
+    mais.title = 'Recuperar 1';
+    mais.addEventListener('click', () => { r.gastos = Math.max(0, r.gastos - 1); atualizarTileRecurso(tile, r); saveState(); });
+    box.append(menos, mais);
+  }
+  tile.querySelector('.rt-txt').textContent = `${disp}/${max}`;
+
+  const partes = [];
+  const auto = r.auto && RECURSOS_AUTO[r.auto];
+  if (auto && auto.info(getLevel())) partes.push(auto.info(getLevel()));
+  if (r.ajustes.some(a => a.ativo)) {
+    partes.push(`base ${base} ` + r.ajustes.filter(a => a.ativo).map(a => `${sinal(Number(a.valor) || 0)} ${a.nome}`).join(' '));
+  }
+  if (r.nota) partes.push(r.nota);
+  tile.querySelector('.rt-info').textContent = partes.join(' · ');
+}
+
+// ---- Efeitos Ativos ----
+function adicionarEfeito() {
+  EFEITOS.push({ id: novoId('efe'), nome: '', desc: '', duracao: '', ativo: false, mods: [] });
+  renderEfeitos();
+  saveState();
+}
+
+function renderEfeitos() {
+  const g = document.getElementById('efeitosGrid');
+  if (!g) return;
+  g.innerHTML = '';
+  if (!EFEITOS.length) {
+    g.innerHTML = '<div class="ref-vazio" style="grid-column:1/-1">Nenhum efeito. Cadastre bênçãos, maldições e bônus temporários e ligue quando estiverem valendo.</div>';
+    return;
+  }
+  EFEITOS.forEach(e => g.appendChild(criarTileEfeito(e)));
+  growAll();
+}
+
+function criarTileEfeito(e) {
+  const tile = document.createElement('div');
+  tile.className = 'efeito-tile ' + (e.ativo ? 'on' : 'off');
+  tile.innerHTML = `
+    <div class="et-topo">
+      <input type="checkbox" class="et-liga"${e.ativo ? ' checked' : ''} title="Ligar/desligar o efeito">
+      <input class="et-nome" type="text" value="${escapeAttr(e.nome)}" placeholder="Nome do efeito">
+      <input class="et-dur" type="text" value="${escapeAttr(e.duracao)}" placeholder="Duração">
+      <button class="ref-btn et-del" title="Excluir efeito">✕</button>
+    </div>
+    <textarea class="et-desc autogrow" rows="1" placeholder="Descrição curta (lembrete)">${escapeHtml(e.desc)}</textarea>
+    <div class="et-mods"></div>
+    <div class="et-novo">
+      <select>${ALVOS_EFEITO.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
+      <input class="mod-val" type="number" value="1">
+      <button class="small-btn">+ Bônus</button>
+    </div>`;
+
+  tile.querySelector('.et-nome').addEventListener('input', ev => { e.nome = ev.target.value; saveState(); });
+  tile.querySelector('.et-dur').addEventListener('input', ev => { e.duracao = ev.target.value; saveState(); });
+  const desc = tile.querySelector('.et-desc');
+  desc.addEventListener('input', ev => { e.desc = ev.target.value; autoGrow(desc); saveState(); });
+  tile.querySelector('.et-liga').addEventListener('change', ev => {
+    e.ativo = ev.target.checked;
+    tile.className = 'efeito-tile ' + (e.ativo ? 'on' : 'off');
+    onAttrChange(); // recalcula tudo com (ou sem) o efeito; os campos digitados não mudam
+  });
+  tile.querySelector('.et-del').addEventListener('click', () => {
+    if (!confirm(`Excluir o efeito "${e.nome || 'sem nome'}"?`)) return;
+    EFEITOS = EFEITOS.filter(x => x.id !== e.id);
+    renderEfeitos();
+    onAttrChange();
+  });
+  tile.querySelector('.et-novo button').addEventListener('click', () => {
+    const alvo = tile.querySelector('.et-novo select').value;
+    const valor = Number(tile.querySelector('.et-novo .mod-val').value);
+    if (!valor) { alert('Informe um valor diferente de zero (ex.: +1 ou −2).'); return; }
+    e.mods.push({ alvo, valor });
+    renderModsEfeito(tile, e);
+    onAttrChange();
+  });
+  renderModsEfeito(tile, e);
+  return tile;
+}
+
+function renderModsEfeito(tile, e) {
+  const box = tile.querySelector('.et-mods');
+  box.innerHTML = '';
+  e.mods.forEach(m => {
+    const nomeAlvo = (ALVOS_EFEITO.find(a => a[0] === m.alvo) || [m.alvo, m.alvo])[1];
+    const c = document.createElement('span');
+    c.className = 'chip-mod' + (m.valor < 0 ? ' neg' : '');
+    c.innerHTML = `${escapeHtml(nomeAlvo)} ${sinal(Number(m.valor) || 0)} <button title="Remover">✕</button>`;
+    c.querySelector('button').addEventListener('click', () => {
+      e.mods = e.mods.filter(x => x !== m);
+      renderModsEfeito(tile, e);
+      onAttrChange();
+    });
+    box.appendChild(c);
+  });
+}
+
+// ---- Retratos: adicionar e excluir espaços ----
+const MAX_RETRATOS = 8;
+
+function adicionarRetrato() {
+  if (RETRATOS.length >= MAX_RETRATOS) { alert(`O máximo é ${MAX_RETRATOS} retratos.`); return; }
+  RETRATOS.push({ rotulo: 'Versão ' + (RETRATOS.length + 1), anexo: '' });
+  renderRetratos();
+  saveState();
+}
+
+function excluirRetrato(i) {
+  const r = RETRATOS[i];
+  if (!r || !confirm(`Excluir o retrato "${r.rotulo || i + 1}"${r.anexo ? ' e a imagem dele' : ''}?`)) return;
+  if (r.anexo) apagarAnexo(r.anexo);
+  RETRATOS.splice(i, 1);
+  renderRetratos();
+  saveState();
+}
+
+// ---- Inicialização dos selos "→ valor com efeitos" ----
+(function () {
+  [['ca', 'eff_ca'], ['initiative', 'eff_ini'], ['speed', 'eff_speed'], ['hpMax', 'eff_hpmax']].forEach(([campo, idBadge]) => {
+    const el = document.getElementById(campo);
+    if (!el || document.getElementById(idBadge)) return;
+    const d = document.createElement('div');
+    d.className = 'eff-badge';
+    d.id = idBadge;
+    el.insertAdjacentElement('afterend', d);
+    el.addEventListener('input', atualizarBadges);
   });
 })();
 
@@ -2888,11 +3407,15 @@ window.carregarFichaPorId = async function(fichaId) {
         REFS = [];
         REFS_FIXAS = { raca: '', especial: '' };
         RETRATOS = [{ rotulo: 'Versão 1', anexo: '' }, { rotulo: 'Versão 2', anexo: '' }];
+        RECURSOS = [];
+        EFEITOS = [];
         ABERTOS = [];
         ATIVO = null;
         renderPainel();
         renderRetratos();
         renderRefs();
+        renderRecursos();
+        renderEfeitos();
 
         document.getElementById('charName').value = nome.trim();
         document.getElementById('charName2').value = nome.trim();
