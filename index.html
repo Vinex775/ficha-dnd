@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.5 -->
+<!-- (VERSÃO ATUAL) 1.6 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -677,6 +677,7 @@
       cursor: pointer; color: var(--ink); font-family: inherit; font-size: 13px;
     }
     .menu-ref button:hover { background: var(--paper-dark); }
+    .menu-ref button.sub { padding-left: 26px; font-size: 12px; color: var(--muted); }
     .menu-ref small { color: var(--muted); margin-left: 4px; }
     .menu-sep { padding: 7px 12px 3px; font-size: 10px; text-transform: uppercase; color: var(--moss); letter-spacing: .5px; border-top: 1px solid var(--line); }
     .menu-vazio { padding: 6px 12px 10px; color: var(--muted); font-size: 12px; }
@@ -1087,7 +1088,7 @@
         <div class="field" style="flex:1"><label>Categoria</label><select id="edCategoria"></select></div>
       </div>
       <div class="field"><label>Link de origem (opcional)</label><input id="edOrigem" type="text" placeholder="https://..."></div>
-      <div class="field"><label>Texto (linhas começando com # viram seções que abrem e fecham; **negrito** funciona)</label>
+      <div class="field"><label>Texto (linhas começando com # viram seções que abrem e fecham — e cada seção pode ser vinculada sozinha ao 📎 como subcartão; **negrito** funciona)</label>
         <textarea id="edTexto" class="freeform" style="min-height:220px;" placeholder="Cole aqui o texto da homebrew.&#10;&#10;# Habilidades&#10;**Golpe Estendido.** Você pode usar..."></textarea></div>
       <div class="field"><label>Imagens (cole com Ctrl+V, arraste ou escolha arquivos)</label>
         <div class="ed-drop" id="edDrop"><div class="ed-thumbs" id="edImgs"></div>
@@ -1104,7 +1105,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.5
+    // (VERSÃO ATUAL) 1.6
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1120,7 +1121,8 @@
     // 1.4 - Tema azul e preto; ícone de atalho (manifest + PNGs); layout de celular (tela cheia, uma coluna,
     //       ataques em cartões, Combate/Recursos/Efeitos/Ataques no topo).
     // 1.5 - Modo Claro (azul e branco) com botão na barra do topo; a escolha fica salva no aparelho.
-    const FICHA_VERSAO = '1.5';
+    // 1.6 - Subcartões: o 📎 pode vincular só uma seção (# Título) de um cartão grande; o painel mostra só aquela parte.
+    const FICHA_VERSAO = '1.6';
 
     // Modo claro / escuro: a escolha fica guardada neste aparelho (localStorage).
     function atualizarBotaoTema() {
@@ -2349,8 +2351,19 @@ function removerRetrato(i) {
 }
 
 // ---- Cartões de referência: lista ----
-function cartaoPorId(id) {
+// Um vínculo é "idDoCartao" ou "idDoCartao::Título da seção" (subcartão).
+function partesDeRef(ref) {
+  const t = String(ref || ''), i = t.indexOf('::');
+  return i < 0 ? { id: t, secao: '' } : { id: t.slice(0, i), secao: t.slice(i + 2) };
+}
+function cartaoPorId(ref) {
+  const id = partesDeRef(ref).id;
   return id ? REFS.find(r => r.id === id) : undefined;
+}
+function listarSecoes(texto) {
+  const out = [];
+  String(texto || '').split('\n').forEach(l => { const m = l.match(/^#{1,3}\s+(.*)$/); if (m && m[1].trim()) out.push(m[1].trim()); });
+  return out;
 }
 
 function renderRefs() {
@@ -2503,9 +2516,9 @@ async function excluirCartao() {
   if (!c || !confirm(`Excluir o cartão "${c.titulo}" e as imagens dele?`)) return;
   for (const id of c.imagens) await apagarAnexo(id);
   REFS = REFS.filter(r => r.id !== c.id);
-  document.querySelectorAll('#attackTable tbody tr').forEach(tr => { if (tr.dataset.ref === c.id) tr.dataset.ref = ''; });
-  Object.keys(REFS_FIXAS).forEach(k => { if (REFS_FIXAS[k] === c.id) REFS_FIXAS[k] = ''; });
-  RECURSOS.forEach(r => { if (r.ref === c.id) r.ref = ''; });
+  document.querySelectorAll('#attackTable tbody tr').forEach(tr => { if (partesDeRef(tr.dataset.ref).id === c.id) tr.dataset.ref = ''; });
+  Object.keys(REFS_FIXAS).forEach(k => { if (partesDeRef(REFS_FIXAS[k]).id === c.id) REFS_FIXAS[k] = ''; });
+  RECURSOS.forEach(r => { if (partesDeRef(r.ref).id === c.id) r.ref = ''; });
   renderRecursos();
   fecharEditor();
   renderRefs();
@@ -2517,8 +2530,12 @@ async function excluirCartao() {
 let ABERTOS = [];
 let ATIVO = null;
 
-function abrirCartao(id) {
+let PARTES = {}; // id do cartão -> título da seção mostrada sozinha ('' = cartão inteiro)
+function abrirCartao(ref, secao) {
+  const pr = partesDeRef(ref);
+  const id = pr.id;
   if (!cartaoPorId(id)) return;
+  PARTES[id] = secao !== undefined ? secao : pr.secao;
   if (!ABERTOS.includes(id)) {
     ABERTOS.push(id);
     if (ABERTOS.length > 4) ABERTOS.shift();
@@ -2544,7 +2561,7 @@ function formatarInline(s) {
 }
 
 // Linhas iniciadas por "# " viram seções que abrem e fecham
-function renderTexto(texto) {
+function renderTexto(texto, soSecao) {
   const secoes = [];
   let atual = { titulo: null, linhas: [] };
   const fechar = () => { if (atual.titulo !== null || atual.linhas.some(l => l.trim())) secoes.push(atual); };
@@ -2554,6 +2571,10 @@ function renderTexto(texto) {
     else atual.linhas.push(l);
   });
   fechar();
+  if (soSecao) {
+    const alvo = secoes.find(s => s.titulo !== null && s.titulo.trim() === soSecao);
+    if (alvo) return `<div class="pr-texto">${formatarInline(alvo.linhas.join('\n').trim())}</div>`;
+  }
   const abrir = secoes.filter(s => s.titulo !== null).length <= 4;
   return secoes.map(s => {
     const corpo = `<div class="pr-texto">${formatarInline(s.linhas.join('\n').trim())}</div>`;
@@ -2581,7 +2602,7 @@ function renderPainel() {
     const c = cartaoPorId(id);
     const b = document.createElement('button');
     b.className = 'pr-aba' + (id === ATIVO ? ' ativa' : '');
-    b.innerHTML = `${escapeHtml(c.titulo)}<span class="x" title="Fechar">✕</span>`;
+    b.innerHTML = `${escapeHtml(c.titulo)}${PARTES[id] ? ' › ' + escapeHtml(PARTES[id]) : ''}<span class="x" title="Fechar">✕</span>`;
     b.addEventListener('click', ev => {
       if (ev.target.classList.contains('x')) fecharAba(id);
       else { ATIVO = id; renderPainel(); }
@@ -2594,7 +2615,15 @@ function renderPainel() {
     ? (urlSegura(c.origem) ? `<a href="${escapeAttr(c.origem)}" target="_blank" rel="noopener noreferrer">Abrir site original ↗</a>` : `<span>${escapeHtml(c.origem)}</span>`)
     : '';
   const corpo = document.getElementById('prCorpo');
-  corpo.innerHTML = `
+  let parte = PARTES[ATIVO] || '';
+  if (parte && !listarSecoes(c.texto).includes(parte)) parte = ''; // seção renomeada/removida: mostra o cartão inteiro
+  corpo.innerHTML = parte ? `
+    <div class="pr-topo"><h2>${escapeHtml(parte)}</h2><span class="ref-cat">${escapeHtml(c.titulo)}</span></div>
+    <div class="pr-acoes">
+      <button class="small-btn" data-acao="editar">✎ Editar cartão</button>
+      <button class="small-btn" style="background:var(--btn2)" data-acao="inteiro">Ver cartão inteiro</button>
+    </div>
+    ${renderTexto(c.texto, parte)}` : `
     <div class="pr-topo"><h2>${escapeHtml(c.titulo)}</h2><span class="ref-cat">${escapeHtml(c.categoria)}</span></div>
     <div class="pr-acoes">
       <button class="small-btn" data-acao="editar">✎ Editar</button>
@@ -2619,8 +2648,10 @@ function renderPainel() {
     });
   });
   corpo.querySelector('[data-acao="editar"]').addEventListener('click', () => editarCartao(cartaoAtivo));
-  corpo.querySelector('[data-acao="expandir"]').addEventListener('click', () => corpo.querySelectorAll('details').forEach(d => { d.open = true; }));
-  corpo.querySelector('[data-acao="recolher"]').addEventListener('click', () => corpo.querySelectorAll('details').forEach(d => { d.open = false; }));
+  const bExp = corpo.querySelector('[data-acao="expandir"]'), bRec = corpo.querySelector('[data-acao="recolher"]'), bInt = corpo.querySelector('[data-acao="inteiro"]');
+  if (bExp) bExp.addEventListener('click', () => corpo.querySelectorAll('details').forEach(d => { d.open = true; }));
+  if (bRec) bRec.addEventListener('click', () => corpo.querySelectorAll('details').forEach(d => { d.open = false; }));
+  if (bInt) bInt.addEventListener('click', () => { PARTES[cartaoAtivo] = ''; renderPainel(); });
 }
 
 // ---- Vínculos (botão 📎) ----
@@ -2651,8 +2682,8 @@ function slotFixo(nome) {
 }
 
 function cliqueRef(btn, slot) {
-  const id = slot.get();
-  if (id && cartaoPorId(id)) abrirCartao(id);
+  const ref = slot.get();
+  if (ref && cartaoPorId(ref)) abrirCartao(ref);
   else abrirMenuRef(btn, slot);
 }
 function cliqueRefAtaque(btn) { cliqueRef(btn, slotAtaque(btn)); }
@@ -2687,10 +2718,12 @@ function abrirMenuRef(btn, slot) {
   const sugestao = slot.titulo ? slot.titulo() : '';
   const ordenados = REFS.slice().sort((a, b) => (b.categoria === slot.categoria) - (a.categoria === slot.categoria));
   let html = '';
-  if (atual) html += `<button data-a="abrir"><b>Abrir:</b> ${escapeHtml(atual.titulo)}</button>`;
+  const parteAtual = partesDeRef(slot.get()).secao;
+  if (atual) html += `<button data-a="abrir"><b>Abrir:</b> ${escapeHtml(atual.titulo)}${parteAtual ? ' › ' + escapeHtml(parteAtual) : ''}</button>`;
   html += '<div class="menu-sep">Vincular a</div>';
   html += ordenados.length
-    ? ordenados.map(r => `<button data-a="vincular" data-id="${escapeAttr(r.id)}">${escapeHtml(r.titulo)}<small>${escapeHtml(r.categoria)}</small></button>`).join('')
+    ? ordenados.map(r => `<button data-a="vincular" data-id="${escapeAttr(r.id)}">${escapeHtml(r.titulo)}<small>${escapeHtml(r.categoria)}</small></button>`
+        + listarSecoes(r.texto).map(t => `<button class="sub" data-a="vincular" data-id="${escapeAttr(r.id)}" data-secao="${escapeAttr(t)}">↳ ${escapeHtml(t)}</button>`).join('')).join('')
     : '<div class="menu-vazio">Nenhum cartão ainda</div>';
   html += `<button data-a="novo">＋ Novo cartão${sugestao ? ` "${escapeHtml(sugestao)}"` : ''}</button>`;
   if (atual) html += '<button data-a="desvincular">Desvincular</button>';
@@ -2709,8 +2742,8 @@ function abrirMenuRef(btn, slot) {
     if (!b) return;
     const a = b.dataset.a;
     fecharMenuRef();
-    if (a === 'abrir') abrirCartao(atual.id);
-    else if (a === 'vincular') { slot.set(b.dataset.id); abrirCartao(b.dataset.id); }
+    if (a === 'abrir') abrirCartao(slot.get());
+    else if (a === 'vincular') { const v = b.dataset.id + (b.dataset.secao ? '::' + b.dataset.secao : ''); slot.set(v); abrirCartao(v); }
     else if (a === 'desvincular') slot.set('');
     else if (a === 'novo') editarCartao(null, { titulo: sugestao, categoria: slot.categoria }, id => slot.set(id));
   });
