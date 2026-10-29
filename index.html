@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.4 -->
+<!-- (VERSÃO ATUAL) 1.5 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -12,6 +12,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#05070c">
+  <script>
+    try { if (localStorage.getItem('fichaTema') === 'claro') document.documentElement.setAttribute('data-tema', 'claro'); } catch (e) {}
+  </script>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -35,6 +38,15 @@
       --danger-text: #ff8f80;
       --btn2: #3a4a63;        /* botão secundário */
     }
+    /* ---------- Modo Claro (v1.5): só troca as variáveis ---------- */
+    :root[data-tema="claro"] {
+      color-scheme: light;
+      --moss: #1b4fa8; --btn: #1e5bb8; --sage: #5b9bd5; --paper: #ffffff; --paper-dark: #eef4fc; --ink: #0f1b2d;
+      --line: #cbd8ea; --field: #ffffff; --page: #f6f9fe; --bg: #e3ecf8; --muted: #55677f; --link: #1d5fd0;
+      --hl: #d9e8fb; --danger-text: #b3382a; --btn2: #55677f;
+    }
+    :root[data-tema="claro"] input::placeholder, :root[data-tema="claro"] textarea::placeholder { color: #8da0ba; }
+    :root[data-tema="claro"] .page { box-shadow: 0 4px 20px rgba(20, 50, 100, 0.12); }
     * {
       box-sizing: border-box;
     }
@@ -822,7 +834,7 @@
     }
 
     @media print {
-      :root {
+      :root, :root[data-tema="claro"] {
         color-scheme: light;
         --moss: #1e3a6e; --btn: #1e3a6e; --sage: #5b8bc4; --paper: #fff; --paper-dark: #eef3fa; --ink: #111;
         --line: #c8d3e3; --field: #fff; --page: #fff; --bg: #fff; --muted: #55627a; --link: #1e3a6e;
@@ -838,6 +850,7 @@
   <div class="save-bar">
     <span id="saveIndicator"></span>
     <span id="versaoFicha" style="color:#a9c7ee; font-size:11px; margin-left:auto;"></span>
+    <button class="small-btn" id="btnTema" onclick="alternarTema()" title="Alternar entre modo escuro e modo claro">☀️ Modo claro</button>
     <button class="small-btn" onclick="saveState(true)" style="background:#2563eb; color:white;">💾 Salvar</button>
     <button class="small-btn" onclick="window.carregarFirebase()" style="background:#1e3a6e; color:white;">📂 Carregar</button>
     <button class="small-btn" onclick="exportFilledHTML()" style="background:#38bdf8; color:#04121f;">📥 Baixar HTML</button>
@@ -846,7 +859,7 @@
 
   <!-- ============ TELA DE SELEÇÃO ============ -->
 <div id="telaSelecao" style="max-width:210mm; margin:0 auto 20px;">
-  <div style="background:linear-gradient(135deg, #0f1b33, #0b1424); border-radius:12px; padding:30px 24px; border:2px solid var(--moss); box-shadow:0 2px 12px rgba(0,0,0,0.5);">
+  <div style="background:linear-gradient(135deg, var(--paper-dark), var(--paper)); border-radius:12px; padding:30px 24px; border:2px solid var(--moss); box-shadow:0 2px 12px rgba(0,0,0,0.5);">
     <h2 style="color:var(--moss); margin:0 0 20px 0; font-family:Arial,Helvetica,sans-serif; text-align:center; font-size:24px;">📂 Meus Personagens</h2>
     
     <!-- Lista de personagens -->
@@ -1091,7 +1104,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.4
+    // (VERSÃO ATUAL) 1.5
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1106,7 +1119,25 @@
     //       retratos: adicionar (até 8) e excluir espaços.
     // 1.4 - Tema azul e preto; ícone de atalho (manifest + PNGs); layout de celular (tela cheia, uma coluna,
     //       ataques em cartões, Combate/Recursos/Efeitos/Ataques no topo).
-    const FICHA_VERSAO = '1.4';
+    // 1.5 - Modo Claro (azul e branco) com botão na barra do topo; a escolha fica salva no aparelho.
+    const FICHA_VERSAO = '1.5';
+
+    // Modo claro / escuro: a escolha fica guardada neste aparelho (localStorage).
+    function atualizarBotaoTema() {
+      const claro = document.documentElement.getAttribute('data-tema') === 'claro';
+      const b = document.getElementById('btnTema');
+      if (b) b.textContent = claro ? '🌙 Modo escuro' : '☀️ Modo claro';
+      const m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', claro ? '#e3ecf8' : '#05070c');
+    }
+    function alternarTema() {
+      const claro = document.documentElement.getAttribute('data-tema') === 'claro';
+      if (claro) document.documentElement.removeAttribute('data-tema');
+      else document.documentElement.setAttribute('data-tema', 'claro');
+      try { localStorage.setItem('fichaTema', claro ? 'escuro' : 'claro'); } catch (e) {}
+      atualizarBotaoTema();
+    }
+    atualizarBotaoTema();
 
     // Enquanto uma ficha está sendo carregada, nada é salvo (evita gravar dados pela metade).
     let carregando = false;
