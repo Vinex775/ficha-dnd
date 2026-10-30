@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.7 -->
+<!-- (VERSÃO ATUAL) 1.8 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -593,7 +593,8 @@
       width: 100%; margin-top: 6px; border: none; border-bottom: 1px solid var(--line); background: transparent;
       font-family: inherit; font-size: 14px; text-align: center; color: var(--moss); font-weight: bold;
     }
-    .retrato-acoes { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+    .retratos-grid > * { min-width: 0; }
+    .retrato-acoes { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
 
     #painelRef {
       position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100vw); background: var(--paper);
@@ -812,6 +813,8 @@
       .spell-header-grid { grid-template-columns: 1fr 1fr; }
       .spellbook-grid { grid-template-columns: 1fr; }
       .retratos-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .retrato-acoes .small-btn { flex: 1 1 100%; padding: 7px 6px; }
+      #boxRetratos .table-actions { text-align: center; }
       /* Ataques: cada linha vira um cartão */
       table.attack-table, table.attack-table tbody { display: block; width: 100%; }
       table.attack-table thead { display: none; }
@@ -1105,7 +1108,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.7
+    // (VERSÃO ATUAL) 1.8
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1123,7 +1126,8 @@
     // 1.5 - Modo Claro (azul e branco) com botão na barra do topo; a escolha fica salva no aparelho.
     // 1.6 - Subcartões: o 📎 pode vincular só uma seção (# Título) de um cartão grande; o painel mostra só aquela parte.
     // 1.7 - Uma linha só com # encerra o subcartão (o texto abaixo dela não entra mais nele).
-    const FICHA_VERSAO = '1.7';
+    // 1.8 - Corrigido: botões dos retratos estouravam a tela no celular (agora quebram linha dentro de cada retrato).
+    const FICHA_VERSAO = '1.8';
 
     // Modo claro / escuro: a escolha fica guardada neste aparelho (localStorage).
     function atualizarBotaoTema() {
