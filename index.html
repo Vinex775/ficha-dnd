@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.8 -->
+<!-- (VERSÃO ATUAL) 1.9 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://*.firebaseio.com https://*.firebaseapp.com;
+  script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://*.firebaseio.com https://*.firebaseapp.com;
+  frame-src https://*.firebaseapp.com https://accounts.google.com;
   connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebaseapp.com wss://*.firebaseio.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data:;
@@ -47,6 +48,21 @@
     }
     :root[data-tema="claro"] input::placeholder, :root[data-tema="claro"] textarea::placeholder { color: #8da0ba; }
     :root[data-tema="claro"] .page { box-shadow: 0 4px 20px rgba(20, 50, 100, 0.12); }
+    /* ---------- Modo leitura (v1.9): quem não entrou com Google só consegue ver ---------- */
+    body.modo-leitura .so-editor,
+    body.modo-leitura #paginaFicha .small-btn,
+    body.modo-leitura #paginaFicha .x-btn,
+    body.modo-leitura #paginaFicha .add-spell-btn,
+    body.modo-leitura .retrato-acoes,
+    body.modo-leitura .recurso-tile .ref-btn:not(.rt-ref):not(.rt-cfg),
+    body.modo-leitura .efeito-tile .ref-btn,
+    body.modo-leitura .chip-mod button,
+    body.modo-leitura .rt-passo,
+    body.modo-leitura #painelRef [data-acao="editar"] { display: none !important; }
+    body.modo-leitura #paginaFicha select,
+    body.modo-leitura #paginaFicha input[type="number"],
+    body.modo-leitura #paginaFicha input[type="checkbox"],
+    body.modo-leitura #paginaFicha .pip { pointer-events: none; }
     * {
       box-sizing: border-box;
     }
@@ -853,12 +869,14 @@
   <!-- ============ BARRA DE SALVAR ============ -->
   <div class="save-bar">
     <span id="saveIndicator"></span>
+    <span id="modoInd" style="color:#a9c7ee; font-size:11px;"></span>
     <span id="versaoFicha" style="color:#a9c7ee; font-size:11px; margin-left:auto;"></span>
+    <button class="small-btn" id="btnLogin" onclick="window.modoLeitura ? entrarGoogle() : sairGoogle()" title="Entrar com Google para editar (só o dono)">🔑 Entrar (editar)</button>
     <button class="small-btn" id="btnTema" onclick="alternarTema()" title="Alternar entre modo escuro e modo claro">☀️ Modo claro</button>
-    <button class="small-btn" onclick="saveState(true)" style="background:#2563eb; color:white;">💾 Salvar</button>
-    <button class="small-btn" onclick="window.carregarFirebase()" style="background:#1e3a6e; color:white;">📂 Carregar</button>
+    <button class="small-btn so-editor" onclick="saveState(true)" style="background:#2563eb; color:white;">💾 Salvar</button>
+    <button class="small-btn so-editor" onclick="window.carregarFirebase()" style="background:#1e3a6e; color:white;">📂 Carregar</button>
     <button class="small-btn" onclick="exportFilledHTML()" style="background:#38bdf8; color:#04121f;">📥 Baixar HTML</button>
-    <button class="small-btn" onclick="excluirFichaAtual()" style="background:#a15c4a; color:white;">🗑️ Excluir</button>
+    <button class="small-btn so-editor" onclick="excluirFichaAtual()" style="background:#a15c4a; color:white;">🗑️ Excluir</button>
   </div>
 
   <!-- ============ TELA DE SELEÇÃO ============ -->
@@ -872,7 +890,7 @@
     </div>
     
     <!-- Botão Criar Novo -->
-    <div style="text-align:center; margin-top:20px;">
+    <div class="so-editor" style="text-align:center; margin-top:20px;">
       <button class="small-btn" onclick="criarNovaFicha()" style="background:#2563eb; color:white; padding:10px 30px; border-radius:8px; font-size:14px;">✨ Criar Novo Personagem</button>
     </div>
   </div>
@@ -1108,7 +1126,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.8
+    // (VERSÃO ATUAL) 1.9
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1127,7 +1145,38 @@
     // 1.6 - Subcartões: o 📎 pode vincular só uma seção (# Título) de um cartão grande; o painel mostra só aquela parte.
     // 1.7 - Uma linha só com # encerra o subcartão (o texto abaixo dela não entra mais nele).
     // 1.8 - Corrigido: botões dos retratos estouravam a tela no celular (agora quebram linha dentro de cada retrato).
-    const FICHA_VERSAO = '1.8';
+    // 1.9 - Login com Google só para o dono (edita); quem não entrou vê a ficha em MODO LEITURA (para o mestre). Requer as regras novas no Firestore.
+    const FICHA_VERSAO = '1.9';
+
+    // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
+    window.modoLeitura = true;
+    window.definirModoEdicao = function (editor, user) {
+      window.modoLeitura = !editor;
+      document.body.classList.toggle('modo-leitura', !editor);
+      const b = document.getElementById('btnLogin');
+      if (b) b.textContent = editor ? '🚪 Sair' : '🔑 Entrar (editar)';
+      const ind = document.getElementById('modoInd');
+      if (ind) ind.textContent = editor ? '✏️ Editando' : '👁 Modo leitura';
+      document.querySelectorAll('#historyDiv').forEach(h => h.setAttribute('contenteditable', editor ? 'true' : 'false'));
+    };
+    window.definirModoEdicao(false);
+    // Trava de segurança no navegador (as regras do Firestore são a proteção de verdade):
+    // nada digitado, colado ou clicado altera a ficha em modo leitura, exceto abrir cartões e ver detalhes.
+    (function () {
+      const PERMITIDOS = '.rt-ref, .rt-cfg, .attack-acoes .ref-btn, .ref-btn.canto, .ref-titulo, .ref-item [data-acao="abrir"], summary, .retrato-img img';
+      document.addEventListener('beforeinput', ev => {
+        if (window.modoLeitura && ev.target.closest && ev.target.closest('#telaFicha')) ev.preventDefault();
+      }, true);
+      document.addEventListener('keydown', ev => {
+        if (window.modoLeitura && ev.target.closest && ev.target.closest('#telaFicha') && ['ArrowUp', 'ArrowDown', 'Delete', 'Backspace'].includes(ev.key)) ev.preventDefault();
+      }, true);
+      document.addEventListener('click', ev => {
+        if (!window.modoLeitura || !ev.target.closest) return;
+        if (!ev.target.closest('#paginaFicha')) return;
+        if (ev.target.closest(PERMITIDOS)) return;
+        if (ev.target.closest('button, input, select, label, textarea, [contenteditable]')) { ev.preventDefault(); ev.stopPropagation(); }
+      }, true);
+    })();
 
     // Modo claro / escuro: a escolha fica guardada neste aparelho (localStorage).
     function atualizarBotaoTema() {
@@ -1916,7 +1965,7 @@
     // saveState()    -> salvamento automático (espera 0,8s sem mexer, e fica quieto se não houver nome)
     // saveState(true)  -> salvamento manual (botão 💾): salva na hora e avisa se faltar o nome
     function saveState(manual) {
-      if (carregando || !window.salvarFirebase) return;
+      if (carregando || !window.salvarFirebase || window.modoLeitura) return;
       clearTimeout(_saveTimer);
       if (manual === true) {
         window.salvarFirebase(false);
@@ -2401,6 +2450,7 @@ function renderRefs() {
 let RASCUNHO = null;
 
 function editarCartao(id, prefill, aoSalvar) {
+  if (window.modoLeitura) return;
   const base = cartaoPorId(id);
   const p = prefill || {};
   RASCUNHO = {
@@ -3199,6 +3249,9 @@ if (embeddedState) {
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
     import {
+      getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
       getFirestore,
       doc,
       setDoc,
@@ -3222,6 +3275,36 @@ if (embeddedState) {
 
     window.firebaseDB = db;
 
+    // ============================================
+    // LOGIN (só o dono edita; o resto vê em modo leitura)
+    // As regras do Firestore também conferem este e-mail: trocar aqui não dá acesso a ninguém.
+    // ============================================
+    const EMAIL_DONO = "joaovictorcada@gmail.com";
+    const auth = getAuth(app);
+    auth.languageCode = 'pt';
+    onAuthStateChanged(auth, user => {
+      const dono = !!user && user.emailVerified && user.email === EMAIL_DONO;
+      if (user && !dono) {
+        signOut(auth);
+        alert('Esta conta Google não tem permissão para editar. Você continua em modo leitura.');
+      }
+      window.definirModoEdicao(dono, user);
+      if (document.getElementById('telaSelecao').style.display !== 'none') window.listarPersonagens();
+    });
+    window.entrarGoogle = async function () {
+      try {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (e) {
+        if (e && e.code === 'auth/popup-closed-by-user') return;
+        console.error('Erro no login:', e);
+        alert('Não consegui entrar: ' + (e && e.code ? e.code : e));
+      }
+    };
+    window.sairGoogle = async function () {
+      if (!confirm('Sair do modo de edição?')) return;
+      await signOut(auth);
+    };
+
     console.log("✅ Firebase conectado!");
 
     // ============================================
@@ -3241,6 +3324,7 @@ if (embeddedState) {
     // ============================================
     // silencioso = true (salvamento automático): não mostra alerta se faltar o nome
     window.salvarFirebase = async function(silencioso) {
+      if (window.modoLeitura) return false;
       try {
         const sheetId = getSheetId(silencioso === true);
         if (!sheetId) return false; // Sai se não tiver nome
@@ -3337,6 +3421,7 @@ if (embeddedState) {
     // FUNÇÃO: Voltar para seleção (com verificação)
     // ============================================
     window.voltarParaSelecao = async function() {
+      if (window.modoLeitura) { window.mostrarSelecao(); return; }
       // Tenta salvar primeiro
       const salvou = await window.salvarFirebase();
       
@@ -3386,7 +3471,7 @@ if (embeddedState) {
       // Cria o botão do personagem
       const btn = document.createElement('button');
       btn.style.cssText = `
-        background: white;
+        background: var(--paper-dark);
         border: 2px solid var(--sage);
         border-radius: 10px;
         padding: 14px 20px;
@@ -3495,6 +3580,7 @@ window.carregarFichaPorId = async function(fichaId) {
     // FUNÇÃO: Criar nova ficha
     // ============================================
     window.criarNovaFicha = async function() {
+      if (window.modoLeitura) return;
       const nome = prompt('Digite o nome do novo personagem:');
       if (!nome || nome.trim() === '') {
         alert('Nome é obrigatório!');
@@ -3580,6 +3666,7 @@ window.carregarFichaPorId = async function(fichaId) {
     // FUNÇÃO: Excluir a ficha que está aberta
     // ============================================
     window.excluirFichaAtual = async function() {
+      if (window.modoLeitura) return;
       const nome = document.getElementById('charName').value;
       if (!nome) {
         alert('Nenhuma ficha aberta para excluir!');
