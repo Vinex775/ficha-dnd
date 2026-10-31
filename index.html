@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 2.2 -->
+<!-- (VERSÃO ATUAL) 2.3 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -1177,7 +1177,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 2.2
+    // (VERSÃO ATUAL) 2.3
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1204,7 +1204,8 @@
     //       desligável), deslocamento, perícias do antecedente/raça e recursos (Arma de Sopro, Resistência Implacável).
     // 2.2 - Clipe homebrew vira Raça, Classe ou Subclasse: formulário "Usar como" no editor do clipe (atributos, deslocamento,
     //       perícias, dado de vida, salvaguardas, conjurador, recursos por nível). Aparece nas listas em "Homebrew".
-    const FICHA_VERSAO = '2.2';
+    // 2.3 - Login lembrado no aparelho (persistência explícita + pedido de armazenamento permanente).
+    const FICHA_VERSAO = '2.3';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -3795,7 +3796,8 @@ if (embeddedState) {
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
     import {
-      getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+      initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, browserPopupRedirectResolver,
+      GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
     import {
       getFirestore,
@@ -3826,7 +3828,13 @@ if (embeddedState) {
     // As regras do Firestore também conferem este e-mail: trocar aqui não dá acesso a ninguém.
     // ============================================
     const EMAIL_DONO = "joaovictorcada@gmail.com";
-    const auth = getAuth(app);
+    // Persistência explícita: o login fica guardado neste aparelho/navegador e volta sozinho nas próximas vezes
+    const auth = initializeAuth(app, {
+      persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+      popupRedirectResolver: browserPopupRedirectResolver
+    });
+    // Pede ao navegador para não apagar os dados do site (onde o login fica guardado) quando faltar espaço
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
     auth.languageCode = 'pt';
     onAuthStateChanged(auth, user => {
       const dono = !!user && user.emailVerified && user.email === EMAIL_DONO;
