@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 2.0 -->
+<!-- (VERSÃO ATUAL) 2.2 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -63,6 +63,15 @@
     body.modo-leitura #paginaFicha input[type="number"],
     body.modo-leitura #paginaFicha input[type="checkbox"],
     body.modo-leitura #paginaFicha .pip { pointer-events: none; }
+    .ed-mec { border: 1px solid var(--line); border-radius: 8px; padding: 10px 10px 2px; margin-bottom: 12px; background: var(--paper-dark); }
+    .mec-attrs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: var(--moss); }
+    .mec-attrs input { width: 100%; text-align: center; border: 1px solid var(--line); border-radius: 5px; background: var(--field); }
+    .mec-saves { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+    .mec-saves label { display: inline-flex; gap: 4px; align-items: center; font-size: 12px; letter-spacing: 0; }
+    .mec-dica { font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; color: var(--muted); margin-bottom: 6px; }
+    .mec-rec { display: grid; grid-template-columns: 1fr 120px 1fr 30px; gap: 4px; margin-bottom: 4px; }
+    .mec-rec input, .mec-rec select { border: 1px solid var(--line); border-radius: 5px; background: var(--field); font-size: 12px; padding: 3px 5px; min-width: 0; }
+    @media (max-width: 820px) { .mec-attrs { grid-template-columns: repeat(3, 1fr); } .mec-rec { grid-template-columns: 1fr 1fr; } }
     .dica-vida { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
     .dica-vida .small-btn { padding: 3px 8px; }
     * {
@@ -99,9 +108,10 @@
       padding-bottom: 10px;
       margin-bottom: 16px;
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 0.6fr;
+      grid-template-columns: repeat(4, 1fr);
       gap: 8px 14px;
     }
+    .sheet-header .span2 { grid-column: span 2; }
     .sheet-header .name-field {
       grid-column: 1 / -1;
     }
@@ -576,6 +586,7 @@
     .ref-btn.ligado { background: var(--btn); color: #fff; border-color: var(--moss); opacity: 1; }
     .ref-btn.canto { position: absolute; z-index: 2; }
     .field.rel { position: relative; }
+    .field.rel select { padding-right: 38px; }
     .field.rel .ref-btn.canto { right: 0; top: -5px; }
     .box.rel { position: relative; }
     .box.rel > .ref-btn.canto { right: 10px; top: 6px; padding: 3px 6px; }
@@ -823,6 +834,7 @@
       #telaSelecao, #telaFicha > div { max-width: none !important; margin-left: 8px !important; margin-right: 8px !important; }
       .page { width: 100%; min-height: 0; padding: 12px 10px; margin: 0 0 12px; border-radius: 0; border-left: none; border-right: none; }
       .sheet-header { grid-template-columns: 1fr 1fr; }
+      .sheet-header .span2 { grid-column: auto; }
       .main-grid { display: flex; flex-direction: column; gap: 0; }
       .col-esq, .col-dir { display: contents; }
       .bx-attr { order: 1; } .bx-comb { order: 2; } #boxRecursos { order: 3; } #boxEfeitos { order: 4; }
@@ -912,12 +924,15 @@
 
     <div class="sheet-header">
       <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
-      <div class="field rel"><label>Raça / Sub-raça</label><button class="ref-btn canto" id="btnRefRaca" title="Cartão da raça · clique: abrir · botão direito/segurar: trocar vínculo" onclick="cliqueRefFixo(this, 'raca')" oncontextmenu="menuRefFixo(this, 'raca', event)">📎</button><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
+      <div class="field rel"><label>Raça</label><button class="ref-btn canto" id="btnRefRaca" title="Cartão da raça · clique: abrir · botão direito/segurar: trocar vínculo" onclick="cliqueRefFixo(this, 'raca')" oncontextmenu="menuRefFixo(this, 'raca', event)">📎</button><select id="selRaca" onchange="aoEscolherRaca()"></select></div>
+      <div class="field"><label>Sub-raça</label><select id="selSubraca" onchange="aoEscolherSubraca()"></select></div>
       <div class="field"><label>Classe</label><select id="selClasse" onchange="aoEscolherClasse()"></select></div>
       <div class="field"><label>Subclasse</label><select id="selSubclasse" onchange="aoEscolherSubclasse()"></select></div>
       <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
-      <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
+      <div class="field span2"><label>Antecedente</label><select id="selAntecedente" onchange="aoEscolherAntecedente()"></select></div>
       <div class="field"><label>Alinhamento</label><input id="alignmentInput" type="text" placeholder="Ex: Neutro e Bom"></div>
+      <div class="field" id="campoRacaLivre" style="display:none; grid-column: 1 / -1;"><label>Raça / Sub-raça (texto livre — homebrew)</label><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)" oninput="aoDigitarRacaLivre()"></div>
+      <div class="field" id="campoAntecedenteLivre" style="display:none; grid-column: 1 / -1;"><label>Antecedente (texto livre — homebrew)</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita" oninput="sincronizarSelectsOrigem(); saveState();"></div>
       <div class="field" id="campoClasseLivre" style="display:none; grid-column: 1 / -1;"><label>Classe / Subclasse (texto livre — homebrew)</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse(true); saveState();"></div>
     </div>
 
@@ -1116,6 +1131,37 @@
       <div class="field"><label>Link de origem (opcional)</label><input id="edOrigem" type="text" placeholder="https://..."></div>
       <div class="field"><label>Texto (linhas começando com # viram seções que abrem e fecham — e cada seção pode ser vinculada sozinha ao 📎 como subcartão; uma linha só com # encerra a seção; **negrito** funciona)</label>
         <textarea id="edTexto" class="freeform" style="min-height:220px;" placeholder="Cole aqui o texto da homebrew.&#10;&#10;# Habilidades&#10;**Golpe Estendido.** Você pode usar..."></textarea></div>
+      <div class="field"><label>Usar como… (opcional: a ficha passa a calcular sozinha o que você marcar abaixo)</label>
+        <select id="edMecTipo" onchange="mostrarFormMec()">
+          <option value="">Só texto e imagens</option><option value="raca">Raça</option><option value="classe">Classe</option><option value="subclasse">Subclasse</option>
+        </select></div>
+      <div id="edMecForm" class="ed-mec" style="display:none">
+        <div data-tipos="raca" class="field"><label>Bônus de atributo (entram como Efeito Ativo, sem mexer no que você digitou)</label>
+          <div class="mec-attrs">
+            <span>FOR<input type="number" id="edMecAttr_FOR" value="0"></span><span>DES<input type="number" id="edMecAttr_DES" value="0"></span>
+            <span>CON<input type="number" id="edMecAttr_CON" value="0"></span><span>INT<input type="number" id="edMecAttr_INT" value="0"></span>
+            <span>SAB<input type="number" id="edMecAttr_SAB" value="0"></span><span>CAR<input type="number" id="edMecAttr_CAR" value="0"></span>
+          </div></div>
+        <div data-tipos="raca" class="field"><label>Deslocamento (deixe em branco para não mexer)</label><input id="edMecVel" type="text" placeholder="Ex: 9m"></div>
+        <div data-tipos="raca" class="field"><label>Perícias que concede (separadas por vírgula)</label><input id="edMecPer" type="text" placeholder="Ex: Percepção, Furtividade"></div>
+        <div data-tipos="classe" class="field"><label>Dado de vida</label>
+          <select id="edMecDv"><option>d6</option><option selected>d8</option><option>d10</option><option>d12</option></select></div>
+        <div data-tipos="classe" class="field"><label>Salvaguardas com proficiência</label>
+          <div class="mec-saves">
+            <label><input type="checkbox" id="edMecSave_FOR"> FOR</label><label><input type="checkbox" id="edMecSave_DES"> DES</label>
+            <label><input type="checkbox" id="edMecSave_CON"> CON</label><label><input type="checkbox" id="edMecSave_INT"> INT</label>
+            <label><input type="checkbox" id="edMecSave_SAB"> SAB</label><label><input type="checkbox" id="edMecSave_CAR"> CAR</label>
+          </div></div>
+        <div data-tipos="classe,subclasse" class="field"><label>Tipo de conjurador</label>
+          <select id="edMecConj"><option value="none">Não conjura</option><option value="full">Completo</option><option value="half">Meio</option><option value="third">Terço</option><option value="pact">Pacto</option></select></div>
+        <div data-tipos="subclasse" class="field"><label>Pertence à classe</label><select id="edMecBase"></select></div>
+        <div data-tipos="raca,classe,subclasse" class="field"><label>Recursos com usos (nome · recarga · usos)</label>
+          <div class="mec-dica">Usos: um número (ex.: 2) ou por nível (ex.: 1:2, 5:3, 9:4 = 2 usos no nível 1, 3 a partir do 5, 4 a partir do 9).</div>
+          <div id="edMecRecs"></div>
+          <button class="small-btn" type="button" onclick="addMecRecursoLinha()">＋ Recurso</button></div>
+        <div data-tipos="classe" class="field"><label>Características por nível (uma por linha, ex.: 3: Caminho Primitivo)</label>
+          <textarea id="edMecFeats" class="freeform" style="min-height:80px;" placeholder="1: Fúria&#10;3: Caminho Primitivo"></textarea></div>
+      </div>
       <div class="field"><label>Imagens (cole com Ctrl+V, arraste ou escolha arquivos)</label>
         <div class="ed-drop" id="edDrop"><div class="ed-thumbs" id="edImgs"></div>
           <button class="small-btn" type="button" onclick="escolherImagensEditor()">＋ Adicionar imagem</button></div></div>
@@ -1131,7 +1177,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 2.0
+    // (VERSÃO ATUAL) 2.2
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1154,7 +1200,11 @@
     // 2.0 - Classe e Subclasse viram listas de seleção (Livro do Jogador 2014): preenchem dado de vida, salvaguardas,
     //       conjurador (inclui Cavaleiro Arcano/Trapaceiro Arcano) e recursos; "Outra" permite digitar homebrew.
     //       Dica de PV (média) e total de Dados de Vida pelo nível — sugestões, nunca sobrescrevem o que você digitou.
-    const FICHA_VERSAO = '2.0';
+    // 2.1 - Raça, Sub-raça e Antecedente viram listas (Livro do Jogador 2014): bônus de atributo entram como Efeito Ativo (por fora,
+    //       desligável), deslocamento, perícias do antecedente/raça e recursos (Arma de Sopro, Resistência Implacável).
+    // 2.2 - Clipe homebrew vira Raça, Classe ou Subclasse: formulário "Usar como" no editor do clipe (atributos, deslocamento,
+    //       perícias, dado de vida, salvaguardas, conjurador, recursos por nível). Aparece nas listas em "Homebrew".
+    const FICHA_VERSAO = '2.2';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -1303,33 +1353,78 @@
     const SUBCLASSE_CONJURADORA = { 'Cavaleiro Arcano': 'third', 'Trapaceiro Arcano': 'third' };
     const semAcento = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
+    // ---------- Homebrew (clipes com "Usar como…") ----------
+    function cartoesMec(tipo) { return REFS.filter(c => c.mec && c.mec.tipo === tipo); }
+    function cartaoMecPorTitulo(tipo, texto) {
+      const t = semAcento(String(texto || '').split('(')[0].trim());
+      return t ? cartoesMec(tipo).find(c => semAcento(c.titulo) === t) || null : null;
+    }
+    function parseFaixas(txt) {
+      const t = String(txt || '').trim();
+      if (!t) return [[1, 1]];
+      if (/^\d+$/.test(t)) return [[1, Number(t)]];
+      return t.split(/[,;]/).map(p => p.split(':').map(x => Number(x.trim()))).filter(a => a.length === 2 && a.every(Number.isFinite)).sort((a, b) => a[0] - b[0]);
+    }
+    function maxFaixas(f, l) { let v = 0; f.forEach(([n, x]) => { if (l >= n) v = x; }); return v; }
+    function registrarRecursosHomebrew() {
+      REFS.forEach(c => {
+        if (!c.mec || !Array.isArray(c.mec.recursos)) return;
+        c.mec.recursos.forEach((r, i) => {
+          const faixas = parseFaixas(r.faixas);
+          RECURSOS_AUTO['hb_' + c.id + '_' + i] = { nome: r.nome || 'Recurso', recarga: r.recarga || 'longo', max: l => maxFaixas(faixas, l), info: () => '' };
+        });
+      });
+    }
+    function chavesRecursosCard(c) { return c && c.mec && c.mec.recursos ? c.mec.recursos.map((_, i) => 'hb_' + c.id + '_' + i) : []; }
+    function recursoIntocado(r) { return !r.ref && !r.nota && !(r.ajustes || []).length; }
+    function cartaoDeKey(key) { return key && String(key).startsWith('hb:') ? REFS.find(c => c.id === String(key).slice(3)) || null : null; }
+    function classeKeyAtual() {
+      const txt = document.getElementById('charClass').value;
+      const hb = cartaoMecPorTitulo('classe', txt);
+      return hb ? 'hb:' + hb.id : detectarClasse(txt);
+    }
+    function nomeClasse(key) { const c = cartaoDeKey(key); return c ? c.titulo : (CLASS_CONFIG[key] ? CLASS_CONFIG[key].nome : ''); }
+    function salvaguardasDe(key) { const c = cartaoDeKey(key); return c ? (c.mec.saves || []) : (SALVAGUARDAS_CLASSE[key] || []); }
+    function chavesRecursosClasse(key) { const c = cartaoDeKey(key); return c ? chavesRecursosCard(c) : (RECURSOS_POR_CLASSE[key] || []); }
+
     function montarSelectsClasse() {
       const sc = document.getElementById('selClasse');
       if (!sc) return;
+      const atual = sc.value;
       const nomes = Object.keys(CLASS_CONFIG).map(id => [id, CLASS_CONFIG[id].nome]).sort((a, b) => a[1].localeCompare(b[1], 'pt'));
-      sc.innerHTML = '<option value="">— escolha —</option>' + nomes.map(([id, n]) => `<option value="${id}">${n}</option>`).join('') + '<option value="__outra">✎ Outra (digitar)</option>';
+      const hbs = cartoesMec('classe').slice().sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt'));
+      sc.innerHTML = '<option value="">— escolha —</option>' + nomes.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')
+        + (hbs.length ? '<optgroup label="Homebrew">' + hbs.map(c => `<option value="hb:${escapeAttr(c.id)}">${escapeHtml(c.titulo)}</option>`).join('') + '</optgroup>' : '')
+        + '<option value="__outra">✎ Outra (digitar)</option>';
+      sc.value = atual;
+      if (sc.value !== atual) sc.value = '';
     }
-    function opcoesSubclasse(classeId) {
-      const lista = SUBCLASSES[classeId] || [];
-      const nv = NIVEL_SUBCLASSE[classeId] || 3;
-      return `<option value="">— nível ${nv}+ —</option>` + lista.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__outra">✎ Outra (homebrew)</option>';
+    function listaSubclasses(classeKey) {
+      const base = (SUBCLASSES[classeKey] || []).map(n => ({ value: n, label: n }));
+      const hb = cartoesMec('subclasse').filter(c => c.mec.classeBase === classeKey).map(c => ({ value: 'hb:' + c.id, label: c.titulo }));
+      return base.concat(hb);
+    }
+    function opcoesSubclasse(classeKey) {
+      const nv = NIVEL_SUBCLASSE[classeKey] || 3;
+      return `<option value="">— nível ${nv}+ —</option>` + listaSubclasses(classeKey).map(o => `<option value="${escapeAttr(o.value)}">${escapeHtml(o.label)}</option>`).join('') + '<option value="__outra">✎ Outra (homebrew)</option>';
     }
     // Lê o texto do campo Classe e acerta as duas listas (o texto continua sendo o que é salvo)
     function sincronizarSelectsClasse() {
       const sc = document.getElementById('selClasse'), ss = document.getElementById('selSubclasse'), txt = document.getElementById('charClass');
       if (!sc || !ss || !txt) return;
       const t = txt.value.trim();
-      const id = detectarClasse(t);
+      const id = classeKeyAtual();
       const classeOutra = sc.value === '__outra' && !id;
       if (id) sc.value = id; else sc.value = (t || classeOutra) ? '__outra' : '';
+      if (id && sc.value !== id) sc.value = '__outra';
       let subOutra = false;
-      if (id) {
+      if (id && sc.value === id) {
         ss.disabled = false;
         const antes = ss.value;
         ss.innerHTML = opcoesSubclasse(id);
-        const alvo = semAcento(t);
-        const achada = (SUBCLASSES[id] || []).find(n => alvo.includes(semAcento(n)));
-        if (achada) ss.value = achada;
+        const alvo = semAcento(t.includes('(') ? t.slice(t.indexOf('(')) : '');
+        const achada = listaSubclasses(id).find(o => alvo.includes(semAcento(o.label)));
+        if (achada) ss.value = achada.value;
         else if (antes === '__outra' || /\(.+\)/.test(t)) { ss.value = '__outra'; subOutra = true; }
         else ss.value = '';
       } else {
@@ -1340,36 +1435,269 @@
     }
     function aoEscolherClasse() {
       const sc = document.getElementById('selClasse'), txt = document.getElementById('charClass');
-      const anterior = detectarClasse(txt.value);
+      const anterior = classeKeyAtual();
       if (sc.value === '__outra') { document.getElementById('campoClasseLivre').style.display = ''; txt.focus(); return; }
-      txt.value = sc.value ? CLASS_CONFIG[sc.value].nome : '';
+      txt.value = sc.value ? nomeClasse(sc.value) : '';
       const ss = document.getElementById('selSubclasse'); if (ss) ss.value = '';
       aplicarSalvaguardasClasse(anterior, sc.value || null);
       // tira os recursos automáticos da classe anterior que você ainda não mexeu (sem vínculo, nota ou ajuste)
       if (anterior && anterior !== sc.value) {
-        const velhos = RECURSOS_POR_CLASSE[anterior] || [];
-        RECURSOS = RECURSOS.filter(r => !(velhos.includes(r.auto) && !r.ref && !r.nota && !(r.ajustes || []).length));
+        const velhos = chavesRecursosClasse(anterior);
+        RECURSOS = RECURSOS.filter(r => !((velhos.includes(r.auto) || ehRecursoDeSubclasse(r.auto)) && recursoIntocado(r)));
         renderRecursos();
       }
       aplicarConfiguracaoClasse(true);
       onAttrChange();
     }
+    function ehRecursoDeSubclasse(auto) {
+      const m = String(auto || '').match(/^hb_(.+)_\d+$/);
+      const c = m && REFS.find(x => x.id === m[1]);
+      return !!(c && c.mec && c.mec.tipo === 'subclasse');
+    }
     function aoEscolherSubclasse() {
       const sc = document.getElementById('selClasse'), ss = document.getElementById('selSubclasse'), txt = document.getElementById('charClass');
       const id = sc.value;
-      if (!CLASS_CONFIG[id]) return;
+      if (!id || !nomeClasse(id)) return;
       if (ss.value === '__outra') { document.getElementById('campoClasseLivre').style.display = ''; txt.focus(); return; }
-      txt.value = ss.value ? `${CLASS_CONFIG[id].nome} (${ss.value})` : CLASS_CONFIG[id].nome;
-      const tipo = SUBCLASSE_CONJURADORA[ss.value];
+      const sub = cartaoDeKey(ss.value);
+      const subNome = sub ? sub.titulo : ss.value;
+      txt.value = subNome ? `${nomeClasse(id)} (${subNome})` : nomeClasse(id);
+      let tipo = SUBCLASSE_CONJURADORA[ss.value];
+      if (sub && sub.mec.conj && sub.mec.conj !== 'none') tipo = sub.mec.conj;
       const casterSel = document.getElementById('casterType');
       if (tipo && casterSel.value === 'none') { casterSel.value = tipo; applyCasterTable(); }
+      // recursos da subclasse homebrew: tira os da subclasse anterior que você não mexeu e põe os novos
+      RECURSOS = RECURSOS.filter(r => !(ehRecursoDeSubclasse(r.auto) && recursoIntocado(r)));
+      if (sub) chavesRecursosCard(sub).forEach(k => {
+        if (RECURSOS.some(r => r.auto === k)) return;
+        RECURSOS.push({ id: novoId('rec'), nome: RECURSOS_AUTO[k].nome, base: 0, gastos: 0, recarga: RECURSOS_AUTO[k].recarga, nota: '', ref: '', auto: k, ajustes: [] });
+      });
+      renderRecursos();
       aplicarConfiguracaoClasse(true);
       saveState();
     }
     // Marca as salvaguardas da classe nova (e desmarca as da classe anterior); outras marcações suas ficam como estão
     function aplicarSalvaguardasClasse(antiga, nova) {
-      (SALVAGUARDAS_CLASSE[antiga] || []).forEach(k => { const c = document.getElementById('saveProf_' + k); if (c) c.checked = false; });
-      (SALVAGUARDAS_CLASSE[nova] || []).forEach(k => { const c = document.getElementById('saveProf_' + k); if (c) c.checked = true; });
+      salvaguardasDe(antiga).forEach(k => { const c = document.getElementById('saveProf_' + k); if (c) c.checked = false; });
+      salvaguardasDe(nova).forEach(k => { const c = document.getElementById('saveProf_' + k); if (c) c.checked = true; });
+    }
+    // Classe homebrew: aplica dado de vida, conjurador, recursos e a tabela de características que você descreveu
+    function aplicarClasseHomebrew(c, deUsuario) {
+      const m = c.mec;
+      definirTitulosProgressao(TITULOS_PADRAO);
+      if (classeAplicada !== null) limparTabelaProgressao();
+      classeAplicada = null;
+      const hd = document.getElementById('hitDice');
+      if (hd && DADOS_VIDA_PADRAO.includes(hd.value.trim())) hd.value = m.dv;
+      const casterSel = document.getElementById('casterType');
+      if (deUsuario === true && casterSel.value === 'none' && m.conj !== 'none') { casterSel.value = m.conj; applyCasterTable(); }
+      if (deUsuario === true) {
+        sugerirRecursosDaClasse('hb:' + c.id);
+        String(m.feats || '').split('\n').forEach(l => {
+          const mm = l.match(/^\s*(\d{1,2})\s*[:.\-)]\s*(.+)$/);
+          if (!mm) return;
+          const el = document.getElementById('prog_resources_' + Number(mm[1]));
+          if (el && !el.value.trim()) el.value = mm[2].trim();
+        });
+        growAll();
+      }
+      atualizarVisibilidadeSlots();
+    }
+
+    /* ---------------------------------------------------------
+      RAÇAS, SUB-RAÇAS E ANTECEDENTES (Livro do Jogador, 2014)
+      attr = bônus de atributo; vel = deslocamento; per = perícias; rec = recursos automáticos; tr = nomes dos traços
+    --------------------------------------------------------- */
+    const RACAS = {
+      anao: { nome: 'Anão', attr: { CON: 2 }, vel: '7,5m', tr: ['Visão no Escuro', 'Resiliência Anã', 'Treinamento Anão em Combate', 'Proficiência com Ferramentas', 'Especialização em Rochas'], subs: {
+        'Anão da Colina': { attr: { SAB: 1 }, tr: ['Tenacidade Anã (+1 PV por nível: some no PV máximo)'] },
+        'Anão da Montanha': { attr: { FOR: 2 }, tr: ['Treinamento Anão com Armaduras'] } } },
+      elfo: { nome: 'Elfo', attr: { DES: 2 }, vel: '9m', per: ['Percepção'], tr: ['Visão no Escuro', 'Sentidos Aguçados', 'Ancestral Feérico', 'Transe'], subs: {
+        'Alto Elfo': { attr: { INT: 1 }, tr: ['Treinamento Élfico com Armas', 'Truque de Mago', 'Idioma Adicional'] },
+        'Elfo da Floresta': { attr: { SAB: 1 }, vel: '10,5m', tr: ['Treinamento Élfico com Armas', 'Pés Ligeiros', 'Máscara da Natureza'] },
+        'Drow': { attr: { CAR: 1 }, tr: ['Visão no Escuro Superior', 'Sensibilidade à Luz Solar', 'Magia Drow', 'Treinamento Drow com Armas'] } } },
+      halfling: { nome: 'Halfling', attr: { DES: 2 }, vel: '7,5m', tr: ['Sortudo', 'Bravura', 'Agilidade Halfling'], subs: {
+        'Pés Leves': { attr: { CAR: 1 }, tr: ['Furtividade Natural'] },
+        'Robusto': { attr: { CON: 1 }, tr: ['Resiliência dos Robustos'] } } },
+      humano: { nome: 'Humano', attr: { FOR: 1, DES: 1, CON: 1, INT: 1, SAB: 1, CAR: 1 }, vel: '9m', tr: ['Idioma Adicional'], subs: {} },
+      draconato: { nome: 'Draconato', attr: { FOR: 2, CAR: 1 }, vel: '9m', rec: ['sopro'], tr: ['Ancestral Dracônico', 'Arma de Sopro', 'Resistência a Dano'], subs: {
+        'Dragão Azul': { tr: ['Sopro: linha de 1,5m/9m (Des), dano Elétrico; resistência a Elétrico'] },
+        'Dragão Branco': { tr: ['Sopro: cone de 4,5m (Con), dano Frio; resistência a Frio'] },
+        'Dragão Bronze': { tr: ['Sopro: linha de 1,5m/9m (Des), dano Elétrico; resistência a Elétrico'] },
+        'Dragão Cobre': { tr: ['Sopro: linha de 1,5m/9m (Des), dano Ácido; resistência a Ácido'] },
+        'Dragão Latão': { tr: ['Sopro: linha de 1,5m/9m (Des), dano Fogo; resistência a Fogo'] },
+        'Dragão Negro': { tr: ['Sopro: linha de 1,5m/9m (Des), dano Ácido; resistência a Ácido'] },
+        'Dragão Ouro': { tr: ['Sopro: cone de 4,5m (Des), dano Fogo; resistência a Fogo'] },
+        'Dragão Prata': { tr: ['Sopro: cone de 4,5m (Con), dano Frio; resistência a Frio'] },
+        'Dragão Verde': { tr: ['Sopro: cone de 4,5m (Con), dano Veneno; resistência a Veneno'] },
+        'Dragão Vermelho': { tr: ['Sopro: cone de 4,5m (Des), dano Fogo; resistência a Fogo'] } } },
+      gnomo: { nome: 'Gnomo', attr: { INT: 2 }, vel: '7,5m', tr: ['Visão no Escuro', 'Esperteza Gnômica'], subs: {
+        'Gnomo da Floresta': { attr: { DES: 1 }, tr: ['Ilusionista Nato', 'Falar com Bestas Pequenas'] },
+        'Gnomo das Rochas': { attr: { CON: 1 }, tr: ['Conhecimento de Artífice', 'Engenhoqueiro'] } } },
+      meioelfo: { nome: 'Meio-Elfo', attr: { CAR: 2 }, vel: '9m', tr: ['Dois outros atributos à sua escolha +1 (some à mão)', 'Visão no Escuro', 'Ancestral Feérico', 'Versatilidade em Perícia (2 perícias à escolha)'], subs: {} },
+      meioorc: { nome: 'Meio-Orc', attr: { FOR: 2, CON: 1 }, vel: '9m', per: ['Intimidação'], rec: ['resistencia_implacavel'], tr: ['Visão no Escuro', 'Ameaçador', 'Resistência Implacável', 'Ataques Selvagens'], subs: {} },
+      tiefling: { nome: 'Tiefling', attr: { INT: 1, CAR: 2 }, vel: '9m', tr: ['Visão no Escuro', 'Resistência Infernal', 'Legado Infernal'], subs: {} }
+    };
+    const ANTECEDENTES = {
+      'Acólito': ['Intuição', 'Religião'], 'Artesão de Guilda': ['Intuição', 'Persuasão'], 'Artista': ['Acrobacia', 'Atuação'],
+      'Charlatão': ['Enganação', 'Prestidigitação'], 'Criminoso': ['Enganação', 'Furtividade'], 'Eremita': ['Medicina', 'Religião'],
+      'Forasteiro': ['Atletismo', 'Sobrevivência'], 'Herói do Povo': ['Adestrar Animais', 'Sobrevivência'], 'Marinheiro': ['Atletismo', 'Percepção'],
+      'Nobre': ['História', 'Persuasão'], 'Órfão': ['Furtividade', 'Prestidigitação'], 'Sábio': ['Arcanismo', 'História'], 'Soldado': ['Atletismo', 'Intimidação']
+    };
+    const VELOCIDADES_PADRAO = ['', '9m', '7,5m', '10,5m', '9', '7,5', '10,5', '7.5m', '10.5m', '9 m', '7,5 m', '10,5 m'];
+
+    function racaAtual() {
+      const t = semAcento(document.getElementById('raceInput').value);
+      let achada = null, pos = Infinity;
+      Object.entries(RACAS).forEach(([id, r]) => {
+        const i = t.indexOf(semAcento(r.nome));
+        if (i !== -1 && i < pos) { achada = id; pos = i; }
+      });
+      return achada;
+    }
+    function racaHbAtual() { return cartaoMecPorTitulo('raca', document.getElementById('raceInput').value); }
+    function racaKeyAtual() { const hb = racaHbAtual(); return hb ? 'hb:' + hb.id : racaAtual(); }
+    function montarSelectsOrigem() {
+      const sr = document.getElementById('selRaca'), sa = document.getElementById('selAntecedente');
+      if (!sr || !sa) return;
+      const atualR = sr.value, atualA = sa.value;
+      const racas = Object.entries(RACAS).map(([id, r]) => [id, r.nome]).sort((a, b) => a[1].localeCompare(b[1], 'pt'));
+      const hbs = cartoesMec('raca').slice().sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt'));
+      sr.innerHTML = '<option value="">— escolha —</option>' + racas.map(([id, n]) => `<option value="${id}">${n}</option>`).join('')
+        + (hbs.length ? '<optgroup label="Homebrew">' + hbs.map(c => `<option value="hb:${escapeAttr(c.id)}">${escapeHtml(c.titulo)}</option>`).join('') + '</optgroup>' : '')
+        + '<option value="__outra">✎ Outra (digitar)</option>';
+      sa.innerHTML = '<option value="">— escolha —</option>' + Object.keys(ANTECEDENTES).map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__outra">✎ Outro (digitar)</option>';
+      sr.value = atualR; if (sr.value !== atualR) sr.value = '';
+      sa.value = atualA; if (sa.value !== atualA) sa.value = '';
+    }
+    function sincronizarSelectsOrigem() {
+      const sr = document.getElementById('selRaca'), ss = document.getElementById('selSubraca'), sa = document.getElementById('selAntecedente');
+      const tr = document.getElementById('raceInput'), ta = document.getElementById('backgroundInput');
+      if (!sr || !ss || !sa) return;
+      // Raça
+      const t = tr.value.trim(), key = racaKeyAtual();
+      sr.value = key || ((t || sr.value === '__outra') ? '__outra' : '');
+      if (key && sr.value !== key) sr.value = '__outra';
+      let subOutra = false;
+      const id = key && RACAS[key] ? key : null;
+      const subs = id ? Object.keys(RACAS[id].subs) : [];
+      if (id && subs.length) {
+        ss.disabled = false;
+        const antes = ss.value;
+        ss.innerHTML = '<option value="">—</option>' + subs.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__outra">✎ Outra (homebrew)</option>';
+        const alvo = semAcento(t);
+        const achada = subs.find(n => alvo.includes(semAcento(n)));
+        if (achada) ss.value = achada;
+        else if (antes === '__outra' || /\(.+\)/.test(t)) { ss.value = '__outra'; subOutra = true; }
+        else ss.value = '';
+      } else {
+        ss.innerHTML = '<option value="">—</option>'; ss.disabled = true;
+      }
+      document.getElementById('campoRacaLivre').style.display = (sr.value === '__outra' || subOutra) ? '' : 'none';
+      // Antecedente
+      const b = ta.value.trim();
+      const nome = Object.keys(ANTECEDENTES).find(n => semAcento(n) === semAcento(b));
+      sa.value = nome || ((b || sa.value === '__outra') ? '__outra' : '');
+      document.getElementById('campoAntecedenteLivre').style.display = sa.value === '__outra' ? '' : 'none';
+    }
+
+    // Efeito Ativo gerado pela raça/antecedente: soma por fora e dá para desligar (ex.: se o valor que você digitou já inclui o bônus)
+    function definirEfeitoOrigem(origem, nome, mods, desc, chave) {
+      EFEITOS = EFEITOS.filter(e => e.origem !== origem);
+      if (nome) EFEITOS.push({ id: novoId('efe'), origem, chave: chave || '', nome, desc: desc || '', duracao: '', ativo: true, mods });
+      renderEfeitos();
+    }
+    function mudarPericias(velhas, novas, outras) {
+      (velhas || []).forEach(n => {
+        if ((novas || []).includes(n) || (outras || []).includes(n)) return;
+        const i = SKILLS.findIndex(x => x.name === n); if (i >= 0) document.getElementById('skillProf_' + i).checked = false;
+      });
+      (novas || []).forEach(n => { const i = SKILLS.findIndex(x => x.name === n); if (i >= 0) document.getElementById('skillProf_' + i).checked = true; });
+    }
+    function periciasDaRaca(id) { return (id && RACAS[id] && RACAS[id].per) || []; }
+    function periciasDoAntecedente() { return ANTECEDENTES[document.getElementById('backgroundInput').value.trim()] || []; }
+    function chaveRacaAplicada() {
+      const e = EFEITOS.find(x => x.origem === 'raca');
+      if (!e) return null;
+      return e.chave || Object.keys(RACAS).find(k => e.nome.startsWith('Raça: ' + RACAS[k].nome)) || null;
+    }
+    function defRacaPorKey(key) {
+      const c = cartaoDeKey(key);
+      if (c) return { per: c.mec.per || [], rec: chavesRecursosCard(c) };
+      return RACAS[key] ? { per: periciasDaRaca(key), rec: RACAS[key].rec || [] } : { per: [], rec: [] };
+    }
+    function defRacaAtual() {
+      const hb = racaHbAtual();
+      if (hb) return { key: 'hb:' + hb.id, nome: hb.titulo, attr: hb.mec.attr || {}, vel: hb.mec.vel || '', per: hb.mec.per || [], rec: chavesRecursosCard(hb), desc: 'Raça homebrew — veja o clipe "' + hb.titulo + '".' };
+      const id = racaAtual();
+      if (!id) return null;
+      const r = RACAS[id];
+      const sub = Object.keys(r.subs).find(n => semAcento(document.getElementById('raceInput').value).includes(semAcento(n)));
+      const s2 = sub ? r.subs[sub] : {};
+      return {
+        key: id, nome: r.nome + (sub ? ' (' + sub + ')' : ''), attr: Object.assign({}, r.attr, s2.attr || {}), vel: s2.vel || r.vel,
+        per: r.per || [], rec: r.rec || [], desc: 'Traços: ' + r.tr.concat(s2.tr || []).join(' · ')
+      };
+    }
+    function aplicarRaca(antigaKey) {
+      const d = defRacaAtual(), velha = antigaKey ? defRacaPorKey(antigaKey) : { per: [], rec: [] };
+      // recursos da raça anterior que você não mexeu saem (a não ser que a raça nova também os use)
+      RECURSOS = RECURSOS.filter(x => !(velha.rec.includes(x.auto) && !(d && d.rec.includes(x.auto)) && recursoIntocado(x)));
+      if (!d) {
+        definirEfeitoOrigem('raca', null);
+        mudarPericias(velha.per, [], periciasDoAntecedente());
+        renderRecursos(); onAttrChange(); return;
+      }
+      const mods = Object.entries(d.attr).map(([alvo, valor]) => ({ alvo, valor }));
+      definirEfeitoOrigem('raca', 'Raça: ' + d.nome, mods, d.desc, d.key);
+      // deslocamento (só troca se estiver no valor padrão de alguma raça)
+      const campo = document.getElementById('speed');
+      if (d.vel && VELOCIDADES_PADRAO.includes(campo.value.trim().toLowerCase())) campo.value = d.vel;
+      mudarPericias(velha.per, d.per, periciasDoAntecedente());
+      d.rec.forEach(k => {
+        if (RECURSOS.some(x => x.auto === k) || !RECURSOS_AUTO[k]) return;
+        RECURSOS.push({ id: novoId('rec'), nome: RECURSOS_AUTO[k].nome, base: 0, gastos: 0, recarga: RECURSOS_AUTO[k].recarga, nota: '', ref: '', auto: k, ajustes: [] });
+      });
+      renderRecursos();
+      onAttrChange();
+    }
+    // Texto livre (homebrew digitado): se a raça deixou de ser uma que a lista conhece, tira o efeito e as perícias que a lista tinha posto
+    function aoDigitarRacaLivre() {
+      if (chaveRacaAplicada() && !racaKeyAtual()) aplicarRaca(chaveRacaAplicada());
+      sincronizarSelectsOrigem();
+      saveState();
+    }
+    function aoEscolherRaca() {
+      const sr = document.getElementById('selRaca'), txt = document.getElementById('raceInput');
+      if (sr.value === '__outra') { document.getElementById('campoRacaLivre').style.display = ''; txt.focus(); return; }
+      const antiga = chaveRacaAplicada();
+      const hb = cartaoDeKey(sr.value);
+      txt.value = hb ? hb.titulo : (sr.value ? RACAS[sr.value].nome : '');
+      document.getElementById('selSubraca').value = '';
+      sincronizarSelectsOrigem();
+      aplicarRaca(antiga);
+      saveState();
+    }
+    function aoEscolherSubraca() {
+      const sr = document.getElementById('selRaca'), ss = document.getElementById('selSubraca'), txt = document.getElementById('raceInput');
+      const id = sr.value;
+      if (!RACAS[id]) return;
+      if (ss.value === '__outra') { document.getElementById('campoRacaLivre').style.display = ''; txt.focus(); return; }
+      txt.value = ss.value ? `${RACAS[id].nome} (${ss.value})` : RACAS[id].nome;
+      sincronizarSelectsOrigem();
+      aplicarRaca(chaveRacaAplicada() || id);
+      saveState();
+    }
+    function aoEscolherAntecedente() {
+      const sa = document.getElementById('selAntecedente'), txt = document.getElementById('backgroundInput');
+      if (sa.value === '__outra') { document.getElementById('campoAntecedenteLivre').style.display = ''; txt.focus(); return; }
+      const antigas = periciasDoAntecedente();
+      txt.value = sa.value;
+      const key = racaKeyAtual();
+      mudarPericias(antigas, ANTECEDENTES[sa.value] || [], cartaoDeKey(key) ? (cartaoDeKey(key).mec.per || []) : periciasDaRaca(key));
+      sincronizarSelectsOrigem();
+      onAttrChange();
+      saveState();
     }
 
     // Dica de vida: total de Dados de Vida e PV médio. É só uma sugestão: o PV Máximo que você digitou não muda sozinho.
@@ -1428,6 +1756,7 @@
     const TITULOS_PADRAO = { truques: 'Truques', slots: 'Espaços de Magia', progressao: 'Recursos Desbloqueados', especial: 'Recurso Especial de Classe / Subclasse' };
     let classeAplicada = null; // classe cuja tabela está preenchida agora
     montarSelectsClasse();
+    montarSelectsOrigem();
 
     function definirTitulosProgressao(t) {
       const h3 = document.querySelector('#progressionTable thead th:nth-child(3)');
@@ -1457,8 +1786,11 @@
       const classeInput = document.getElementById('charClass');
       if (!classeInput) return;
       sincronizarSelectsClasse();
+      sincronizarSelectsOrigem();
       atualizarDicasVida();
 
+      const hbClasse = cartaoMecPorTitulo('classe', classeInput.value);
+      if (hbClasse) { aplicarClasseHomebrew(hbClasse, deUsuario); return; }
       const classeId = detectarClasse(classeInput.value);
 
       if (!classeId || !CLASS_CONFIG[classeId]) {
@@ -2066,12 +2398,12 @@
       // v1.2: referências, retratos e anexos (as imagens em si ficam em fichas/{anexosDe}/anexos)
       state.anexosDe = ANEXOS_DE || '';
       state.retratos = RETRATOS.map(r => ({ rotulo: r.rotulo || '', anexo: r.anexo || '' }));
-      state.referencias = REFS.map(r => ({ id: r.id, titulo: r.titulo, categoria: r.categoria, origem: r.origem, texto: r.texto, imagens: r.imagens.slice() }));
+      state.referencias = REFS.map(r => ({ id: r.id, titulo: r.titulo, categoria: r.categoria, origem: r.origem, texto: r.texto, imagens: r.imagens.slice(), mec: r.mec || null }));
       state.refsFixas = { raca: REFS_FIXAS.raca || '', especial: REFS_FIXAS.especial || '' };
 
       // v1.3: recursos e efeitos
       state.recursos = RECURSOS.map(r => ({ id: r.id, nome: r.nome, base: Number(r.base) || 0, gastos: Number(r.gastos) || 0, recarga: r.recarga, nota: r.nota, ref: r.ref || '', auto: r.auto || '', ajustes: r.ajustes.map(a => ({ id: a.id, nome: a.nome, valor: Number(a.valor) || 0, ativo: !!a.ativo })) }));
-      state.efeitos = EFEITOS.map(e => ({ id: e.id, nome: e.nome, desc: e.desc, duracao: e.duracao, ativo: !!e.ativo, mods: e.mods.map(m => ({ alvo: m.alvo, valor: Number(m.valor) || 0 })) }));
+      state.efeitos = EFEITOS.map(e => ({ id: e.id, origem: e.origem || '', chave: e.chave || '', nome: e.nome, desc: e.desc, duracao: e.duracao, ativo: !!e.ativo, mods: e.mods.map(m => ({ alvo: m.alvo, valor: Number(m.valor) || 0 })) }));
 
       state.spells = {};
       SPELL_LEVELS.forEach((label, idx) => {
@@ -2124,7 +2456,7 @@
     function aplicarEstado(state) {
       // v1.3: efeitos e recursos primeiro, para os cálculos já considerarem os efeitos ligados
       EFEITOS = Array.isArray(state.efeitos) ? state.efeitos.map(e => ({
-        id: String(e.id), nome: e.nome || '', desc: e.desc || '', duracao: e.duracao || '', ativo: !!e.ativo,
+        id: String(e.id), origem: e.origem || '', chave: e.chave || '', nome: e.nome || '', desc: e.desc || '', duracao: e.duracao || '', ativo: !!e.ativo,
         mods: Array.isArray(e.mods) ? e.mods.map(m => ({ alvo: m.alvo, valor: Number(m.valor) || 0 })) : []
       })) : [];
       RECURSOS = Array.isArray(state.recursos) ? state.recursos.map(r => ({
@@ -2215,7 +2547,7 @@
       }));
       REFS = Array.isArray(state.referencias) ? state.referencias.map(r => ({
         id: String(r.id), titulo: r.titulo || '', categoria: r.categoria || 'Outro', origem: r.origem || '',
-        texto: r.texto || '', imagens: Array.isArray(r.imagens) ? r.imagens.map(String) : []
+        texto: r.texto || '', imagens: Array.isArray(r.imagens) ? r.imagens.map(String) : [], mec: limparMec(r.mec)
       })) : [];
       REFS_FIXAS = { raca: (state.refsFixas && state.refsFixas.raca) || '', especial: (state.refsFixas && state.refsFixas.especial) || '' };
       ABERTOS = [];
@@ -2549,6 +2881,7 @@ function listarSecoes(texto) {
 }
 
 function renderRefs() {
+  try { registrarRecursosHomebrew(); montarSelectsClasse(); montarSelectsOrigem(); sincronizarSelectsClasse(); sincronizarSelectsOrigem(); } catch (e) { /* listas ainda não prontas */ }
   const lista = document.getElementById('refsLista');
   if (lista) {
     const filtro = (document.getElementById('refsFiltro').value || '').trim().toLowerCase();
@@ -2594,6 +2927,7 @@ function editarCartao(id, prefill, aoSalvar) {
   sel.value = base ? base.categoria : (p.categoria || 'Outro');
   document.getElementById('edOrigem').value = base ? base.origem : '';
   document.getElementById('edTexto').value = base ? base.texto : '';
+  preencherFormMec(base ? base.mec : null);
   document.getElementById('edExcluir').style.display = base ? '' : 'none';
   renderThumbsRascunho();
   document.getElementById('edModal').classList.add('aberto');
@@ -2674,13 +3008,16 @@ async function salvarCartao() {
       categoria: document.getElementById('edCategoria').value,
       origem: document.getElementById('edOrigem').value.trim(),
       texto: document.getElementById('edTexto').value,
-      imagens: d.imagens.map(x => x.id)
+      imagens: d.imagens.map(x => x.id),
+      mec: coletarMec()
     };
     const i = REFS.findIndex(r => r.id === dados.id);
     if (i >= 0) REFS[i] = dados; else REFS.push(dados);
     const aoSalvar = d.aoSalvar;
     fecharEditor();
+    registrarRecursosHomebrew();
     renderRefs();
+    renderRecursos();
     renderPainel();
     saveState();
     if (aoSalvar) aoSalvar(dados.id);
@@ -2937,6 +3274,84 @@ function abrirMenuRef(btn, slot) {
   }, 0);
 }
 
+
+// ---- Formulário "Usar como…" (clipe homebrew vira raça, classe ou subclasse) ----
+const MEC_ATTRS = ['FOR', 'DES', 'CON', 'INT', 'SAB', 'CAR'];
+function limparMec(m) {
+  if (!m || typeof m !== 'object' || !['raca', 'classe', 'subclasse'].includes(m.tipo)) return null;
+  const attr = {};
+  MEC_ATTRS.forEach(k => { const v = Number(m.attr && m.attr[k]); if (v) attr[k] = v; });
+  return {
+    tipo: m.tipo, attr, vel: String(m.vel || ''), per: Array.isArray(m.per) ? m.per.map(String) : [],
+    dv: ['d6', 'd8', 'd10', 'd12'].includes(m.dv) ? m.dv : 'd8',
+    saves: Array.isArray(m.saves) ? m.saves.filter(k => MEC_ATTRS.includes(k)) : [],
+    conj: ['none', 'full', 'half', 'third', 'pact'].includes(m.conj) ? m.conj : 'none',
+    classeBase: String(m.classeBase || ''), feats: String(m.feats || ''),
+    recursos: Array.isArray(m.recursos) ? m.recursos.map(r => ({ nome: String(r.nome || ''), recarga: ['longo', 'curto', 'manual', 'nenhuma'].includes(r.recarga) ? r.recarga : 'longo', faixas: String(r.faixas || '1') })) : []
+  };
+}
+function addMecRecursoLinha(r) {
+  const d = document.createElement('div');
+  d.className = 'mec-rec';
+  d.innerHTML = `<input class="mr-nome" type="text" placeholder="Nome" value="${escapeAttr((r && r.nome) || '')}">
+    <select class="mr-rec"><option value="longo">Descanso longo</option><option value="curto">Descanso curto</option><option value="manual">Manual</option><option value="nenhuma">Sem recarga</option></select>
+    <input class="mr-faixas" type="text" placeholder="1  ou  1:2, 5:3" value="${escapeAttr((r && r.faixas) || '1')}">
+    <button class="small-btn remove-btn" type="button" title="Tirar">✕</button>`;
+  d.querySelector('.mr-rec').value = (r && r.recarga) || 'longo';
+  d.querySelector('button').addEventListener('click', () => d.remove());
+  document.getElementById('edMecRecs').appendChild(d);
+}
+function mostrarFormMec() {
+  const tipo = document.getElementById('edMecTipo').value;
+  const form = document.getElementById('edMecForm');
+  form.style.display = tipo ? '' : 'none';
+  form.querySelectorAll('[data-tipos]').forEach(el => { el.style.display = el.dataset.tipos.split(',').includes(tipo) ? '' : 'none'; });
+  if (tipo === 'subclasse') {
+    const sel = document.getElementById('edMecBase'), atual = sel.value;
+    const proprio = RASCUNHO && RASCUNHO.id;
+    sel.innerHTML = Object.keys(CLASS_CONFIG).map(id => [id, CLASS_CONFIG[id].nome]).sort((a, b) => a[1].localeCompare(b[1], 'pt')).map(([id, n]) => `<option value="${id}">${n}</option>`).join('')
+      + cartoesMec('classe').filter(c => c.id !== proprio).map(c => `<option value="hb:${escapeAttr(c.id)}">${escapeHtml(c.titulo)} (homebrew)</option>`).join('');
+    if (atual) sel.value = atual;
+  }
+  if (tipo === 'raca') document.getElementById('edCategoria').value = 'Raça';
+}
+function preencherFormMec(m) {
+  m = limparMec(m);
+  document.getElementById('edMecTipo').value = m ? m.tipo : '';
+  MEC_ATTRS.forEach(k => {
+    document.getElementById('edMecAttr_' + k).value = (m && m.attr[k]) || 0;
+    document.getElementById('edMecSave_' + k).checked = !!(m && m.saves.includes(k));
+  });
+  document.getElementById('edMecVel').value = m ? m.vel : '';
+  document.getElementById('edMecPer').value = m ? m.per.join(', ') : '';
+  document.getElementById('edMecDv').value = m ? m.dv : 'd8';
+  document.getElementById('edMecConj').value = m ? m.conj : 'none';
+  document.getElementById('edMecFeats').value = m ? m.feats : '';
+  document.getElementById('edMecRecs').innerHTML = '';
+  (m ? m.recursos : []).forEach(addMecRecursoLinha);
+  mostrarFormMec();
+  if (m && m.tipo === 'subclasse' && m.classeBase) document.getElementById('edMecBase').value = m.classeBase;
+}
+function coletarMec() {
+  const tipo = document.getElementById('edMecTipo').value;
+  if (!tipo) return null;
+  const attr = {};
+  MEC_ATTRS.forEach(k => { const v = Number(document.getElementById('edMecAttr_' + k).value); if (v) attr[k] = v; });
+  const per = document.getElementById('edMecPer').value.split(',').map(t => t.trim()).filter(Boolean)
+    .map(t => { const sk = SKILLS.find(x => semAcento(x.name) === semAcento(t)); return sk ? sk.name : null; }).filter(Boolean);
+  const recursos = [...document.querySelectorAll('#edMecRecs .mec-rec')].map(d => ({
+    nome: d.querySelector('.mr-nome').value.trim(), recarga: d.querySelector('.mr-rec').value, faixas: d.querySelector('.mr-faixas').value.trim() || '1'
+  })).filter(r => r.nome);
+  return limparMec({
+    tipo, attr, vel: document.getElementById('edMecVel').value.trim(), per,
+    dv: document.getElementById('edMecDv').value,
+    saves: MEC_ATTRS.filter(k => document.getElementById('edMecSave_' + k).checked),
+    conj: document.getElementById('edMecConj').value,
+    classeBase: tipo === 'subclasse' ? document.getElementById('edMecBase').value : '',
+    feats: document.getElementById('edMecFeats').value, recursos
+  });
+}
+
 // ---- Arrastar imagens para dentro do editor + atalhos de teclado ----
 (function () {
   const drop = document.getElementById('edDrop');
@@ -2987,7 +3402,9 @@ const RECURSOS_AUTO = {
   retomar: { nome: 'Retomar o Fôlego', recarga: 'curto', max: () => 1, info: () => '' },
   indomavel: { nome: 'Indomável', recarga: 'longo', max: l => (l >= 17 ? 3 : l >= 13 ? 2 : l >= 9 ? 1 : 0), info: () => '' },
   feitico_pontos: { nome: 'Pontos de Feitiçaria', recarga: 'longo', max: l => (l >= 2 ? l : 0), info: () => '' },
-  recup_arcana: { nome: 'Recuperação Arcana', recarga: 'longo', max: () => 1, info: () => '' }
+  recup_arcana: { nome: 'Recuperação Arcana', recarga: 'longo', max: () => 1, info: () => '' },
+  sopro: { nome: 'Arma de Sopro', recarga: 'curto', max: () => 1, info: l => 'Dano ' + (l >= 16 ? 5 : l >= 11 ? 4 : l >= 6 ? 3 : 2) + 'd6 · CD 8 + CON + prof.' },
+  resistencia_implacavel: { nome: 'Resistência Implacável', recarga: 'longo', max: () => 1, info: () => 'Cai a 1 PV em vez de 0' }
 };
 const RECURSOS_POR_CLASSE = {
   barbaro: ['furia'], monge: ['ki'], paladino: ['imposicao'], clerigo: ['canalizar'], druida: ['forma_selvagem'],
@@ -3062,7 +3479,7 @@ function adicionarRecurso(dados) {
 }
 
 function sugerirRecursosDaClasse(classeId, avisar) {
-  const chaves = RECURSOS_POR_CLASSE[classeId] || [];
+  const chaves = chavesRecursosClasse(classeId);
   let novos = 0;
   chaves.forEach(k => {
     if (RECURSOS.some(r => r.auto === k)) return;
@@ -3074,7 +3491,7 @@ function sugerirRecursosDaClasse(classeId, avisar) {
 }
 
 function sugerirRecursosDoBotao() {
-  const classeId = detectarClasse(document.getElementById('charClass').value);
+  const classeId = classeKeyAtual();
   if (!classeId) { alert('Preencha o campo Classe (ex.: Bárbaro) para eu sugerir os recursos.'); return; }
   sugerirRecursosDaClasse(classeId, true);
 }
@@ -3106,6 +3523,7 @@ function slotRecurso(r) {
 }
 
 function renderRecursos() {
+  registrarRecursosHomebrew();
   const g = document.getElementById('recursosGrid');
   if (!g) return;
   g.innerHTML = '';
