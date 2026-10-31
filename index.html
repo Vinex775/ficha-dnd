@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 1.9 -->
+<!-- (VERSÃO ATUAL) 2.0 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -63,6 +63,8 @@
     body.modo-leitura #paginaFicha input[type="number"],
     body.modo-leitura #paginaFicha input[type="checkbox"],
     body.modo-leitura #paginaFicha .pip { pointer-events: none; }
+    .dica-vida { font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+    .dica-vida .small-btn { padding: 3px 8px; }
     * {
       box-sizing: border-box;
     }
@@ -911,10 +913,12 @@
     <div class="sheet-header">
       <div class="field name-field"><label>Nome do Personagem</label><input id="charName" type="text" placeholder="Nome do personagem" oninput="syncName()"></div>
       <div class="field rel"><label>Raça / Sub-raça</label><button class="ref-btn canto" id="btnRefRaca" title="Cartão da raça · clique: abrir · botão direito/segurar: trocar vínculo" onclick="cliqueRefFixo(this, 'raca')" oncontextmenu="menuRefFixo(this, 'raca', event)">📎</button><input id="raceInput" type="text" placeholder="Ex: Elfo (Alto Elfo)"></div>
-      <div class="field"><label>Classe / Subclasse</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse(true); saveState();"></div>
+      <div class="field"><label>Classe</label><select id="selClasse" onchange="aoEscolherClasse()"></select></div>
+      <div class="field"><label>Subclasse</label><select id="selSubclasse" onchange="aoEscolherSubclasse()"></select></div>
       <div class="field"><label>Nível</label><input id="level" type="number" min="1" max="20" value="1" oninput="onLevelChange()"></div>
       <div class="field"><label>Antecedente</label><input id="backgroundInput" type="text" placeholder="Ex: Eremita"></div>
       <div class="field"><label>Alinhamento</label><input id="alignmentInput" type="text" placeholder="Ex: Neutro e Bom"></div>
+      <div class="field" id="campoClasseLivre" style="display:none; grid-column: 1 / -1;"><label>Classe / Subclasse (texto livre — homebrew)</label><input id="charClass" type="text" placeholder="Ex: Druida (Círculo da Terra)" oninput="aplicarConfiguracaoClasse(true); saveState();"></div>
     </div>
 
     <div class="main-grid">
@@ -979,13 +983,14 @@
               <input id="initiative" type="number" value="0" oninput="onInitiativeInput(this)" title="Automático (Destreza). Digite para sobrescrever; apague para voltar ao automático." style="width:100%; text-align:center; border:none; background:transparent; font-size:16px; border-bottom:1px solid var(--line);">
             </div>
             <div class="combat-stat"><label>Deslocamento</label><input id="speed" type="text" value="9m"></div>
-            <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8"></div>
+            <div class="combat-stat"><label>Dado de Vida</label><input id="hitDice" type="text" placeholder="ex: 1d8" oninput="atualizarDicasVida()"></div>
           </div>
           <div class="hp-row">
             <div class="combat-stat"><label>PV Atual</label><input id="hpCur" type="number" value="0"></div>
             <div class="combat-stat"><label>PV Máximo</label><input id="hpMax" type="number" value="0"></div>
             <div class="combat-stat"><label>PV Temporário</label><input id="hpTemp" type="number" value="0"></div>
           </div>
+          <div id="dicaVida" class="dica-vida"></div>
 
         </div>
 
@@ -1126,7 +1131,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 1.9
+    // (VERSÃO ATUAL) 2.0
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1146,7 +1151,10 @@
     // 1.7 - Uma linha só com # encerra o subcartão (o texto abaixo dela não entra mais nele).
     // 1.8 - Corrigido: botões dos retratos estouravam a tela no celular (agora quebram linha dentro de cada retrato).
     // 1.9 - Login com Google só para o dono (edita); quem não entrou vê a ficha em MODO LEITURA (para o mestre). Requer as regras novas no Firestore.
-    const FICHA_VERSAO = '1.9';
+    // 2.0 - Classe e Subclasse viram listas de seleção (Livro do Jogador 2014): preenchem dado de vida, salvaguardas,
+    //       conjurador (inclui Cavaleiro Arcano/Trapaceiro Arcano) e recursos; "Outra" permite digitar homebrew.
+    //       Dica de PV (média) e total de Dados de Vida pelo nível — sugestões, nunca sobrescrevem o que você digitou.
+    const FICHA_VERSAO = '2.0';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -1267,6 +1275,122 @@
       feiticeiro:  { nome: 'Feiticeiro',  recursos: { progressao: 'Características', truques: 'Truques',                slots: 'Espaços de Magia',  especial: 'Pontos de Feitiçaria' }, usaMagia: true, conjurador: 'full', dadoVida: 'd6' }
     };
 
+    /* ---------------------------------------------------------
+      LISTAS DE CLASSE E SUBCLASSE (Livro do Jogador, 2014)
+    --------------------------------------------------------- */
+    const SUBCLASSES = {
+      barbaro: ['Caminho do Furioso', 'Caminho do Guerreiro Totêmico'],
+      bardo: ['Colégio do Conhecimento', 'Colégio da Bravura'],
+      bruxo: ['A Arquifada', 'O Corruptor', 'O Grande Antigo'],
+      clerigo: ['Domínio do Conhecimento', 'Domínio da Enganação', 'Domínio da Guerra', 'Domínio da Luz', 'Domínio da Natureza', 'Domínio da Tempestade', 'Domínio da Vida'],
+      druida: ['Círculo da Terra', 'Círculo da Lua'],
+      feiticeiro: ['Linhagem Dracônica', 'Magia Selvagem'],
+      guerreiro: ['Campeão', 'Cavaleiro Arcano', 'Mestre de Batalha'],
+      ladino: ['Ladrão', 'Assassino', 'Trapaceiro Arcano'],
+      mago: ['Escola de Abjuração', 'Escola de Adivinhação', 'Escola de Conjuração', 'Escola de Encantamento', 'Escola de Evocação', 'Escola de Ilusão', 'Escola de Necromancia', 'Escola de Transmutação'],
+      monge: ['Caminho da Mão Aberta', 'Caminho da Sombra', 'Caminho dos Quatro Elementos'],
+      paladino: ['Juramento de Devoção', 'Juramento dos Anciões', 'Juramento de Vingança'],
+      patrulheiro: ['Conclave da Besta', 'Conclave do Caçador', 'Conclave do Rastreador']
+    };
+    // Nível em que a subclasse é escolhida (só para avisar na lista)
+    const NIVEL_SUBCLASSE = { clerigo: 1, bruxo: 1, feiticeiro: 1, druida: 2, mago: 2 };
+    // Salvaguardas em que a classe tem proficiência
+    const SALVAGUARDAS_CLASSE = {
+      barbaro: ['FOR', 'CON'], bardo: ['DES', 'CAR'], bruxo: ['SAB', 'CAR'], clerigo: ['SAB', 'CAR'], druida: ['INT', 'SAB'],
+      feiticeiro: ['CON', 'CAR'], guerreiro: ['FOR', 'CON'], ladino: ['DES', 'INT'], mago: ['INT', 'SAB'], monge: ['FOR', 'DES'],
+      paladino: ['SAB', 'CAR'], patrulheiro: ['FOR', 'DES']
+    };
+    const SUBCLASSE_CONJURADORA = { 'Cavaleiro Arcano': 'third', 'Trapaceiro Arcano': 'third' };
+    const semAcento = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+    function montarSelectsClasse() {
+      const sc = document.getElementById('selClasse');
+      if (!sc) return;
+      const nomes = Object.keys(CLASS_CONFIG).map(id => [id, CLASS_CONFIG[id].nome]).sort((a, b) => a[1].localeCompare(b[1], 'pt'));
+      sc.innerHTML = '<option value="">— escolha —</option>' + nomes.map(([id, n]) => `<option value="${id}">${n}</option>`).join('') + '<option value="__outra">✎ Outra (digitar)</option>';
+    }
+    function opcoesSubclasse(classeId) {
+      const lista = SUBCLASSES[classeId] || [];
+      const nv = NIVEL_SUBCLASSE[classeId] || 3;
+      return `<option value="">— nível ${nv}+ —</option>` + lista.map(n => `<option value="${n}">${n}</option>`).join('') + '<option value="__outra">✎ Outra (homebrew)</option>';
+    }
+    // Lê o texto do campo Classe e acerta as duas listas (o texto continua sendo o que é salvo)
+    function sincronizarSelectsClasse() {
+      const sc = document.getElementById('selClasse'), ss = document.getElementById('selSubclasse'), txt = document.getElementById('charClass');
+      if (!sc || !ss || !txt) return;
+      const t = txt.value.trim();
+      const id = detectarClasse(t);
+      const classeOutra = sc.value === '__outra' && !id;
+      if (id) sc.value = id; else sc.value = (t || classeOutra) ? '__outra' : '';
+      let subOutra = false;
+      if (id) {
+        ss.disabled = false;
+        const antes = ss.value;
+        ss.innerHTML = opcoesSubclasse(id);
+        const alvo = semAcento(t);
+        const achada = (SUBCLASSES[id] || []).find(n => alvo.includes(semAcento(n)));
+        if (achada) ss.value = achada;
+        else if (antes === '__outra' || /\(.+\)/.test(t)) { ss.value = '__outra'; subOutra = true; }
+        else ss.value = '';
+      } else {
+        ss.innerHTML = '<option value="">—</option>';
+        ss.disabled = true;
+      }
+      document.getElementById('campoClasseLivre').style.display = (sc.value === '__outra' || subOutra) ? '' : 'none';
+    }
+    function aoEscolherClasse() {
+      const sc = document.getElementById('selClasse'), txt = document.getElementById('charClass');
+      const anterior = detectarClasse(txt.value);
+      if (sc.value === '__outra') { document.getElementById('campoClasseLivre').style.display = ''; txt.focus(); return; }
+      txt.value = sc.value ? CLASS_CONFIG[sc.value].nome : '';
+      const ss = document.getElementById('selSubclasse'); if (ss) ss.value = '';
+      aplicarSalvaguardasClasse(anterior, sc.value || null);
+      // tira os recursos automáticos da classe anterior que você ainda não mexeu (sem vínculo, nota ou ajuste)
+      if (anterior && anterior !== sc.value) {
+        const velhos = RECURSOS_POR_CLASSE[anterior] || [];
+        RECURSOS = RECURSOS.filter(r => !(velhos.includes(r.auto) && !r.ref && !r.nota && !(r.ajustes || []).length));
+        renderRecursos();
+      }
+      aplicarConfiguracaoClasse(true);
+      onAttrChange();
+    }
+    function aoEscolherSubclasse() {
+      const sc = document.getElementById('selClasse'), ss = document.getElementById('selSubclasse'), txt = document.getElementById('charClass');
+      const id = sc.value;
+      if (!CLASS_CONFIG[id]) return;
+      if (ss.value === '__outra') { document.getElementById('campoClasseLivre').style.display = ''; txt.focus(); return; }
+      txt.value = ss.value ? `${CLASS_CONFIG[id].nome} (${ss.value})` : CLASS_CONFIG[id].nome;
+      const tipo = SUBCLASSE_CONJURADORA[ss.value];
+      const casterSel = document.getElementById('casterType');
+      if (tipo && casterSel.value === 'none') { casterSel.value = tipo; applyCasterTable(); }
+      aplicarConfiguracaoClasse(true);
+      saveState();
+    }
+    // Marca as salvaguardas da classe nova (e desmarca as da classe anterior); outras marcações suas ficam como estão
+    function aplicarSalvaguardasClasse(antiga, nova) {
+      (SALVAGUARDAS_CLASSE[antiga] || []).forEach(k => { const c = document.getElementById('saveProf_' + k); if (c) c.checked = false; });
+      (SALVAGUARDAS_CLASSE[nova] || []).forEach(k => { const c = document.getElementById('saveProf_' + k); if (c) c.checked = true; });
+    }
+
+    // Dica de vida: total de Dados de Vida e PV médio. É só uma sugestão: o PV Máximo que você digitou não muda sozinho.
+    function atualizarDicasVida() {
+      const el = document.getElementById('dicaVida');
+      if (!el) return;
+      const m = String(document.getElementById('hitDice').value).match(/d\s*(\d+)/i);
+      if (!m) { el.innerHTML = ''; return; }
+      const die = Number(m[1]), lvl = getLevel();
+      const con = mod(getAttrVal('CON'));
+      const pv = die + con + (lvl - 1) * (Math.floor(die / 2) + 1 + con);
+      el.innerHTML = `<span>🎲 Dados de Vida no nível ${lvl}: <b>${lvl}d${die}</b></span>` +
+        `<span>💡 PV médio (CON ${fmt(con)}): <b>${Math.max(pv, lvl)}</b></span>` +
+        `<button class="small-btn so-editor" onclick="usarPvSugerido(${Math.max(pv, lvl)})">Usar como PV máximo</button>`;
+    }
+    function usarPvSugerido(v) {
+      const campo = document.getElementById('hpMax');
+      if (campo.value && Number(campo.value) > 0 && !confirm(`Trocar o PV máximo atual (${campo.value}) por ${v}?`)) return;
+      campo.value = v; campo.dispatchEvent(new Event('input', { bubbles: true })); saveState();
+    }
+
     // Detecta a classe pelo texto do campo. Vale a palavra que aparece PRIMEIRO no texto
     // (assim "Clérigo (Domínio da Guerra)" não vira Guerreiro) e ignora acentos.
     function detectarClasse(texto) {
@@ -1303,6 +1427,7 @@
     const DADOS_VIDA_PADRAO = ['', '1d8', 'd6', 'd8', 'd10', 'd12'];
     const TITULOS_PADRAO = { truques: 'Truques', slots: 'Espaços de Magia', progressao: 'Recursos Desbloqueados', especial: 'Recurso Especial de Classe / Subclasse' };
     let classeAplicada = null; // classe cuja tabela está preenchida agora
+    montarSelectsClasse();
 
     function definirTitulosProgressao(t) {
       const h3 = document.querySelector('#progressionTable thead th:nth-child(3)');
@@ -1331,6 +1456,8 @@
     function aplicarConfiguracaoClasse(deUsuario) {
       const classeInput = document.getElementById('charClass');
       if (!classeInput) return;
+      sincronizarSelectsClasse();
+      atualizarDicasVida();
 
       const classeId = detectarClasse(classeInput.value);
 
@@ -1747,6 +1874,7 @@
       updateSpellDC();
       calcularIniciativa();
       atualizarBadges();
+      atualizarDicasVida();
       saveState();
     }
 
