@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 2.3 -->
+<!-- (VERSÃO ATUAL) 2.4 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -648,6 +648,16 @@
     .pr-topo h2 { margin: 0; font-size: 19px; color: var(--moss); flex: 1; }
     .pr-acoes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
     .pr-acoes a { color: var(--link); }
+    .hab-grupo { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; background: var(--paper); }
+    .hab-grupo > summary { cursor: pointer; padding: 8px 10px; font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; font-weight: bold; color: var(--moss); text-transform: uppercase; letter-spacing: .4px; }
+    .hab-lista { padding: 0 10px 8px; }
+    .hab-item { border-top: 1px solid var(--line); padding: 7px 0; }
+    .hab-nome { font-weight: bold; font-size: 14px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .hab-nv { font-family: Arial, Helvetica, sans-serif; font-size: 10.5px; font-weight: bold; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 0 6px; }
+    .hab-txt { font-size: 13px; line-height: 1.5; margin-top: 3px; }
+    .hab-agora { font-size: 12.5px; line-height: 1.45; margin-top: 3px; color: var(--moss); }
+    .hab-vazio, .hab-nota { color: var(--muted); font-family: Arial, Helvetica, sans-serif; font-size: 12px; padding: 4px 2px 8px; }
+    @media print { .hab-grupo { break-inside: auto; } }
     .pr-secao { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px; background: var(--paper); }
     .pr-secao > summary {
       cursor: pointer; padding: 8px 10px; font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; font-weight: bold;
@@ -839,7 +849,7 @@
       .col-esq, .col-dir { display: contents; }
       .bx-attr { order: 1; } .bx-comb { order: 2; } #boxRecursos { order: 3; } #boxEfeitos { order: 4; }
       .bx-atq { order: 5; } .bx-peric { order: 6; } .bx-slots { order: 7; } .bx-esp { order: 8; }
-      .bx-equip { order: 9; } #boxRefs { order: 10; } .bx-orig { order: 11; } .bx-prog { order: 12; }
+      .bx-equip { order: 9; } #boxHab { order: 10; } #boxRefs { order: 11; } .bx-orig { order: 12; } .bx-prog { order: 13; }
       .spell-header-grid { grid-template-columns: 1fr 1fr; }
       .spellbook-grid { grid-template-columns: 1fr; }
       .retratos-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -1052,6 +1062,11 @@
           <textarea id="equipmentText" class="freeform" style="min-height:110px;" placeholder="Liste equipamentos, pacotes de aventureiro, moedas e itens de interpretação..."></textarea>
         </div>
 
+        <div class="box" id="boxHab">
+          <h3>Habilidades &amp; Poderes</h3>
+          <div id="habLista"></div>
+        </div>
+
         <div class="box" id="boxRefs">
           <h3>Referências (homebrew, poderes, imagens)</h3>
           <div class="refs-topo"><input type="text" id="refsFiltro" placeholder="Buscar cartão..." oninput="renderRefs()"><button class="small-btn" onclick="editarCartao(null)">+ Novo cartão</button></div>
@@ -1177,7 +1192,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 2.3
+    // (VERSÃO ATUAL) 2.4
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1205,7 +1220,8 @@
     // 2.2 - Clipe homebrew vira Raça, Classe ou Subclasse: formulário "Usar como" no editor do clipe (atributos, deslocamento,
     //       perícias, dado de vida, salvaguardas, conjurador, recursos por nível). Aparece nas listas em "Homebrew".
     // 2.3 - Login lembrado no aparelho (persistência explícita + pedido de armazenamento permanente).
-    const FICHA_VERSAO = '2.3';
+    // 2.4 - Quadro "Habilidades & Poderes": lista, já com resumo do que faz, as habilidades da classe até o nível atual.
+    const FICHA_VERSAO = '2.4';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -1387,6 +1403,42 @@
     function nomeClasse(key) { const c = cartaoDeKey(key); return c ? c.titulo : (CLASS_CONFIG[key] ? CLASS_CONFIG[key].nome : ''); }
     function salvaguardasDe(key) { const c = cartaoDeKey(key); return c ? (c.mec.saves || []) : (SALVAGUARDAS_CLASSE[key] || []); }
     function chavesRecursosClasse(key) { const c = cartaoDeKey(key); return c ? chavesRecursosCard(c) : (RECURSOS_POR_CLASSE[key] || []); }
+
+
+    /* ---------------------------------------------------------
+       HABILIDADES & PODERES (resumos próprios das características de classe, regras 2014)
+    --------------------------------------------------------- */
+    const HAB_CLASSE = {"barbaro":[[1,"Fúria","Ação bônus: entra em fúria por 1 min (usos/descanso longo pela tabela). Vantagem em testes/salvaguardas de FOR, bônus de dano corpo a corpo com FOR e resistência a dano contundente/cortante/perfurante. Sem armadura pesada nem magias; acaba se você não atacar nem sofrer dano."],[1,"Defesa sem Armadura","Sem armadura, sua CA = 10 + mod. DES + mod. CON. Pode usar escudo."],[2,"Ataque Descuidado","Ao fazer o primeiro ataque do turno, pode atacar sem cuidado: vantagem nos ataques corpo a corpo com FOR neste turno, mas ataques contra você têm vantagem até seu próximo turno."],[2,"Sentido de Perigo","Vantagem em salvaguardas de DES contra efeitos que você possa ver (armadilhas, magias). Não funciona se estiver cego, surdo ou incapacitado."],[3,"Caminho Primitivo","Escolha sua subclasse (Furioso ou Guerreiro Totêmico); ela dá características nos níveis 3, 6, 10 e 14."],[5,"Ataque Extra","Ao usar a ação Atacar, ataca duas vezes."],[5,"Movimento Rápido","Sem armadura pesada, seu deslocamento aumenta em 3 m."],[7,"Instinto Selvagem","Vantagem na iniciativa. Se for surpreendido, pode agir normalmente se entrar em fúria antes de qualquer outra coisa."],[9,"Crítico Brutal (1 dado)","Em acerto crítico corpo a corpo, rola mais 1 dado de dano da arma."],[11,"Fúria Implacável","Se cair a 0 PV em fúria, pode fazer salvaguarda de CON CD 10 para ficar com 1 PV. A CD sobe 5 a cada uso seguinte, até um descanso curto/longo."],[13,"Crítico Brutal (2 dados)","Em crítico corpo a corpo, rola mais 2 dados de dano da arma."],[15,"Fúria Persistente","Sua fúria só termina se você ficar inconsciente ou escolher encerrá-la (não acaba mais por falta de ataque/dano)."],[17,"Crítico Brutal (3 dados)","Em crítico corpo a corpo, rola mais 3 dados de dano da arma."],[18,"Força Indomável","Se o total de um teste de FOR for menor que seu valor de FOR, use o valor de FOR no lugar."],[20,"Campeão Primitivo","FOR e CON aumentam em 4; o máximo de cada passa a 24."]],"bardo":[[1,"Inspiração de Bardo (d6)","Ação bônus: dá a uma criatura a até 18 m um dado de inspiração d6 para somar a um teste, ataque ou salvaguarda dentro de 10 min. Usos = mod. CAR (mín. 1), recarrega no descanso longo."],[1,"Conjuração","Conjura magias de bardo usando CAR. Conhece truques e magias conhecidas pela tabela; pode usar um instrumento musical como foco."],[2,"Pau para Toda Obra","Soma metade do bônus de proficiência (arredondado p/ baixo) em testes de atributo sem proficiência."],[2,"Canção de Descanso (d6)","Em descanso curto, quem ouvir sua música e gastar Dados de Vida recupera +1d6 PV extras."],[3,"Colégio de Bardo","Escolha sua subclasse (Conhecimento ou Bravura); ela dá características nos níveis 3, 6 e 14."],[3,"Especialização","Escolha 2 perícias proficientes: seu bônus de proficiência é dobrado nelas."],[5,"Inspiração de Bardo (d8)","O dado de inspiração passa a d8."],[5,"Fonte de Inspiração","Sua Inspiração de Bardo agora recarrega em descanso curto ou longo."],[6,"Contracanto","Ação: até o fim do seu próximo turno, você e aliados a 9 m têm vantagem em salvaguardas contra amedrontado e enfeitiçado."],[9,"Canção de Descanso (d8)","Os PV extras da Canção de Descanso passam a 1d8."],[10,"Inspiração de Bardo (d10)","O dado de inspiração passa a d10."],[10,"Especialização","Escolha mais 2 perícias para dobrar a proficiência."],[10,"Segredos Mágicos","Aprende 2 magias de qualquer classe (de um nível que você possa conjurar); contam como magias de bardo."],[13,"Canção de Descanso (d10)","Os PV extras da Canção de Descanso passam a 1d10."],[14,"Segredos Mágicos","Aprende mais 2 magias de qualquer classe."],[15,"Inspiração de Bardo (d12)","O dado de inspiração passa a d12."],[17,"Canção de Descanso (d12)","Os PV extras da Canção de Descanso passam a 1d12."],[18,"Segredos Mágicos","Aprende mais 2 magias de qualquer classe."],[20,"Inspiração Superior","Ao rolar iniciativa sem usos de Inspiração de Bardo restantes, recupera 1 uso."]],"clerigo":[[1,"Conjuração","Conjura magias de clérigo usando SAB. Prepara magias por dia (nível + mod. SAB) da lista de clérigo; usa símbolo sagrado como foco. Pode conjurar rituais."],[1,"Domínio Divino","Escolha sua subclasse (Domínio); ela dá magias de domínio e características nos níveis 1, 2, 6, 8 e 17."],[2,"Canalizar Divindade (1/descanso)","Ação: canaliza energia divina 1 vez entre descansos curtos/longos. Opções: Expulsar Mortos-Vivos (CD de magia, SAB; criaturas a 9 m que falharem fogem por 1 min) e a opção do seu Domínio."],[5,"Destruir Mortos-Vivos (ND 1/2)","Mortos-vivos que falham na salvaguarda de Expulsar são destruídos se ND 1/2 ou menos."],[6,"Canalizar Divindade (2/descanso)","Passa a ter 2 usos entre descansos."],[8,"Destruir Mortos-Vivos (ND 1)","O limite de ND sobe para 1."],[10,"Intervenção Divina","Ação: pede ajuda ao seu deus; rola d100 e, se tirar ≤ seu nível de clérigo, a intervenção ocorre (decisão do mestre). Sucesso: não pode usar por 7 dias. Falha: pode tentar de novo no descanso longo."],[11,"Destruir Mortos-Vivos (ND 2)","O limite de ND sobe para 2."],[14,"Destruir Mortos-Vivos (ND 3)","O limite de ND sobe para 3."],[17,"Destruir Mortos-Vivos (ND 4)","O limite de ND sobe para 4."],[18,"Canalizar Divindade (3/descanso)","Passa a ter 3 usos entre descansos."],[20,"Intervenção Divina Aprimorada","A Intervenção Divina funciona automaticamente, sem rolar."]],"druida":[[1,"Druídico","Você conhece o idioma secreto dos druidas e pode deixar mensagens ocultas; quem o conhece as percebe."],[1,"Conjuração","Conjura magias de druida usando SAB. Prepara magias por dia (nível + mod. SAB); usa foco druídico. Pode conjurar rituais."],[2,"Forma Selvagem (ND 1/4, sem nadar/voar)","Ação: vira uma fera que você já viu (2 usos, recarrega em descanso curto/longo). Dura metade do nível em horas. Mantém Int/Sab/Car, usa PV e características físicas da fera; ao zerar, volta ao normal. Limite: ND 1/4, sem natação nem voo."],[2,"Círculo Druídico","Escolha sua subclasse (Terra ou Lua); ela dá características nos níveis 2, 6, 10 e 14."],[4,"Forma Selvagem (ND 1/2, pode nadar)","Passa a poder assumir feras ND 1/2 com deslocamento de natação."],[8,"Forma Selvagem (ND 1, pode voar)","Passa a poder assumir feras ND 1, incluindo com deslocamento de voo."],[18,"Corpo Atemporal","Você envelhece 1 ano a cada 10 que passam."],[18,"Conjuração Bestial","Pode conjurar magias em Forma Selvagem, usando os componentes verbais e somáticos da fera."],[20,"Arquidruida","Usos de Forma Selvagem ilimitados. Ignora componentes verbais/somáticos e materiais baratos de magias de druida."]],"guerreiro":[[1,"Estilo de Luta","Escolha um estilo: Arquearia (+2 ataque à distância), Defesa (+1 CA com armadura), Duelismo (+2 dano com arma em uma mão), Combate com Armas Grandes (relança 1 e 2 no dano), Proteção (reação impõe desvantagem a ataque contra aliado) ou Combate com Duas Armas (soma mod. no ataque extra)."],[1,"Retomar o Fôlego","Ação bônus: recupera 1d10 + nível de guerreiro em PV. Uma vez por descanso curto/longo."],[2,"Surto de Ação","No seu turno, ganha 1 ação adicional. Uma vez por descanso curto/longo."],[3,"Arquétipo Marcial","Escolha sua subclasse (Campeão, Mestre de Batalha ou Cavaleiro Arcano); ela dá características nos níveis 3, 7, 10, 15 e 18."],[5,"Ataque Extra","Ao usar a ação Atacar, ataca duas vezes."],[9,"Indomável (1 uso)","Pode refazer uma salvaguarda que falhou, usando o novo resultado. 1 uso por descanso longo."],[11,"Ataque Extra (2)","Ao usar a ação Atacar, ataca três vezes."],[13,"Indomável (2 usos)","Pode usar Indomável 2 vezes entre descansos longos (1 por salvaguarda)."],[17,"Surto de Ação (2 usos)","Pode usar Surto de Ação 2 vezes por descanso (só 1 por turno)."],[17,"Indomável (3 usos)","Pode usar Indomável 3 vezes entre descansos longos."],[20,"Ataque Extra (3)","Ao usar a ação Atacar, ataca quatro vezes."]],"ladino":[[1,"Especialização","Escolha 2 perícias (ou 1 + ferramentas de ladrão): seu bônus de proficiência é dobrado nelas."],[1,"Ataque Furtivo","1x por turno, +dano extra (1d6 no nv 1, +1d6 a cada 2 níveis) se tiver vantagem no ataque, ou se um aliado inimigo do alvo estiver a 1,5 m sem desvantagem. Exige arma de acuidade ou à distância."],[1,"Gíria de Ladrão","Conhece o código secreto de ladrões: idioma e sinais escondidos em conversas comuns."],[2,"Ação Astuta","Ação bônus a cada turno para Correr, Desengajar ou Esconder-se."],[3,"Arquétipo de Ladino","Escolha sua subclasse (Ladrão, Assassino ou Trapaceiro Arcano); ela dá características nos níveis 3, 9, 13 e 17."],[5,"Esquiva Sobrenatural","Reação: reduz à metade o dano de um ataque de uma criatura que você possa ver."],[6,"Especialização","Escolha mais 2 perícias para dobrar a proficiência."],[7,"Evasão","Em salvaguardas de DES para metade do dano: sucesso = nenhum dano, falha = metade."],[11,"Talento Confiável","Em testes de perícia com proficiência, qualquer d20 menor que 10 conta como 10."],[14,"Sentido Cego","Percebe criaturas escondidas ou invisíveis a até 3 m."],[15,"Mente Escorregadia","Ganha proficiência em salvaguardas de SAB."],[18,"Elusivo","Nenhum ataque tem vantagem contra você, a não ser que esteja incapacitado."],[20,"Golpe de Sorte","Se errar um ataque ou falhar num teste, pode transformar o d20 em 20. Uma vez por descanso curto/longo."]],"mago":[[1,"Conjuração","Conjura magias de mago usando INT. Tem grimório com 6 magias de 1º nível; prepara (nível + mod. INT) magias por dia. Pode copiar magias para o grimório e conjurar rituais direto dele. Foco arcano permitido."],[1,"Recuperação Arcana","1x/dia, em descanso curto, recupera espaços de magia gastos com nível combinado ≤ metade do nível de mago (arredondado p/ cima), nenhum de 6º ou maior."],[2,"Tradição Arcana","Escolha sua subclasse (uma das 8 Escolas de magia); ela dá características nos níveis 2, 6, 10 e 14."],[18,"Maestria de Magias","Escolha uma magia de 1º e uma de 2º nível do seu grimório: pode conjurá-las no nível base sem gastar espaço."],[20,"Assinatura de Magias","Escolha 2 magias de 3º nível do grimório: sempre preparadas, conjurável 1x cada por descanso curto/longo sem gastar espaço."]],"monge":[[1,"Defesa sem Armadura","Sem armadura e sem escudo, CA = 10 + mod. DES + mod. SAB."],[1,"Artes Marciais","Sem armadura/escudo, usando ataques desarmados ou armas de monge: usa DES em vez de FOR; dano desarmado usa um dado de artes marciais (d4 no nv 1, sobe com o nível); ao atacar, ganha 1 ataque desarmado como ação bônus."],[2,"Ki","Pontos de ki = nível de monge, recuperam em descanso curto/longo. Gaste 1 para: Rajada de Golpes (2 ataques desarmados como ação bônus), Defesa Paciente (Esquiva como ação bônus) ou Passo do Vento (Desengajar/Correr bônus, salto dobrado). CD de ki = 8 + prof. + SAB."],[2,"Movimento sem Armadura","Sem armadura/escudo, +3 m de deslocamento (aumenta com o nível)."],[3,"Tradição Monástica","Escolha sua subclasse (Mão Aberta, Sombra ou Quatro Elementos); ela dá características nos níveis 3, 6, 11 e 17."],[3,"Defletir Projéteis","Reação: reduz o dano de ataque à distância em 1d10 + mod. DES + nível de monge. Se reduzir a 0, pode pegar o projétil e gastar 1 ki para devolver o ataque."],[4,"Queda Lenta","Reação: reduz dano de queda em 5 × nível de monge."],[5,"Ataque Extra","Ao usar a ação Atacar, ataca duas vezes."],[5,"Golpe Atordoante","Ao acertar corpo a corpo, gaste 1 ki: o alvo faz salvaguarda de CON ou fica atordoado até o fim do seu próximo turno."],[6,"Golpes de Ki","Seus ataques desarmados contam como mágicos para vencer resistência/imunidade a dano não mágico."],[7,"Evasão","Em salvaguardas de DES para metade do dano: sucesso = nenhum dano, falha = metade."],[7,"Mente Tranquila","Ação: encerra em você um efeito de enfeitiçado ou amedrontado."],[10,"Pureza Corporal","Imune a doenças e veneno."],[13,"Língua do Sol e da Lua","Entende qualquer idioma falado e todas as criaturas entendem o que você fala."],[14,"Alma de Diamante","Proficiência em todas as salvaguardas. Pode gastar 1 ki para refazer uma salvaguarda que falhou."],[15,"Corpo Atemporal","Não sofre efeitos de envelhecimento, não precisa de comida nem água."],[18,"Corpo Vazio","Gaste 4 ki: invisível por 1 min e resistência a todos os danos exceto energético. Com 8 ki, lança Projeção Astral em você."],[20,"Perfeição Interior","Ao rolar iniciativa sem ki, recupera 4 pontos de ki."]],"paladino":[[1,"Sentido Divino","Ação: até o fim do próximo turno, detecta celestiais, ínferos e mortos-vivos a até 18 m e locais consagrados/profanados. Usos = 1 + mod. CAR por descanso longo."],[1,"Imposição de Mãos","Reserva de cura = 5 × nível de paladino, recarrega no descanso longo. Ação: toca para curar PV da reserva, ou gaste 5 pontos para curar doença/veneno."],[2,"Estilo de Luta","Escolha um estilo: Defesa (+1 CA com armadura), Duelismo (+2 dano com arma em uma mão), Combate com Armas Grandes (relança 1 e 2 no dano) ou Proteção (reação impõe desvantagem a ataque contra aliado)."],[2,"Conjuração","Conjura magias de paladino usando CAR. Prepara (nível/2 + mod. CAR) magias por dia; usa símbolo sagrado como foco."],[2,"Destruição Divina","Ao acertar corpo a corpo, gaste um espaço de magia para causar 2d8 radiante extra (+1d8 por nível do espaço acima de 1º, máx. 5d8; +1d8 contra ínferos/mortos-vivos)."],[3,"Saúde Divina","Imune a doenças."],[3,"Juramento Sagrado","Escolha sua subclasse (Devoção, Anciões ou Vingança); ela dá magias de juramento, Canalizar Divindade e características nos níveis 3, 7, 15 e 20."],[5,"Ataque Extra","Ao usar a ação Atacar, ataca duas vezes."],[6,"Aura de Proteção","Você e aliados a até 3 m somam seu mod. CAR (mín. +1) em todas as salvaguardas, enquanto você estiver consciente."],[10,"Aura de Coragem","Você e aliados a até 3 m não podem ser amedrontados enquanto você estiver consciente."],[11,"Destruição Divina Aprimorada","Todos os seus ataques corpo a corpo com arma causam +1d8 de dano radiante."],[14,"Toque Purificador","Ação: encerra uma magia em você ou em criatura voluntária. Usos = mod. CAR (mín. 1) por descanso longo."],[18,"Aprimoramento de Auras","O alcance das suas auras sobe para 9 m."]],"patrulheiro":[[1,"Inimigo Favorito","Escolha um tipo de inimigo: vantagem em testes para rastrear e lembrar informações sobre eles. Aprende 1 idioma desse tipo."],[1,"Explorador Natural","Escolha um terreno favorito: em viagens por ele, dobra sua proficiência em testes de INT/SAB ligados ao terreno, não se perde, o grupo ignora terreno difícil, você encontra o dobro de comida e se move furtivo em ritmo normal."],[2,"Estilo de Luta","Escolha um estilo: Arquearia (+2 ataque à distância), Defesa (+1 CA com armadura), Duelismo (+2 dano com arma em uma mão) ou Combate com Duas Armas (soma mod. no ataque extra)."],[2,"Conjuração","Conjura magias de patrulheiro usando SAB, com magias conhecidas pela tabela; usa foco druídico."],[3,"Arquétipo de Patrulheiro","Escolha sua subclasse (Conclave do Caçador, da Besta ou do Rastreador); ela dá características nos níveis 3, 7, 11 e 15."],[3,"Consciência Primitiva","Gasta 1 espaço de magia: por 1 min por nível do espaço, sente a presença de aberrações, celestiais, dragões, elementais, feéricos, ínferos e mortos-vivos a até 1,5 km (9 km em terreno favorito)."],[5,"Ataque Extra","Ao usar a ação Atacar, ataca duas vezes."],[6,"Inimigo Favorito e Explorador Aprimorados","Escolha mais um inimigo favorito (+1 idioma) e mais um terreno favorito."],[8,"Passos de Terreno","Terreno difícil não custa deslocamento extra, e plantas mágicas/comuns não impedem seu avanço."],[10,"Explorador Aprimorado","Escolha mais um terreno favorito."],[10,"Camuflagem Natural","Gaste 1 minuto se camuflando com materiais naturais: +10 em testes de Furtividade enquanto ficar parado, sem se mover nem agir."],[14,"Inimigo Favorito Aprimorado","Escolha mais um inimigo favorito."],[14,"Desaparecer","Pode se esconder como ação bônus e não pode ser rastreado por meios não mágicos."],[18,"Sentidos Selvagens","Sem visão, ainda percebe criaturas invisíveis/escondidas a até 9 m que não estejam escondidas por magia."],[20,"Matador de Inimigos","1x por turno, soma seu mod. SAB ao ataque ou dano contra um inimigo favorito."]],"bruxo":[[1,"Patrono Transcendental","Escolha sua subclasse (Arquifada, Corruptor ou Grande Antigo); ela dá características nos níveis 1, 6, 10 e 14."],[1,"Magia de Pacto","Conjura magias de bruxo usando CAR. Tem poucos espaços de magia (1 a 4), todos do mesmo nível (máx. 5º), que recarregam em descanso curto ou longo. Foco arcano permitido."],[2,"Invocações Místicas","Escolha 2 invocações (mais ao subir de nível): melhorias mágicas permanentes, algumas com pré-requisito de nível/pacto. Pode trocar 1 ao subir de nível."],[3,"Dádiva do Pacto","Escolha: Pacto da Corrente (familiar especial), Pacto da Lâmina (arma mágica invocada) ou Pacto do Tomo (Livro das Sombras com 3 truques extras)."],[11,"Arcana Mística (6º)","Escolha uma magia de 6º nível: conjurável 1x por descanso longo sem gastar espaço."],[13,"Arcana Mística (7º)","Escolha uma magia de 7º nível: conjurável 1x por descanso longo sem gastar espaço."],[15,"Arcana Mística (8º)","Escolha uma magia de 8º nível: conjurável 1x por descanso longo sem gastar espaço."],[17,"Arcana Mística (9º)","Escolha uma magia de 9º nível: conjurável 1x por descanso longo sem gastar espaço."],[20,"Mestre Transcendental","Ação: pede ajuda ao patrono; recupera todos os espaços de Magia de Pacto (se não tiver, inventa). 1x por descanso longo."]],"feiticeiro":[[1,"Conjuração","Conjura magias de feiticeiro usando CAR. Conhece magias fixas pela tabela (não prepara). Foco arcano permitido."],[1,"Origem de Feitiçaria","Escolha sua subclasse (Linhagem Dracônica ou Magia Selvagem); ela dá características nos níveis 1, 6, 14 e 18."],[2,"Fonte de Magia (pontos = nível)","Pontos de feitiçaria = nível de feiticeiro (descanso longo recupera). Ação bônus: converte pontos em espaço de magia (1º=2 pts, 2º=3, 3º=5, 4º=6, 5º=7) ou espaço em pontos."],[3,"Metamagia","Escolha 2 opções de Metamagia (ex.: Magia Acelerada, Duplicada, Cuidadosa, Distante, Potencializada, Sutil, Dirigida); gaste pontos para modificar magias. Escolhe mais nos níveis 10 e 17."],[10,"Metamagia","Aprende mais 1 opção de Metamagia."],[17,"Metamagia","Aprende mais 1 opção de Metamagia."],[20,"Restauração Feiticeira","Em descanso curto, recupera 4 pontos de feitiçaria."]]};
+    function habBase(n) { return n.replace(/\s*\(.*\)\s*$/, ''); }
+    function habAgrupar(lista, lvl) {
+      const vis = lista.filter(f => f[0] <= lvl), grupos = [];
+      vis.forEach(f => {
+        const base = habBase(f[1]);
+        const g = grupos.find(x => x.base === base && (x.paren || /\(/.test(f[1])));
+        if (g) { g.ult = f; g.paren = true; } else grupos.push({ base, prim: f, ult: f, paren: /\(/.test(f[1]) });
+      });
+      return grupos;
+    }
+    function renderHabilidades() {
+      const el = document.getElementById('habLista'); if (!el) return;
+      const key = classeKeyAtual(), lvl = getLevel();
+      const lista = HAB_CLASSE[key];
+      let html = '';
+      if (lista) {
+        const itens = habAgrupar(lista, lvl).map(g => {
+          const mudou = g.ult !== g.prim;
+          return `<div class="hab-item"><div class="hab-nome">${escapeHtml(mudou ? g.ult[1] : g.prim[1])}<span class="hab-nv">Nv ${g.prim[0]}</span></div>
+            <div class="hab-txt">${escapeHtml(g.prim[2])}</div>${mudou ? `<div class="hab-agora">Agora (nv ${g.ult[0]}): ${escapeHtml(g.ult[2])}</div>` : ''}</div>`;
+        }).join('');
+        html = `<details class="hab-grupo" open><summary>Classe — ${escapeHtml(nomeClasse(key))} (nível ${lvl})</summary><div class="hab-lista">${itens}
+          <div class="hab-nota">Características de subclasse, raça e antecedente ainda não estão nesta lista — use os cartões em Referências.</div></div></details>`;
+      } else if (key) {
+        html = '<div class="hab-vazio">Classe homebrew: suas habilidades vêm dos cartões em Referências.</div>';
+      } else {
+        html = '<div class="hab-vazio">Escolha uma Classe lá em cima para ver as habilidades dela aqui.</div>';
+      }
+      el.innerHTML = html;
+    }
 
     function montarSelectsClasse() {
       const sc = document.getElementById('selClasse');
@@ -1787,6 +1839,7 @@
       const classeInput = document.getElementById('charClass');
       if (!classeInput) return;
       sincronizarSelectsClasse();
+      try { renderHabilidades(); } catch (e) {}
       sincronizarSelectsOrigem();
       atualizarDicasVida();
 
@@ -2232,6 +2285,7 @@
 
     function onLevelChange() {
       const level = getLevel();
+      try { renderHabilidades(); } catch (e) {}
       const pb = profBonusEf(level);
       document.getElementById('profBonusDisplay').textContent = fmt(pb);
 
@@ -2882,6 +2936,7 @@ function listarSecoes(texto) {
 }
 
 function renderRefs() {
+  try { renderHabilidades(); } catch (e) { /* ainda não pronto */ }
   try { registrarRecursosHomebrew(); montarSelectsClasse(); montarSelectsOrigem(); sincronizarSelectsClasse(); sincronizarSelectsOrigem(); } catch (e) { /* listas ainda não prontas */ }
   const lista = document.getElementById('refsLista');
   if (lista) {
