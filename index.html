@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 2.10 -->
+<!-- (VERSÃO ATUAL) 2.11 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -970,7 +970,7 @@
           <div class="attr-grid" id="attrGrid"></div>
         </div>
 
-        <div class="box bx-orig">
+        <div class="box bx-orig" style="display:none">
           <h3>Origens dos Bônus</h3>
           <textarea id="originsText" class="freeform" placeholder="Descreva de onde vêm os bônus (raça, classe, antecedente). Ex: +2 SAB (Raça), +1 CON (Antecedente)..."></textarea>
         </div>
@@ -989,6 +989,15 @@
           <div id="saveList" class="tag-list" style="margin-bottom:10px;"></div>
           <div style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:var(--moss);text-transform:uppercase;margin-bottom:3px;">Perícias</div>
           <div id="skillList" class="tag-list"></div>
+        </div>
+
+        <div class="box" id="boxEfeitos">
+          <h3>Efeitos Ativos</h3>
+          <div class="rec-topo">
+            <span class="rec-dica">Os bônus dos efeitos ligados são somados por fora e aparecem como "→ valor". O número que você digita (inclusive bônus que o mestre deu) nunca é alterado.</span>
+            <button class="small-btn" onclick="adicionarEfeito()">+ Efeito</button>
+          </div>
+          <div class="rec-grid" id="efeitosGrid"></div>
         </div>
 
         <div class="box bx-slots">
@@ -1046,15 +1055,6 @@
           <div class="rec-grid" id="recursosGrid"></div>
         </div>
 
-        <div class="box" id="boxEfeitos">
-          <h3>Efeitos Ativos</h3>
-          <div class="rec-topo">
-            <span class="rec-dica">Os bônus dos efeitos ligados são somados por fora e aparecem como "→ valor". O número que você digita (inclusive bônus que o mestre deu) nunca é alterado.</span>
-            <button class="small-btn" onclick="adicionarEfeito()">+ Efeito</button>
-          </div>
-          <div class="rec-grid" id="efeitosGrid"></div>
-        </div>
-
         <div class="box bx-atq">
           <h3>Ataques &amp; Armas</h3>
           <table class="data-table attack-table" id="attackTable">
@@ -1107,7 +1107,7 @@
       <div class="field name-field"><label>Nome do Personagem</label><input id="charName2" type="text" placeholder="Nome do personagem" oninput="syncNameBack()"></div>
     </div>
 
-    <div class="box">
+    <div class="box" id="boxConj">
       <h3>Conjuração <button class="small-btn so-editor" style="background:var(--btn2);margin-left:8px;" onclick="abrirMagias()">📖 Magias da classe</button></h3>
       <div class="spell-header-grid">
         <div class="field">
@@ -1230,7 +1230,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 2.10
+    // (VERSÃO ATUAL) 2.11
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1265,7 +1265,8 @@
     // 2.8 - Navegador de magias por classe (lista do livro, 361 magias): adiciona o cartão da magia já com tempo, alcance, componentes e duração.
     // 2.9 - Magias: cada magia agora traz um resumo do efeito (texto próprio) no navegador e no cartão adicionado.
     // 2.10 - Efeitos Ativos: a barra de novo bônus só aparece depois de clicar no "+".
-    const FICHA_VERSAO = '2.10';
+    // 2.11 - 1ª coluna: Atributos, Bônus & Perícias, Efeitos Ativos (sem "Origens dos Bônus"); Conjuração/Espaços de Magia somem para classes sem magia.
+    const FICHA_VERSAO = '2.11';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -1914,15 +1915,24 @@
       if (especial) especial.textContent = t.especial;
     }
 
-    // Mostra a tabela de espaços de magia se a classe usa magia OU se o tipo de conjurador foi escolhido
+    // Espaços de Magia + Conjuração + Grimório só aparecem se a classe usa magia, se o tipo de conjurador foi escolhido,
+    // se é Cavaleiro Arcano/Trapaceiro Arcano ou se já existem magias na ficha. "Origens dos Bônus" só aparece se tiver texto antigo.
     function atualizarVisibilidadeSlots() {
       const slotBox = document.querySelector('.box:has(.slot-table)');
       if (!slotBox) return;
-      const classeId = detectarClasse(document.getElementById('charClass').value);
+      const txt = document.getElementById('charClass').value;
+      const classeId = detectarClasse(txt);
       const usaMagia = classeId ? CLASS_CONFIG[classeId].usaMagia : true;
       const tipo = document.getElementById('casterType').value;
+      const t = semAcento(txt);
+      const arcano = t.indexOf('cavaleiro arcano') !== -1 || t.indexOf('trapaceiro arcano') !== -1;
+      const temMagias = !!document.querySelector('.spell-card');
+      const mostrar = usaMagia || tipo !== 'none' || arcano || temMagias;
+      [slotBox, document.getElementById('boxConj'), document.getElementById('spellbookGrid')].forEach(el => { if (el) el.style.display = mostrar ? '' : 'none'; });
       const table = slotBox.querySelector('.slot-table');
-      if (table) table.style.display = (usaMagia || tipo !== 'none') ? '' : 'none';
+      if (table) table.style.display = '';
+      const orig = document.querySelector('.bx-orig'), ot = document.getElementById('originsText');
+      if (orig && ot) orig.style.display = ot.value.trim() ? '' : 'none';
     }
 
     // Aplica a configuração da classe na ficha.
@@ -1966,6 +1976,13 @@
       const casterSel = document.getElementById('casterType');
       if (deUsuario === true && casterSel && casterSel.value === 'none' && config.conjurador !== 'none') {
         casterSel.value = config.conjurador;
+        applyCasterTable();
+      }
+
+      // Trocou para uma classe sem magia (Bárbaro, Guerreiro…): volta o tipo de conjurador para "Manual" (os cartões de magia existentes são mantidos)
+      if (deUsuario === true && casterSel && config.conjurador === 'none' && (classeAplicada !== classeId || casterSel.value === 'third') && casterSel.value !== 'none'
+          && semAcento(classeInput.value).indexOf('arcano') === -1) {
+        casterSel.value = 'none';
         applyCasterTable();
       }
 
