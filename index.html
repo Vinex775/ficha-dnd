@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 2.11 -->
+<!-- (VERSÃO ATUAL) 2.12 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -791,6 +791,10 @@
     .et-novo.aberto { display: flex; }
     .et-plus { width: 22px; height: 22px; padding: 0 !important; line-height: 20px; border-radius: 50%; font-weight: bold; margin-top: 4px; }
     .rt-novo-aj .aj-nome { flex: 1; }
+    .efeitos-lista { grid-template-columns: 1fr; }
+    .efeito-tile .et-topo { flex-wrap: wrap; }
+    .efeito-tile .et-nome { flex: 1 1 50px; }
+    .efeito-tile .et-dur { width: 52px; }
     .efeito-tile.off { opacity: .6; }
     .efeito-tile.on { border-color: var(--moss); background: var(--hl); }
     .et-dur { width: 60px; flex: none; }
@@ -970,10 +974,7 @@
           <div class="attr-grid" id="attrGrid"></div>
         </div>
 
-        <div class="box bx-orig" style="display:none">
-          <h3>Origens dos Bônus</h3>
-          <textarea id="originsText" class="freeform" placeholder="Descreva de onde vêm os bônus (raça, classe, antecedente). Ex: +2 SAB (Raça), +1 CON (Antecedente)..."></textarea>
-        </div>
+        <textarea id="originsText" hidden></textarea>
 
         <div class="box bx-peric">
           <h3>Bônus &amp; Perícias</h3>
@@ -997,7 +998,7 @@
             <span class="rec-dica">Os bônus dos efeitos ligados são somados por fora e aparecem como "→ valor". O número que você digita (inclusive bônus que o mestre deu) nunca é alterado.</span>
             <button class="small-btn" onclick="adicionarEfeito()">+ Efeito</button>
           </div>
-          <div class="rec-grid" id="efeitosGrid"></div>
+          <div class="rec-grid efeitos-lista" id="efeitosGrid"></div>
         </div>
 
         <div class="box bx-slots">
@@ -1230,7 +1231,7 @@
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 2.11
+    // (VERSÃO ATUAL) 2.12
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1265,8 +1266,9 @@
     // 2.8 - Navegador de magias por classe (lista do livro, 361 magias): adiciona o cartão da magia já com tempo, alcance, componentes e duração.
     // 2.9 - Magias: cada magia agora traz um resumo do efeito (texto próprio) no navegador e no cartão adicionado.
     // 2.10 - Efeitos Ativos: a barra de novo bônus só aparece depois de clicar no "+".
+    // 2.12 - Efeitos Ativos: um efeito por linha (sem quebrar o layout); "Origens dos Bônus" removido de vez.
     // 2.11 - 1ª coluna: Atributos, Bônus & Perícias, Efeitos Ativos (sem "Origens dos Bônus"); Conjuração/Espaços de Magia somem para classes sem magia.
-    const FICHA_VERSAO = '2.11';
+    const FICHA_VERSAO = '2.12';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -1931,8 +1933,6 @@
       [slotBox, document.getElementById('boxConj'), document.getElementById('spellbookGrid')].forEach(el => { if (el) el.style.display = mostrar ? '' : 'none'; });
       const table = slotBox.querySelector('.slot-table');
       if (table) table.style.display = '';
-      const orig = document.querySelector('.bx-orig'), ot = document.getElementById('originsText');
-      if (orig && ot) orig.style.display = ot.value.trim() ? '' : 'none';
     }
 
     // Aplica a configuração da classe na ficha.
