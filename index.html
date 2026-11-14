@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- (VERSÃO ATUAL) 2.15 -->
+<!-- (VERSÃO ATUAL) 2.16 -->
 <html lang="pt-BR">
 <head>
   <meta http-equiv="Content-Security-Policy" content="
@@ -1241,14 +1241,14 @@
       <h3>📚 Biblioteca de homebrew</h3>
       <div class="field"><input type="text" id="bibFiltro" placeholder="Buscar na biblioteca..." oninput="renderBiblioteca()"></div>
       <div id="bibLista"></div>
-      <div class="ed-botoes"><span style="flex:1"></span><button class="small-btn" style="background:var(--btn2)" onclick="fecharBiblioteca()">Fechar</button></div>
+      <div class="ed-botoes"><button class="small-btn so-editor" id="btnImportTasha" onclick="importarCaldeirao()" title="Grava na biblioteca os cartões do livro (só quem tem permissão de escrita)">⬆ Importar Caldeirão de Tasha</button><span style="flex:1"></span><button class="small-btn" style="background:var(--btn2)" onclick="fecharBiblioteca()">Fechar</button></div>
     </div>
   </div>
 
   <div id="lightbox"><button class="lb-fechar" title="Fechar (Esc)">✕</button><img alt=""></div>
 
   <script>
-    // (VERSÃO ATUAL) 2.15
+    // (VERSÃO ATUAL) 2.16
     //
     // Histórico de versões (ao mudar, atualize a linha acima e FICHA_VERSAO):
     // 1.0 - versão original
@@ -1283,12 +1283,13 @@
     // 2.8 - Navegador de magias por classe (lista do livro, 361 magias): adiciona o cartão da magia já com tempo, alcance, componentes e duração.
     // 2.9 - Magias: cada magia agora traz um resumo do efeito (texto próprio) no navegador e no cartão adicionado.
     // 2.10 - Efeitos Ativos: a barra de novo bônus só aparece depois de clicar no "+".
+    // 2.16 - Caldeirão de Tasha (4/4): botão "Importar Caldeirão de Tasha" na Biblioteca grava os cartões do livro (subclasses, Artífice, infusões, talentos, opções, regras e magias novas) como cartões compartilhados.
     // 2.15 - Caldeirão de Tasha (3/4): 21 magias novas do livro no navegador de magias + lista de magias do Artífice (classes conjuradoras já recebem as novas).
     // 2.14 - Caldeirão de Tasha (2/4): botão "Opções do Caldeirão" (talentos, opções de classe, regras de origem/subclasse) que adiciona cartões.
     // 2.13 - Caldeirão de Tasha (1/4): classe Artífice (tabela, espaços de magia, habilidades, infusões) e subclasses novas de todas as classes.
     // 2.12 - Efeitos Ativos: um efeito por linha (sem quebrar o layout); "Origens dos Bônus" removido de vez.
     // 2.11 - 1ª coluna: Atributos, Bônus & Perícias, Efeitos Ativos (sem "Origens dos Bônus"); Conjuração/Espaços de Magia somem para classes sem magia.
-    const FICHA_VERSAO = '2.15';
+    const FICHA_VERSAO = '2.16';
 
     // Modo leitura x edição. Começa em LEITURA; o login com Google (módulo do Firebase, mais abaixo) libera a edição.
     window.modoLeitura = true;
@@ -3365,6 +3366,39 @@ async function abrirBiblioteca() {
   try { BIB = await window.bibliotecaListar(); } catch (e) { console.error(e); l.innerHTML = '<div class="bib-vazio">Não consegui carregar a biblioteca. Confira as regras do Firestore (coleção "biblioteca").</div>'; return; }
   BIB.sort((a, b) => (a.categoria || '').localeCompare(b.categoria || '') || (a.titulo || '').localeCompare(b.titulo || ''));
   renderBiblioteca();
+}
+function cartoesCaldeirao() {
+  const SUBS_TASHA = ["Trilha da Besta", "Trilha da Magia Selvagem", "Colégio da Criação", "Colégio da Eloquência", "O Insondável", "O Gênio", "Domínio da Ordem", "Domínio da Paz", "Domínio do Crepúsculo", "Círculo dos Esporos", "Círculo das Estrelas", "Círculo do Fogo Selvagem", "Mente Aberrante", "Alma Cronométrica", "Andarilho Feérico", "Portador do Enxame", "Guerreiro Psiônico", "Cavaleiro Rúnico", "Fantasma", "Alma Laminada", "Lâmina Cantante", "Ordem dos Escribas", "Caminho da Misericórdia", "Caminho da Forma Astral", "Juramento da Glória", "Juramento da Vigilância", "Alquimista", "Armeiro", "Atirador", "Ferreiro de Batalha"];
+  const NOVAS = ["Chicote Elétrico", "Farpa Mental", "Lâmina da Chama Esverdeada", "Lâmina Estrondosa", "Rompante de Espadas", "Beberagem Cáustica de Tasha", "Chicote Mental de Tasha", "Invocar Fera", "Fortaleza Intelectual", "Invocar Fada", "Invocar Morto-Vivo", "Invocar Prole Sombria", "Mortalha Espiritual", "Invocar Aberração", "Invocar Construto", "Invocar Elemental", "Invocar Celestial", "Disfarce Sobrenatural de Tasha", "Invocar Corruptor", "Sonho do Véu Azul", "Lâmina do Desastre"];
+  const fmtLista = l => l.map(([n, t, r]) => `Nv ${n} — ${t}: ${r}`).join('\n\n');
+  const slug = t => 'bib_tasha_' + semAcento(t).replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  const out = [];
+  const add = (titulo, categoria, texto) => out.push({ id: slug(titulo), dados: { titulo, categoria, origem: 'Caldeirão de Tudo de Tasha', texto: texto + '\n\n(Resumo próprio — confira o livro em caso de dúvida.)', mec: null } });
+  add('Classe: Artífice', 'Poder', 'Mestre da invenção mágica. d8 de vida, salvaguardas CON e INT, conjurador (INT) de meio nível arredondado para cima.\n\n' + fmtLista(HAB_CLASSE.artifice));
+  add('Infusões de Artífice', 'Poder', HAB_INFUSOES.map(([n, t, r]) => `${t} (nv ${n}+): ${r}`).join('\n\n'));
+  SUBS_TASHA.forEach(n => { if (HAB_SUB[n]) add('Subclasse: ' + n, 'Poder', fmtLista(HAB_SUB[n])); });
+  OPCOES_TASHA.forEach(o => {
+    const cl = o[1] && CLASS_CONFIG[o[1]] ? CLASS_CONFIG[o[1]].nome + ' · ' : '';
+    add((o[0] === 'o' ? cl : '') + o[4], o[0] === 't' ? 'Talento' : 'Poder', (o[5] ? 'Pré-requisito: ' + o[5] + '\n\n' : '') + o[6]);
+  });
+  MAGIAS.filter(m => NOVAS.includes(m[0])).forEach(m => add('Magia: ' + m[0], 'Poder', `${SPELL_LEVELS[m[1]]} · ${m[2]}${m[3] ? ' (ritual)' : ''}\n${magiaMeta(m)}${m[7] ? '\nMaterial: ' + m[7] : ''}\n\n${m[10]}`));
+  return out;
+}
+async function importarCaldeirao() {
+  if (window.modoLeitura) return;
+  const cards = cartoesCaldeirao();
+  if (!confirm(`Gravar ${cards.length} cartões do Caldeirão de Tasha na biblioteca compartilhada? (Rodar de novo só atualiza os mesmos cartões, sem duplicar.)`)) return;
+  const btn = document.getElementById('btnImportTasha'); btn.disabled = true;
+  let ok = 0;
+  try {
+    for (const c of cards) { await window.bibliotecaSalvar(c.id, JSON.parse(JSON.stringify(c.dados))); ok++; btn.textContent = `Enviando… ${ok}/${cards.length}`; }
+    flashIndicator('Caldeirão importado ✓');
+  } catch (e) {
+    console.error(e);
+    alert(`Parei em ${ok} de ${cards.length}. Só quem tem permissão de escrita (login do dono) consegue importar. Erro: ${e && e.message ? e.message : e}`);
+  }
+  btn.disabled = false; btn.textContent = '⬆ Importar Caldeirão de Tasha';
+  await abrirBiblioteca();
 }
 function fecharBiblioteca() { document.getElementById('bibModal').classList.remove('aberto'); }
 function renderBiblioteca() {
